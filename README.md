@@ -4,155 +4,164 @@
 
 # Arki Chat 🟦
 
-A squircle chatbot companion that lives in your browser, and a friendlier front for
-[Ollama](https://ollama.com) — the same local models, without the developer dashboard. Every
-reply is generated locally: no API keys, no cloud, no build step, **zero npm dependencies**.
+Teman asisten berbentuk *squircle* yang tinggal di peramban Anda — dan pintu masuk yang lebih
+ramah bagi [Ollama](https://ollama.com). Model lokal yang sama, tanpa dasbor-developer. Setiap
+balasan dihasilkan secara lokal: tanpa API key, tanpa cloud, tanpa proses build, **tanpa
+ketergantungan npm sama sekali**.
 
-But it doesn't just answer. Arki can **act**: search YouTube and put on lofi in a built-in
-player while you keep chatting, open Gmail or GitHub in a tab for you, and listen for the wake
-word **“Arki”** so you can pause the music without touching the keyboard.
+Tapi Arki bukan sekadar menjawab. Arki bisa **bertindak**: mencari di YouTube lalu memutar lofi di
+player bawaan sembari Anda mengobrol, membuka Gmail atau GitHub di tab untuk Anda, dan mendengarkan
+kata pemicu **“Arki”** sehingga Anda bisa menjeda musik tanpa menyentuh keyboard.
 
 > **Maintainer** — Adnuri Mohamidi
 
 ```bash
-ollama serve        # 1. Ollama running
-node server.js      # 2. Arki (nothing to install)
+ollama serve        # 1. Ollama jalan
+node server.js      # 2. Arki (tidak ada yang perlu diinstal)
 open http://localhost:5177
 ```
 
-![Arki Chat on desktop, playing lofi in the sidebar while it chats](screenshots/desktop.png)
+![Arki Chat di desktop, memutar lofi di sidebar sambil mengobrol](screenshots/desktop.png)
 
 <p align="center">
-  <img src="screenshots/mobile.png" width="300" alt="Arki Chat on a phone">
+  <img src="screenshots/mobile.png" width="300" alt="Arki Chat di ponsel">
 </p>
 
 <p align="center">
-  <img src="screenshots/about.png" width="620" alt="The Arki Chat about page">
+  <img src="screenshots/about.png" width="620" alt="Halaman tentang Arki Chat">
 </p>
+
+> 🌐 **Bahasa:** Indonesia · [English](README.en.md)
 
 ---
 
-## Contents
+## Daftar Isi
 
-- [Quick start](#quick-start)
-- [Why](#why)
-- [Tools — Arki can act](#tools--arki-can-act)
-- [Playing music in the page](#playing-music-in-the-page)
-- [The wake word](#the-wake-word)
-- [Slash commands](#slash-commands)
-- [Chat features](#chat-features)
-- [The avatar](#the-avatar)
+- [Mulai Cepat](#mulai-cepat)
+- [Kenapa](#kenapa)
+- [Tools — Arki bisa bertindak](#tools--arki-bisa-bertindak)
+- [Memutar musik di halaman](#memutar-musik-di-halaman)
+- [Kata pemicu](#kata-pemicu)
+- [Perintah slash](#perintah-slash)
+- [Fitur chat](#fitur-chat)
+- [Avatar](#avatar)
 - [Keyboard](#keyboard)
-- [Responsive](#responsive)
-- [Configuration](#configuration)
-- [How it works](#how-it-works)
-- [What's remembered](#whats-remembered)
-- [Troubleshooting](#troubleshooting)
-- [Good to know](#good-to-know)
+- [Responsif](#responsif)
+- [Konfigurasi](#konfigurasi)
+- [Cara kerjanya](#cara-kerjanya)
+- [Yang diingat](#yang-diingat)
+- [Pemecahan masalah](#pemecahan-masalah)
+- [Baik untuk diketahui](#baik-untuk-diketahui)
 - [Brand](#brand)
-- [Files](#files)
-- [Credits](#credits)
-- [License](#license)
+- [Berkas](#berkas)
+- [Kredit](#kredit)
+- [Lisensi](#lisensi)
 
 ---
 
-## Quick start
+## Mulai Cepat
 
-**Requirements:** Node 18+ (developed on Node 24) and a running Ollama with at least one chat
-model.
+**Kebutuhan:** Node 18+ (dikembangkan di Node 24) dan Ollama yang sedang berjalan dengan minimal
+satu model chat.
 
 ```bash
-# 1. Install Ollama and pull a model you like
+# 1. Instal Ollama lalu tarik model yang Anda sukai
 ollama pull qwen3.5:2b
 
-# 2. Run Arki — no npm install, there are no dependencies
+# 2. Jalankan Arki — tanpa npm install, tidak ada dependensi
 node server.js
 
-# 3. Open http://localhost:5177
+# 3. Buka http://localhost:5177
 ```
 
-Or read the [About page](about.html) first if you would rather know what you are getting.
+Kalau ingin tahu dulu apa yang akan Anda dapat, baca [halaman Tentang](about.html) lebih dulu.
 
-If port 5177 is busy, Arki quietly moves to the next free one and prints the URL it used.
+Jika port 5177 sedang dipakai, Arki dengantenang naik ke port bebas berikutnya dan mencetak URL
+yang dipakainya.
 
-Nothing is installed, built or bundled. `index.html` is the whole frontend; `server.js` is a
-~150-line static server plus a proxy.
-
----
-
-## Why
-
-Ollama is the most welcoming way to run a model on your own machine, and it has quietly become
-the default local brain for a lot of people. But its web interface was never built for *using*
-it — it was built for *checking* it. Model parameters, token counts, curl-shaped concepts. It
-answers the question “is my model running?” beautifully and “what do I actually want?” not at
-all.
-
-Arki Chat is the other front door. Same models, same machine, same privacy — but a companion
-instead of a dashboard:
-
-- **Anyone can start.** `ollama serve`, `node server.js`, done. No Docker, no Python, no
-  weights to download, no config file.
-- **No vocabulary required.** You don't choose a model by parameter count; you pick the one
-  that works, and Arki tells you which can see images.
-- **It does things, not just answers.** Ask for lofi and it plays while you keep talking. Ask
-  for your Gmail and it opens it.
-- **It tells you the truth.** Every reply carries its model, wall time and token rate. Every
-  tool call shows exactly what it did. Small local models are imperfect; Arki never hides it.
-- **It fits.** 320px wide or 2560 — same app, and the phone version is the real one.
-
-For everyone already happy in a terminal, Ollama's own interface is still the right tool. This
-is for the person who has Ollama running and isn't sure what to do next.
+Tidak ada yang diinstal, dibangun, atau di-*bundle*. `index.html` adalah seluruh frontend-nya;
+`server.js` adalah server statik ~150 baris plus sebuah proxy.
 
 ---
 
-## Tools — Arki can act
+## Kenapa
 
-Four tools are attached to every request. When the model decides one is needed it emits a
-`tool_calls` entry, Arki runs it locally, and the real result is fed back so the model can
-confirm what actually happened.
+Ollama adalah cara paling ramah untuk menjalankan model di mesin Anda sendiri, dan diam-diam ia
+telah menjadi "otak lokal" bawaan banyak orang. Tapi antarmuka web-nya tidak pernah dirancang
+untuk *dipakai* — dirancang untuk *diperiksa*. Parameter model, jumlah token, konsep berbentuk
+curl. Ia menjawab pertanyaan "apakah model saya jalan?" dengan sangat indah, dan "sebenarnya apa
+yang saya mau?" sama sekali tidak.
 
-| Tool | Parameters | What it does |
+Arki Chat adalah pintu depan yang lain. Model sama, mesin sama, privasi sama — tapi yang ini
+*teman*, bukan dasbor:
+
+- **Siapa pun bisa mulai.** `ollama serve`, `node server.js`, selesai. Tanpa Docker, tanpa Python,
+  tanpa unduhan bobot, tanpa berkas konfigurasi.
+- **Tidak perlu kosakata teknis.** Anda tidak memilih model berdasarkan jumlah parameter; Anda
+  memilih yang hasilnya cocok, dan Arki memberi tahu mana yang bisa melihat gambar.
+- **Ia melakukan sesuatu, bukan sekadar menjawab.** Minta lofi dan ia memutar sambil Anda bicara.
+  Minta Gmail Anda dan ia membukanya.
+- **Ia jujur.** Setiap balasan mencantumkan model, waktu tempuh, dan laju token. Setiap pemanggilan
+  tool menampilkan persis apa yang dilakkukan. Model lokal kecil memang tidak sempurna; Arki tidak
+  pernah menyembunyikannya.
+- **Pas di layar Anda.** Lebar 320px atau 2560 — aplikasi yang sama, dan versi ponselnya justru
+  yang justru paling bagus.
+
+Bagi siapa pun yang sudah nyaman di terminal, antarmuka Ollama sendiri tetaplah alat yang tepat.
+Ini untuk orang yang sudah menjalankan Ollama tapi belum tahu harus apa selanjutnya.
+
+---
+
+## Tools — Arki bisa bertindak
+
+Empat tool ditempelkan pada setiap permintaan. Ketika model memutuskan sebuah tool dibutuhkan, ia
+menghasilkan entri `tool_calls`, Arki menjalankannya secara lokal, lalu hasil nyatanya dikembalikan
+supaya model bisa mengonfirmasi apa yang benar-benar terjadi.
+
+| Tool | Parameter | Fungsinya |
 |---|---|---|
-| `play_music` | `query`, `service?` | Searches YouTube and plays the top hit in the sidebar player. Also accepts a YouTube URL, a Spotify track/album/playlist link or URI, or a direct audio file URL. |
-| `control_music` | `action` | `pause` · `resume` · `stop` · `next` on the sidebar player. |
-| `set_volume` | `level` | In-page volume, 0–100. |
-| `open_app` | `name` | Opens a site in a new tab — gmail, youtube, github, drive, calendar, maps, netflix, reddit, wikipedia, x, notion, figma, amazon, chatgpt, claude, weather, news, npm, huggingface and more, via 41 name shortcuts covering ~37 sites. Any full URL works; an unrecognised name falls back to a web search. |
+| `play_music` | `query`, `service?` | Mencari di YouTube dan memutar hasil teratas di player sidebar. Terima juga URL YouTube, tautan track/album/playlist atau URI Spotify, maupun URL file audio langsung. |
+| `control_music` | `action` | `pause` · `resume` · `stop` · `next` pada player sidebar. |
+| `set_volume` | `level` | Volume di dalam halaman, 0–100. |
+| `open_app` | `name` | Membuka situs di tab baru — gmail, youtube, github, drive, calendar, maps, netflix, reddit, wikipedia, x, notion, figma, amazon, chatgpt, claude, weather, news, npm, huggingface, dan lainnya, lewat 41 pintasan nama untuk ~37 situs. URL lengkap apa pun bisa; nama yang tidak dikenali akan jatuh ke pencarian web. |
 
-**Where the output goes.** Tool calls render as cards in the sidebar under *Tool activity* —
-arguments and the actual result — capped at the last 8 with a **clear** button. The transcript
-stays a clean conversation; Arki just says what it did, in one sentence.
+**Ke mana hasilnya ditampilkan.** Pemanggilan tool muncul sebagai kartu di sidebar di bawah
+*Tool activity* — argumen dan hasil sebenarnya — dibatasi 8 terakhir dengan tombol **clear**.
+Transkrip tetap bersih seperti percakapan biasa; Arki cukup menyebutkan apa yang ia lakukan, dalam
+satu kalimat.
 
 ```
 you    ▸ Play some calm jazz piano music for me
-arka   ▸ Here you go — smooth piano jazz is playing in the sidebar.
+arka   ▸ Here's your track — smooth piano jazz is playing in the sidebar.
           ⚡ play_music  query="calm jazz piano"
             Now playing on YouTube: “4K Cozy Coffee Shop with Smooth Piano
             Jazz Music…” by Relaxing Jazz Piano (3 hours, 35 minutes).
 ```
 
-**Details worth knowing**
+**Detail yang perlu diketahui**
 
-- The loop runs **up to 4 turns** per message, so Arki can chain actions (play, then adjust
-  volume, then confirm).
-- If a model rejects the `tools` array, Arki logs it and **retries the turn without tools**
-  instead of failing. The chat never breaks over it.
-- The last **6** actions are summarised into a system message, so follow-ups like *"play the
-  next one"* or *"turn it down"* work.
-- Small local models are eager helpers — a 2B model may call `set_volume` on its own. The tool
-  descriptions and system prompt both say explicitly not to, but if a model ignores that, the
-  card in the sidebar shows exactly what it did.
+- Putarannya berjalan **hingga 4 putaran** per pesan, sehingga Arki dapat merangkai aksi (main,
+  lalu atur volume, lalu konfirmasi).
+- Jika sebuah model menolak array `tools`, Arki mencatatnya dan **mengulang percakapan tanpa tools**
+  alih-alih gagal. Chat tidak pernah rusak karena itu.
+- **6** aksi terakhir diringkas menjadi sebuah system message, sehingga pertanyaan lanjutan seperti
+  *"mainkan yang berikutnya"* atau *"turunkan volumenya"* tetap jalan.
+- Model lokal kecil memang terlalu eagerness — model 2B bisa saja memanggil
+  `set_volume` dengan sendirinya. Deskripsi tool dan system prompt sama-sama menyatakan jangan
+  begitu, tetapi kalau model tetap mengabaikannya, kartu di sidebar akan menampilkan persis apa
+  yang ia lakukan.
 
-**Tool-calling needs a tool-capable model.** Verified working here with `qwen3.5:2b`,
-`granite4.2`, `gemma4`, `ornith-1.5:9b` and `Spark-X2.5-4B`. `phi4-mini` and `gemma2:9b` ignored
-the tools and only chatted — with those, everything still works through the slash commands.
+**Tool-calling butuh model yang mendukungnya.** Terverifikasi bekerja di sini dengan
+`qwen3.5:2b`, `granite4.2`, `gemma4`, `ornith-1.5:9b`, dan `Spark-X2.5-4B`. `phi4-mini` dan
+`gemma2:9b` mengabaikan tools dan hanya mengobrol — dengan model seperti itu, semuanya tetap bisa
+dilakukan lewat perintah slash.
 
 ---
 
-## Playing music in the page
+## Memutar musik di halaman
 
-The player lives in the **sidebar**, under the avatar, so music never interrupts the
-conversation column.
+Player-nya berada di **sidebar**, di bawah avatar, sehingga musik tidak pernah mengganggu kolom
+percakapan.
 
 ```
 ❚❚ ■ ▾   4K Cozy Coffee Shop with Smooth Piano Jazz Music for Relaxing…
@@ -163,318 +172,326 @@ conversation column.
          ────────●────  ↗  ✕
 ```
 
-- ❚❚ / ▶ pause and resume · ■ stop · ▾ hide the video but **keep the audio playing**
-  (remembered across sessions) · volume slider · ↗ open the source in a tab · ✕ close
-- The sidebar is two independently scrolling cells: Arki stays at its full 290px and the player
-  scrolls beneath it, so starting a track can never shove Arki out of frame
-- The avatar picks up a violet *Playing* glow each time a track starts
+- ❚❚ / ▶ jeda dan lanjutkan · ■ hentikan · ▾ sembunyikan video tetapi **audio tetap berjalan**
+  (diingat antar sesi) · slider volume · ↗ buka sumbernya di tab · ✕ tutup
+- Sidebar adalah dua sel yang menggulir secara independen: Arki tetap pada lebar penuh 290px dan
+  player menggulir di bawahnya, jadi memulai lagu tidak akan mendorong Arki keluar dari bingkai
+- Avatar menyala dengan cahaya ungu *Playing* setiap kali lagu dimulai
 
-**Where the audio comes from**
+**Dari mana audionya**
 
-- **YouTube** — no API key. YouTube killed its public "search" embed, so `server.js` provides
-  `/api/ytsearch`: it reads the normal search results page once, pulls out real video ids with
-  titles, channels and durations, and the page embeds the top hit with the `youtube-nocookie`
-  player. Results are cached in memory for 10 minutes.
-- **Spotify** — track, album, playlist, show and episode links and `spotify:` URIs embed
-  straight into the page. Spotify has no embeddable *search*, so a plain search (or
-  `service: "spotify"`) opens `open.spotify.com/search/…` in a new tab and Arki tells you to
-  paste the real link back for in-page playback.
-- **Any audio file** — a URL ending in `.mp3`, `.m4a`, `.aac`, `.ogg`, `.wav`, `.flac`, `.opus`
-  or `.mp4` plays in a native `<audio>` element, which Arki can then pause, skip and volume like
-  any other source.
+- **YouTube** — tanpa API key. YouTube telah mematikan embed "search" publiknya, jadi `server.js`
+  menyediakan `/api/ytsearch`: ia membaca halaman hasil pencarian sekali, mengambil id video asli
+  beserta judul, channel, dan durasinya, lalu halaman tersebut menyematkan hasil teratas dengan
+  player `youtube-nocookie`. Hasil di-cache di memori selama 10 menit.
+- **Spotify** — tautan track, album, playlist, show, dan episode serta URI `spotify:` disematkan
+  langsung ke halaman. Spotify tidak menyediakan *search* yang bisa disematkan, sehingga pencarian
+  biasa (atau `service: "spotify"`) membuka `open.spotify.com/search/…` di tab baru dan Arki
+  menyuruh Anda menempelkan tautan aslinya kembali untuk diputar di dalam halaman.
+- **Berkas audio apa pun** — URL yang berakhiran `.mp3`, `.m4a`, `.aac`, `.ogg`, `.wav`, `.flac`,
+  `.opus`, atau `.mp4` diputar pada elemen `<audio>` native, yang lalu bisa dijeda, dilewati, dan
+  diatur volumenya seperti sumber mana pun.
 
-> Browsers block un-muted autoplay until they consider you an engaged listener. If the video
-> doesn't start by itself, press ▶ once (or click inside the player) and it stays with you.
+> Peramban memblokir autoplay yang tidak di-*mute* sampai mereka menganggap Anda pendengar yang
+> aktif. Kalau video tidak berjalan sendiri, tekan ▶ sekali (atau klik di dalam player) dan
+> dan setelah itu ia tetap menemani Anda.
 
 ---
 
-## The wake word
+## Kata pemicu
 
-Click **🎤 Wake “Arki”** to start listening (Chrome or Safari, and you'll be asked for mic
-permission once).
+Klik **🎤 Wake “Arki”** untuk mulai mendengarkan (Chrome atau Safari, dan Anda akan diminta izin
+mikrofon satu kali).
 
-| You say | Arki does |
+| Anda ucapkan | Arki melakukan |
 |---|---|
-| *"Arki"* | pauses the music — say it again to resume |
-| *"Arki, play some bossa nova"* | treats the rest as a request and runs it through the tools |
-| *"Arki, pause that"* | `"pause that"` is matched as a slash command and runs instantly |
+| *"Arki"* | menjeda musik — ucapkan lagi untuk melanjutkan |
+| *"Arki, mainkan bossa nova"* | menganggap sisanya sebagai permintaan dan menjalankannya lewat tools |
+| *"Arki, pause that"* | `"pause that"` dicocokkan sebagai perintah slash dan langsung dijalankan |
 
-While listening, Arki goes cyan with a *Listening* state and shows the live transcript, so you
-can see what it heard. Click `wake word: Arki` under the avatar to rename the word — anything
-you like, matched as a whole word.
+Saat mendengarkan, Arki berubah menjadi sian dengan status *Listening* dan menampilkan transkrip
+langsung, sehingga Anda bisa melihat apa yang didengarnya. Klik `wake word: Arki` di bawah avatar
+untuk mengganti kata tersebut — apa pun yang Anda mau, dicocokkan sebagai satu kata utuh.
 
-Recognition uses the Web Speech API, which is **browser-provided** (in Chrome it sends audio to
-Google for transcription) and only exists in Chromium and Safari. Firefox and friends get a
-clear message in the event log and the button turns itself off. The slash commands below do the
-same jobs without a microphone.
+Pengenalan suara memakai Web Speech API, yang **disediakan peramban** (di Chrome audio dikirim ke
+Google untuk ditranskripsi) dan hanya ada di Chromium dan Safari. Firefox dan sejenisnya
+mendapatkan pesan yang jelas di event log dan tombolnya otomatis dinonaktifkan. Perintah slash di
+bawah melakukan pekerjaan yang sama tanpa mikrofon.
 
 ---
 
-## Slash commands
+## Perintah slash
 
-These bypass the model entirely and run the same tools instantly — handy for testing, for
-browsers without speech support, and for when you just want the thing to stop.
+Perintah ini melewati model sepenuhnya dan menjalankan tool yang sama secara instan — berguna untuk
+menguji, untuk peramban tanpa dukungan suara, dan ketika Anda hanya ingin agar sesuatu berhenti.
 
-| Command | Example |
+| Perintah | Contoh |
 |---|---|
 | `/play <query>` | `/play lofi hip hop beats` |
 | `/pause` `/resume` `/stop` | `/pause` |
-| `/next` or `/skip` | `/next` |
+| `/next` atau `/skip` | `/next` |
 | `/vol <0-100>` | `/vol 35` |
-| `/open <app or url>` | `/open gmail` |
+| `/open <app atau url>` | `/open gmail` |
 
 ---
 
-## Chat features
+## Fitur chat
 
-- **Streaming replies** token by token, with a working **Stop** button and a live
-  `thinking… 3s` / `writing… 4s` timer.
-- **Reply stats** under each reply: model, wall time, tokens and tok/s.
-- **Copy** on hover for every reply; **Retry** on failures, which restores the previous prompt
-  *and* its images.
-- **Model picker** listing every installed chat model, `📷` marking vision-capable ones. The
-  choice is remembered.
-- **Vision** — drop images onto Arki, paste, or use 📎. Up to 4 per message, 6 MB each.
-- **🧠 Deep toggle** — replies go out with `think:false` by default because reasoning models
-  will happily spend 230 tokens thinking and return nothing. Measured on this machine with the
-  same prompt: **0.2s / 2 tokens vs 129s / 232 tokens and an empty reply.** Turn Deep on when
-  you want the slower, deeper answer.
-- **Starter prompts** on an empty conversation, and a **↓ latest** button when you scroll back.
-- **New chat** clears the transcript and starts fresh.
-- **Light/dark theme**, remembered, defaulting to your OS preference.
-- **Event log** in the sidebar — every request, tool call, wake word and error with timestamps.
-- Optional retro beeps on state changes.
+- **Balasan streaming** token demi token, dengan tombol **Stop** yang berfungsi dan timer
+  `thinking… 3s` / `writing… 4s` secara langsung.
+- **Statistik balasan** di bawah tiap balasan: model, waktu tempuh, token, dan tok/s.
+- **Copy** saat hover untuk setiap balasan; **Retry** saat gagal, yang memulihkan prompt sebelumnya
+  *beserta* gambarnya.
+- **Pemilih model** yang menampilkan semua model chat terpasang, dengan `📷` untuk model yang punya
+  kemampuan vision. Pilihan ini diingat.
+- **Vision** — seret gambar ke Arki, tempel, atau gunakan 📎. Maksimal 4 per pesan, 6 MB masing-masing.
+- **Toggle 🧠 Deep** — balasan dikirim dengan `think:false` secara default karena model
+  beralasan dengan senang hati menghabiskan 230 token untuk berpikir lalu mengembalikan kosong.
+  Diukur di mesin ini dengan prompt yang sama: **0.2s / 2 token dibanding 129s / 232 token dan
+  balasan kosong.** Nyalakan Deep ketika Anda ingin jawaban yang lebih lambat dan lebih mendalam.
+- **Prompt pemula** saat percakapan kosong, dan tombol **↓ latest** saat Anda menggulir ke belakang.
+- **New chat** membersihkan transkrip dan memulai baru.
+- **Tema terang/gelap**, diingat, mengikuti preferensi OS Anda sebagai nilai awal.
+- **Event log** di sidebar — setiap permintaan, pemanggilan tool, kata pemicu, dan error
+  lengkap dengan cap waktu.
+- Bunyi retro opsional saat status berubah.
 
 ---
 
-## The avatar
+## Avatar
 
-Arki is a superellipse that breathes, blinks, tracks your cursor, squashes when poked, and
-changes colour with what it's doing. A small geometric fringe — five rounded strands in the same
-pill language as the eyes — sways as you move, flattens when Arki turns into a mailbox to
-swallow a file, and whips about when dizzy. Tap it for a quip, tap it three times quickly to
-make it dizzy.
+Arki adalah sebuah *superellipse* yang bernapas, berkedip, mengikuti kursor Anda, merempuh saat
+ditekuk, dan berubah warna sesuai kegiatannya. Jenggolan geometris kecil — lima helai membulat dalam
+bahasa pil yang sama dengan matanya — bergoyang saat Anda bergerak, dan ratakan saat Arki berubah
+menjadi kotak surat untuk menelan berkas, serta berkibar saat pusing. Ketuk untuk komentar, ketuk
+tiga kali cepat untuk membuatnya pusing.
 
-<img src="screenshots/avatar.png" width="620" alt="Arki in the sidebar, with its fringe and the idle state">
+<img src="screenshots/avatar.png" width="620" alt="Arki di sidebar, bersama jenggolannya dan status diam">
 
-| State | Colour | When |
+| Status | Warna | Kapan |
 |---|---|---|
-| Idle | soft white | nothing happening |
-| Thinking | violet | waiting for the first token |
-| Working | blue | streaming a reply |
-| Searching | indigo | looking something up on YouTube |
-| Finished | green | reply done (stars!) |
-| Error | red | Ollama unreachable or the model failed |
-| Listening | cyan | hands-free mode is on |
-| Playing | violet | a track just started |
-| Upload / Annoyed / Dizzy | — | attaching an image, poked, triple-poked |
+| Idle | putih lembut | tidak ada yang terjadi |
+| Thinking | ungu | menunggu token pertama |
+| Working | biru | sedang streaming balasan |
+| Searching | indigo | sedang mencari sesuatu di YouTube |
+| Finished | hijau | balasan selesai (bintang-bintang!) |
+| Error | merah | Ollama tidak terjangkau atau model gagal |
+| Listening | sian | mode hands-free aktif |
+| Playing | ungu | sebuah lagu baru saja dimulai |
+| Upload / Annoyed / Dizzy | — | sedang melampirkan gambar, ditekuk, ditekuk tiga kali |
 
 ---
 
 ## Keyboard
 
-| Key | Action |
+| Tombol | Aksi |
 |---|---|
-| `Enter` | send |
-| `Shift` + `Enter` | newline |
-| `Tab` | visible focus rings on every control |
+| `Enter` | kirim |
+| `Shift` + `Enter` | baris baru |
+| `Tab` | cincin fokus yang terlihat pada semua kontrol |
 
-To stop a reply mid-stream, click **■ Stop** (the Send button becomes Stop while generating).
+Untuk menghentikan balasan di tengah streaming, klik **■ Stop** (tombol Kirim berubah menjadi Stop
+saat sedang membuat).
 
 ---
 
-## Responsive
+## Responsif
 
-Arki is verified from **320×568 up to 2560×1440**, including tablet portrait, laptop with the
-browser chrome open, and phones in landscape.
+Arki terverifikasi dari **320×568 hingga 2560×1440**, termasuk tablet potret, laptop dengan
+chrome peramban terbuka, dan ponsel dalam mode lanskap.
 
-| Width | Layout |
+| Lebar | Tata letak |
 |---|---|
-| ≥ 981px | sidebar + conversation side by side |
-| 821–980px | same, tighter sidebar and smaller Arki |
-| ≤ 820px | single column — identity bar, conversation, then the panels; tagline hidden |
-| ≤ 560px | smaller mark and avatar, model name trimmed |
-| ≤ 400px | compact controls throughout |
+| ≥ 981px | sidebar + percakapan berdampingan |
+| 821–980px | sama, sidebar lebih rapat dan Arki lebih kecil |
+| ≤ 820px | satu kolom — bar identitas, percakapan, lalu panel-panel; tagline disembunyikan |
+| ≤ 560px | mark dan avatar lebih kecil, nama model dipangkas |
+| ≤ 400px | kontrol lebih ringkas di seluruh aplikasi |
 
-Height is handled separately, because a wide-but-short window is a different problem:
+Tinggi ditangani terpisah, karena jendela yang lebar tetapi pendek adalah masalah yang berbeda:
 
-| Height | Layout |
+| Tinggi | Tata letak |
 |---|---|
-| ≤ 720px (desktop) | smaller Arki, caption hidden |
-| ≤ 560px + landscape | phone-like two columns with a 168px rail, mini header, tagline and notch hidden |
-| phones (stacked) | the composer is sticky to the bottom of the viewport |
+| ≤ 720px (desktop) | Arki lebih kecil, caption disembunyikan |
+| ≤ 560px + lanskap | dua kolom ala ponsel dengan rail 168px, header mini, tagline dan notch disembunyikan |
+| ponsel (tersusun) | composer menempel di bagian bawah viewport |
 
-The chat fills whatever height is left rather than growing to fit the messages, so it never
-pushes the composer off-screen. The sidebar is two independently scrolling cells — Arki's
-identity block keeps its full size, and the player and tool cards scroll beneath it, so opening
-a track can never shove Arki out of frame.
+Chat mengisi tinggi yang tersisa alih-alih tumbuh mengikuti panjang pesan, sehingga tidak pernah
+mendorong composer keluar layar. Sidebar adalah dua sel yang menggulir independen — blok identitas
+Arki mempertahankan ukuran penuhnya, sementara player dan kartu tool menggulir di bawahnya,
+sehingga membuka lagu tidak akan mendorong Arki keluar bingkai.
 
-Everything uses `dvh` with a `vh` fallback, and the composer pads for the iPhone home indicator.
+Semuanya memakai `dvh` dengan cadangan `vh`, dan composer memberi ruang untuk home indicator
+iPhone.
 
 ---
 
-## Configuration
+## Konfigurasi
 
-| Variable | Default | Purpose |
+| Variabel | Bawaan | Kegunaan |
 |---|---|---|
-| `PORT` | `5177` | HTTP port; auto-increments if busy |
-| `OLLAMA_HOST` | `http://127.0.0.1:11434` | where Ollama is listening |
+| `PORT` | `5177` | Port HTTP; naik sendiri jika sedang dipakai |
+| `OLLAMA_HOST` | `http://127.0.0.1:11434` | tempat Ollama mendengarkan |
 
 ```bash
 PORT=8080 OLLAMA_HOST=http://192.168.1.10:11434 node server.js
 ```
 
-Point `OLLAMA_HOST` at another machine on your LAN to use its GPU while the page stays on
-yours. Only reach it over a network you trust — the proxy is unauthenticated by design.
+Arahkan `OLLAMA_HOST` ke mesin lain di LAN Anda untuk memakai GPU-nya sementara halamannya tetap di
+mesin Anda. Hanya hubungkan lewat jaringan yang Anda percaya — proxy ini sengaja tidak
+menggunakan autentikasi.
 
 ---
 
-## How it works
+## Cara kerjanya
 
 ```
 browser  ──►  server.js  ──►  Ollama  (/api/chat, streaming NDJSON)
    │              │
-   │              └──────►  youtube.com  (/api/ytsearch — search page → video ids)
+   │              └──────►  youtube.com  (/api/ytsearch — halaman pencarian → id video)
    │
    └── iframe ──► youtube-nocookie.com / open.spotify.com
 ```
 
-**`server.js`** is ~150 lines and does four things:
+**`server.js`** berukuran ~150 baris dan mengerjakan empat hal:
 
-1. serves the static files from its own directory (with path-traversal protection)
-2. proxies every `/api/*` request to Ollama, streaming NDJSON straight through — this exists
-   only to dodge browser CORS
-3. serves `/api/ytsearch`, which fetches YouTube's search page and extracts up to 5 results,
-   cached for 10 minutes
-4. listens on `PORT`, stepping up a port at a time if it's taken
+1. menyajikan berkas statik dari direktorinya sendiri (dengan perlindungan path-traversal)
+2. mem-proxy setiap permintaan `/api/*` ke Ollama, meneruskan streaming NDJSON apa adanya — ini
+   ada semata-mata untuk menghindari CORS peramban
+3. menyajikan `/api/ytsearch`, yang mengambil halaman pencarian YouTube dan mengekstrak hingga 5
+   hasil, di-cache selama 10 menit
+4. mendengarkan di `PORT`, naik satu port jika sudah terpakai
 
-**`index.html`** is the entire frontend — avatar engine on canvas, chat UI, markdown-lite
-renderer, tool definitions, the tool-call loop, the player and the wake word. Tools are executed
-**client-side**; the server never sees them.
+**`index.html`** adalah seluruh frontend — mesin avatar di canvas, UI chat, renderer *markdown-lite*,
+definisi tool, loop pemanggilan tool, player, dan kata pemicu. Tool dieksekusi di sisi
+**klien**; server tidak pernah melihatnya.
 
-**Context management:** the transcript is capped at 40 messages, of which the last 20 are sent
-to the model. A leading orphaned assistant message is trimmed so a user/assistant pair is never
-split. Client-only fields never leave the browser.
+**Manajemen konteks:** transkrip dibatasi 40 pesan, di mana 20 terakhir dikirim ke model. Pesan
+asisten yang menggantung di awal dipangkas agar pasangan pengguna/asisten tidak pernah terpecah.
+Field khusus klien tidak pernah meninggalkan peramban.
 
 ---
 
-## What's remembered
+## Yang diingat
 
-Stored in `localStorage`, all under the `arki.` prefix:
+Disimpan di `localStorage`, semuanya berawalan `arki.`:
 
-| Key | What |
+| Key | Isi |
 |---|---|
-| `arki.model` | selected model |
-| `arki.think` | 🧠 Deep on/off |
-| `arki.theme` | light / dark |
-| `arki.vol` | player volume |
-| `arki.dockVideo` | video preview shown or audio-only |
-| `arki.wake` | the wake word |
+| `arki.model` | model yang dipilih |
+| `arki.think` | 🧠 Deep aktif/nonaktif |
+| `arki.theme` | terang / gelap |
+| `arki.vol` | volume player |
+| `arki.dockVideo` | pratinjau video ditampilkan atau audio-saja |
+| `arki.wake` | kata pemicu |
 
-The conversation itself is **not** persisted. Nothing is written to disk anywhere — reload and
-you're starting fresh. The server prints two startup lines and nothing else; it never logs
-request or message content.
-
----
-
-## Troubleshooting
-
-**"Can't reach Ollama"** — the banner above the composer means the server can't reach it. Check
-`ollama serve` is running, and that `OLLAMA_HOST` matches where it's actually listening. The app
-retries every 5 seconds on its own.
-
-**No models in the dropdown** — `ollama pull qwen3.5:2b` (or any chat model) to install one.
-
-**Empty replies from a reasoning model** — expected, and why `think:false` is the default. Turn
-on **🧠 Deep** and ask again.
-
-**Very slow first reply** — that's the model loading into memory. A few seconds for small
-models, up to ~30s for large ones. The timer under the reply shows it happening; the second
-reply is instant.
-
-**Tools never fire** — your model probably doesn't support tool calling. Try `granite4.2` or
-`gemma4`, or just use `/play` and `/open`.
-
-**🎤 does nothing** — Web Speech isn't supported in your browser (Firefox), or mic permission
-was denied. Use the slash commands.
-
-**Video won't autoplay** — browser autoplay policy. Press ▶ once.
+Percakapan itu sendiri **tidak** disimpan. Tidak ada yang ditulis ke disk di mana pun — muat ulang
+dan Anda mulai dari nol. Server mencetak dua baris saat mulai dan tidak ada selain itu; ia tidak
+pernah mencatat isi permintaan atau pesan.
 
 ---
 
-## Good to know
+## Pemecahan masalah
 
-- YouTube and Spotify players are third-party iframes. They need internet and they set their
-  own cookies; your prompts are never sent to them.
-- The Web Speech API transcribes in the browser. In Chrome that means audio goes to Google for
-  the duration of the recognition session. Everything else — chat, tools, music — stays local.
-- Small local models are good at *calling* tools and less good at *restraint*. Arki's card log
-  exists so you can always see exactly what happened.
-- YouTube may change its results page markup, which would break `/api/ytsearch`. When that
-  happens `/play` falls back to opening the search page in a new tab rather than failing.
+**"Can't reach Ollama"** — banner di atas composer berarti server tidak dapat menjangkau Ollama.
+Pastikan `ollama serve` sedang berjalan dan `OLLAMA_HOST` cocok dengan lokasi listennya. Aplikasi
+otomatis mencoba lagi setiap 5 detik.
+
+**Tidak ada model di dropdown** — `ollama pull qwen3.5:2b` (atau model chat apa pun) untuk
+menginstal salah satunya.
+
+**Balasan kosong dari model beralasan** — itu wajar, dan justru alasan kenapa `think:false` adalah
+nilai bawaan. Nyalakan **🧠 Deep** lalu tanyakan lagi.
+
+**Balasan pertama sangat lambat** — itu model sedang dimuat ke memori. Beberapa detik untuk model
+kecil, hingga ~30s untuk model besar. Timer di bawah balasan menunjukkannya; balasan kedua
+langsung terasa.
+
+**Tools tidak pernah terpanggil** — kemungkinan besar model Anda tidak mendukung tool calling. Coba
+`granite4.2` atau `gemma4`, atau gunakan saja `/play` dan `/open`.
+
+**🎤 tidak melakukan apa-apa** — Web Speech tidak didukung di peramban Anda (Firefox), atau izin
+mikrofon ditolak. Gunakan perintah slash.
+
+**Video tidak mau autoplay** — kebijakan autoplay peramban. Tekan ▶ sekali.
+
+---
+
+## Baik untuk diketahui
+
+- Player YouTube dan Spotify adalah iframe pihak ketiga. Keduanya butuh internet dan menempatkan
+  cookie mereka sendiri; prompt Anda tidak pernah dikirim ke mereka.
+- Web Speech API mentranskripsi di dalam peramban. Di Chrome itu berarti audio dikirim ke Google
+  selama sesi pengenalan berlangsung. Selebihnya — chat, tools, musik — tetap lokal.
+- Model lokal kecil bagus dalam *memanggil* tools dan lebih buruk dalam *menahan diri*. Log kartu
+  Arki ada supaya Anda selalu bisa melihat persis apa yang terjadi.
+- YouTube mungkin mengubah markup halaman hasil pencariannya, yang akan merusak `/api/ytsearch`.
+  Jika itu terjadi, `/play` akan jatuh ke membuka halaman pencarian di tab baru alih-alih gagal.
 
 ---
 
 ## Brand
 
-`logo.svg` is the complete mark: a blue squircle speech bubble carrying Arki's two pill eyes
-and its little fringe — the squircle *is* Arki, the bubble *is* chat. It's a handful of shapes
-and one gradient, no fonts and no dependencies, so it's safe to inline, recolour or scale to any
-size. It stays legible down to 16px.
+`logo.svg` adalah mark lengkapnya: gelembung bicara *squircle* berwarna biru yang membawa dua mata
+pil Arki dan jenggolan kecilnya — *squircle*-nya **adalah** Arki, gelembungnya **adalah** chat.
+Hanya beberapa bentuk dan satu gradien, tanpa fonta dan tanpa dependensi, jadi aman untuk di-*inline*,
+diwarnai ulang, atau diskalakan ke ukuran apa pun. Tetap terbaca hingga 16px.
 
-In the app it appears as a 46px lockup beside the wordmark, blinks once every 7.5 seconds, and
-doubles as the favicon.
+Di dalam aplikasi ia muncul sebagai *lockup* 46px di samping wordmark, berkedip sekali setiap 7.5
+detik, dan sekaligus menjadi favicon.
 
 ---
 
-## Files
+## Berkas
 
 ```
-logo.svg       The Arki Chat brand mark (also the favicon)
-server.js      Static server + Ollama streaming proxy + /api/ytsearch
-index.html     Avatar engine (inspired by Coucou), chat UI, tools, player and wake word
-about.html     The About page — what it is, privacy, credits and licence
-screenshots/   The images in this file
-package.json   metadata only — there is nothing to install
+logo.svg       Mark brand Arki Chat (sekaligus favicon)
+server.js      Server statik + proxy streaming Ollama + /api/ytsearch
+index.html     Mesin avatar (terinspirasi Coucou), UI chat, tools, player, dan kata pemicu
+about.html     Halaman Tentang — apa itu, privasi, kredit, dan lisensi
+screenshots/   Gambar-gambar di berkas ini
+package.json   Hanya metadata — tidak ada yang perlu diinstal
 ```
 
-**About page** — `about.html` is the human-facing explainer: what Arki is, a four-step
-quickstart, an honest privacy breakdown, credits and the licence. It is linked from the header
-and opens in a new tab so your conversation is never interrupted, and it shares the
-`arki.theme` key so it always matches the chat's light/dark setting.
+**Halaman Tentang** — `about.html` adalah penjelasan yang ramah manusia: apa itu Arki, panduan
+empat langkah, rincian privasi yang jujur, kredit, dan lisensinya. Tertaut dari header dan terbuka
+di tab baru sehingga percakapan Anda tidak pernah terputus, serta berbagi key `arki.theme` sehingga
+selalu cocok dengan pengaturan terang/gelap chat.
 
-## Credits
+## Kredit
 
-Built and maintained by **Adnuri Mohamidi**.
+Dibangun dan dipelihara oleh **Adnuri Mohamidi**.
 
 ### Avatar
 
-Arki's squircle avatar engine — the superellipse body, the eyes projected on a sphere that
-follow your cursor, the blinking, the idle breathing, the poke/annoy/dizzy reactions, and the
-morph into a box when you drop a file — is inspired by **Mochi**, the character from
-**[Coucou](https://github.com/Louis-CFM/coucou)** by Louis Raillé.
+Mesin avatar *squircle* Arki — badan *superellipse*, mata yang diproyeksikan pada bola sphere yang
+mengikuti kursor Anda, kedip, pernafasan diam, reaksi poke/annoy/dizzy, serta perubahan bentuk
+menjadi kotak saat Anda menjatuhkan berkas — terinspirasi oleh **Mochi**, karakter dari
+**[Coucou](https://github.com/Louis-CFM/coucou)** karya Louis Raillé.
 
-Coucou is MIT licensed, and Arki's engine is a JavaScript reimplementation of those ideas for
-the browser. Thanks to Louis for making it open — “every line of code, every animation, every
-sound — free to use, read, fork and remix.”
+Coucou berlisensi MIT, dan mesin Arki adalah reimplementasi JavaScript dari ide-ide tersebut untuk
+peramban. Terima kasih kepada Louis telah membuatnya terbuka — "setiap baris kode, setiap animasi,
+setiap suara — bebas untuk digunakan, dibaca, di-*fork*, dan di-*remix*."
 
-Everything else in Arki Chat — the layout, the tool-calling system, the sidebar player, the
-wake word, the responsive design, Arki's fringe and `logo.svg` — is original to this project.
+Selebihnya di Arki Chat — tata letak, sistem tool-calling, player sidebar, kata pemicu, desain
+responsif, jenggolan Arki, dan `logo.svg` — adalah karya orisinal proyek ini.
 
-### Also standing on
+### Berdiri di atas bahu
 
-- [Ollama](https://ollama.com) — runs every model locally, and does the actual reasoning
-- [Fredoka](https://fonts.google.com/specimen/Fredoka) & [Nunito](https://fonts.google.com/specimen/Nunito) — the type
-- YouTube and Spotify — the embedded players in the sidebar
+- [Ollama](https://ollama.com) — menjalankan setiap model secara lokal, dan melakukan penalaran
+  yang sebenarnya
+- [Fredoka](https://fonts.google.com/specimen/Fredoka) & [Nunito](https://fonts.google.com/specimen/Nunito) — tipografinya
+- YouTube dan Spotify — player yang disematkan di sidebar
 
 ---
 
-## License
+## Lisensi
 
-Arki Chat is released under the [MIT License](https://opensource.org/licenses/MIT).
+Arki Chat dirilis di bawah [MIT License](https://opensource.org/licenses/MIT).
 
-It includes work derived from [Coucou](https://github.com/Louis-CFM/coucou), which is also MIT
-licensed. The original notice is reproduced below as its license requires:
+Proyek ini memuat karya yang diturunkan dari [Coucou](https://github.com/Louis-CFM/coucou), yang
+juga berlisensi MIT. Pemberitahuan aslinya direproduksi di bawah ini sebagaimana diwajibkan
+lisensinya:
 
 ```
 MIT License
