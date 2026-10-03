@@ -1,0 +1,23 @@
+{
+  "name": "arki-chat",
+  "version": "1.0.0",
+  "description": "A friendly front for Ollama — a squircle companion that chats, plays music and does things for you, with nothing to install.",
+  "author": "Adnuri Mohamidi",
+  "keywords": [
+    "ollama",
+    "llm",
+    "local-llm",
+    "chat",
+    "chatbot",
+    "assistant",
+    "avatar",
+    "tool-calling",
+    "voice",
+    "no-dependencies"
+  ],
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "license": "MIT"
+}

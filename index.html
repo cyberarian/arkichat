@@ -1,0 +1,1103 @@
+<!--
+  Arki Chat — MIT © Adnuri Mohamidi
+  The squircle avatar engine below is inspired by Mochi from Coucou (MIT © 2026 Louis Raillé),
+  https://github.com/Louis-CFM/coucou — reimplemented in JS for the browser.
+  See the Credits and License sections of README.md.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Arki Chat — your local squircle companion</title>
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f2f0;--panel:#fff;--ink:#1b1c22;--mute:#6b6d78;--line:#dcdbd7;--acc:#3b9eff;--ok:#2bbf8a;--screen:#e6e5e2}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121317;--panel:#1b1d23;--ink:#ececf0;--mute:#8d909c;--line:#2c2e36;--screen:#0b0c0f}}
+:root[data-theme="dark"]{--bg:#121317;--panel:#1b1d23;--ink:#ececf0;--mute:#8d909c;--line:#2c2e36;--screen:#0b0c0f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Nunito","Trebuchet MS",system-ui,sans-serif}
+h1{font-family:"Fredoka","Trebuchet MS",system-ui,sans-serif;margin:0;font-weight:600;font-size:29px;letter-spacing:-.5px;line-height:1.05}
+/* a definite height is what makes the chat's `1fr` grid row resolve to a real
+   scrollable box instead of growing to the height of every message */
+main{max-width:1180px;margin:0 auto;padding:20px 16px 24px;display:flex;flex-direction:column;
+ height:100vh;height:100dvh;overflow:hidden}
+header{flex:none}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+/* brand lockup: the squircle-chat mark sits beside the wordmark and blinks like Arki */
+.brand{display:flex;align-items:center;gap:13px;min-width:0}
+.logo{width:46px;height:46px;flex:none;filter:drop-shadow(0 4px 11px rgba(59,158,255,.32))}
+.logo .eyes{transform-box:fill-box;transform-origin:center;animation:logoBlink 7.5s ease-in-out infinite}
+@keyframes logoBlink{0%,93%,100%{transform:scaleY(1)}95%,97.5%{transform:scaleY(.08)}}
+.brandtext{min-width:0}
+h1 span{color:var(--acc);margin-left:.26em}
+.sub{color:var(--mute);margin:3px 0 0;max-width:46ch}
+.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:7px 14px;border-radius:999px}
+button:hover{border-color:var(--mute)}
+button:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+button.pri{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+button[aria-pressed="true"]{border-color:var(--ink);font-weight:700}
+.linkbtn{display:inline-block;font:inherit;cursor:pointer;text-decoration:none;border:1px solid var(--line);
+ background:var(--panel);color:var(--ink);padding:7px 14px;border-radius:999px}
+.linkbtn:hover{border-color:var(--mute)}
+select{font:inherit;padding:7px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);max-width:230px}
+/* notch pill with live mini avatar */
+.notch{display:flex;align-items:center;gap:8px;background:#000;border-radius:999px;padding:5px 14px 5px 8px;box-shadow:0 0 0 1px #222}
+.notch span{color:#9a9ca6;font-size:12px;min-width:70px}
+.notch i{width:7px;height:7px;border-radius:50%;background:var(--ok);flex:none}
+.notch i.off{background:#555}
+.screen{margin-top:20px;background:var(--screen);border:1px solid var(--line);border-radius:18px;overflow:hidden;
+ display:flex;flex:1 1 auto;min-height:0}
+/* the sidebar is two stacked cells: the identity block keeps its size, the panels
+   scroll on their own so opening the player can never push Arki out of view.
+   the stage flexes into whatever height is left, so no guessed pixel offsets */
+.stage{display:grid;flex:1;min-height:0;grid-template-columns:minmax(268px,340px) minmax(0,1fr);
+ grid-template-rows:auto minmax(0,1fr);grid-template-areas:"av chat" "side chat"}
+.avcol{grid-area:av;border-right:1px solid var(--line);padding:12px 14px;background:var(--panel);
+ display:flex;flex-direction:column;align-items:center;gap:8px;overflow-y:auto;min-height:0}
+.sidepanels{grid-area:side;border-right:1px solid var(--line);background:var(--panel);
+ padding:0 14px 12px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;min-height:0}
+.avatar{position:relative;display:flex;justify-content:center;padding:14px 0 2px}
+#main{width:290px;height:290px;max-width:100%;touch-action:manipulation;cursor:pointer;transition:width .25s ease,height .25s ease}
+.avatar.drop #main{filter:drop-shadow(0 0 18px var(--acc))}
+.cap{color:var(--mute);font-size:12.5px;text-align:center}
+.quip{position:absolute;top:2px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--line);box-shadow:0 2px 8px rgba(0,0,0,.08);padding:5px 12px;border-radius:12px;font-size:13px;opacity:0;transition:opacity .18s;pointer-events:none;white-space:nowrap;z-index:2}
+.quip.on{opacity:1}
+.pill{display:inline-block;padding:2px 12px;border-radius:999px;font-weight:700;font-size:13px;color:#111;background:#ddd}
+.statusrow{display:flex;align-items:center;gap:8px}
+.logbox{width:100%;font-size:12px;color:var(--mute);margin-top:2px}
+.logbox summary{cursor:pointer;user-select:none}
+#log{margin:6px 0 0;padding:0 0 0 2px;list-style:none;font:11.5px ui-monospace,Menlo,monospace;max-height:130px;overflow:auto;text-align:left}
+#log li{padding:2px 0;border-bottom:1px dashed var(--line)}
+#log li.good::before{content:'✓ ';color:var(--ok);font-weight:700}
+/* chat column */
+.chat{grid-area:chat;display:flex;flex-direction:column;min-height:0}
+.msgswrap{position:relative;flex:1;min-height:0;display:flex;flex-direction:column}
+.msgs{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:10px;min-height:0;overscroll-behavior:contain;scrollbar-gutter:stable}
+.msgs::-webkit-scrollbar{width:10px}
+.msgs::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px;border:3px solid transparent;background-clip:content-box}
+.msgrow{max-width:82%;display:flex;flex-direction:column;gap:2px}
+.msgrow.user{align-self:flex-end;align-items:flex-end}
+.msgrow.arki{align-self:flex-start;align-items:flex-start}
+.msg{padding:10px 14px;border-radius:16px;line-height:1.5;font-size:14.5px;overflow-wrap:break-word;max-width:100%}
+.msgrow.user .msg{background:var(--ink);color:var(--bg);border-bottom-right-radius:6px}
+.msgrow.arki .msg{background:var(--panel);border:1px solid var(--line);border-bottom-left-radius:6px}
+.msgmeta{font-size:11px;color:var(--mute);padding:0 6px;font-variant-numeric:tabular-nums}
+.msgtools{display:flex;gap:6px;padding:0 4px;max-height:0;opacity:0;overflow:hidden;transition:max-height .18s ease,opacity .18s ease}
+.msgrow.arki:hover .msgtools,.msgrow.arki:focus-within .msgtools{max-height:34px;opacity:1}
+button.mini{font-size:11.5px;padding:3px 10px;color:var(--mute);background:transparent;border-color:transparent}
+button.mini:hover{color:var(--ink);border-color:var(--line)}
+@media(hover:none){.msgtools{max-height:34px;opacity:1}}
+.starters{display:flex;flex-wrap:wrap;gap:6px}
+.starters button{font-size:12.5px;padding:4px 12px;color:var(--mute)}
+.starters button:hover{color:var(--ink)}
+.jump{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);font-size:12px;padding:4px 12px;box-shadow:0 2px 12px rgba(0,0,0,.18)}
+.msg pre{background:rgba(127,127,127,.13);padding:10px 12px;border-radius:10px;overflow-x:auto;font:12.5px ui-monospace,Menlo,monospace;margin:6px 0}
+.msg code{font:12.5px ui-monospace,Menlo,monospace;background:rgba(127,127,127,.16);padding:1px 5px;border-radius:6px}
+.msg pre code{background:none;padding:0}
+.msg img{max-width:180px;max-height:180px;border-radius:10px;display:block;margin:2px 0 4px}
+.cursor{display:inline-block;width:8px;height:15px;background:var(--acc);border-radius:2px;vertical-align:-2px;animation:blink 1s steps(1) infinite;margin-left:2px}
+.think{display:block;color:var(--mute);font-size:12.5px;font-style:italic;white-space:pre-wrap;max-height:120px;overflow:hidden}
+.dots i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--mute);margin-right:4px;animation:pulse 1.2s infinite}
+.dots i:nth-child(2){animation-delay:.2s}.dots i:nth-child(3){animation-delay:.4s}
+@keyframes pulse{0%,80%,100%{opacity:.25}40%{opacity:1}}
+@keyframes blink{50%{opacity:0}}
+.banner{display:none;background:#f87171;color:#fff;padding:8px 14px;border-radius:12px;font-size:13px;margin:0 14px}
+.banner.on{display:block}
+.banner code{font:12px ui-monospace,Menlo,monospace;background:rgba(0,0,0,.25);padding:1px 6px;border-radius:6px}
+.attach{display:flex;gap:8px;padding:8px 14px 0;flex-wrap:wrap}
+.attach:empty{display:none}
+.chip{display:flex;align-items:center;gap:6px;font-size:12px;padding:4px 6px;border:1px solid var(--line);border-radius:999px;background:var(--panel)}
+.chip img{width:32px;height:32px;object-fit:cover;border-radius:999px}
+.chip button{padding:0 6px;font-size:14px;line-height:1;border:none;background:none;color:var(--mute)}
+.chip button:hover{color:var(--ink)}
+.composer{display:flex;gap:8px;padding:12px 14px;padding-bottom:calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--panel);align-items:flex-end}
+textarea{flex:1;resize:none;font:inherit;padding:10px 14px;border-radius:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);max-height:140px;line-height:1.45}
+#send{min-width:82px}
+button:disabled{opacity:.45;cursor:default;border-color:var(--line)}
+#attachBtn{font-size:15px;padding:10px 13px;line-height:1}
+.pill.live{animation:pillPulse 1.6s ease-in-out infinite}
+@keyframes pillPulse{50%{box-shadow:0 0 0 6px rgba(59,158,255,.15)}}
+/* ---- sidebar panels: now playing + tool activity (the chat stays pure conversation) ---- */
+.dock,.toolpanel{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:14px;padding:9px 10px}
+.dock[hidden],.toolpanel[hidden]{display:none}
+.dockhead{display:flex;align-items:center;gap:8px}
+.dockicon{width:26px;height:26px;border-radius:8px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-size:12px;flex:none}
+.dockicon.playing{animation:pillPulse 1.4s ease-in-out infinite}
+.dockmeta{flex:1;min-width:0}
+.docktitle{font-size:12.5px;font-weight:700;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.docksub{font-size:11px;color:var(--mute);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dockframe{position:relative;margin:8px auto 0;border-radius:10px;overflow:hidden;background:#000;aspect-ratio:16/9;max-width:min(100%,236px)}
+.dockframe[hidden]{display:none}
+.dockframe iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.dockframe audio{width:100%;display:block}
+.dockbtns{display:flex;gap:3px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.dockvol{flex:1;min-width:38px;accent-color:var(--acc);cursor:pointer}
+.sphead{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mute)}
+.sphead .spclear{margin-left:auto;text-transform:none;letter-spacing:0}
+/* ---- tool-call cards ---- */
+.toolbox{display:flex;flex-direction:column;gap:6px;max-height:min(23vh,164px);overflow-y:auto;margin-top:8px;padding-right:2px}
+.toolbox:empty{display:none}
+.toolcall{border:1px solid var(--line);background:var(--panel);border-radius:11px;padding:6px 9px;font-size:11.5px;animation:toolIn .28s ease}
+@keyframes toolIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+.toolcall.run{border-color:var(--acc)}
+.toolcall.bad{border-color:#f87171}
+.toolhead{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700}
+.toolhead .tag{font-size:12px;line-height:1;flex:none}
+.toolhead .tn{flex:none}
+.toolarg{color:var(--mute);font-weight:400;font-family:ui-monospace,Menlo,monospace;font-size:10.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
+.toolres{color:var(--mute);margin-top:3px;font-size:11px;overflow-wrap:break-word;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+/* ---- wake word / voice ---- */
+.waverow{display:flex;align-items:center;gap:7px;justify-content:center;font-size:11.5px;color:var(--mute)}
+.waverow[hidden]{display:none}
+.wave{display:inline-flex;gap:2px;align-items:flex-end;height:12px}
+.wave i{width:2.5px;background:var(--acc);border-radius:2px;height:4px;animation:wv .9s ease-in-out infinite}
+.wave i:nth-child(2){animation-delay:.15s}.wave i:nth-child(3){animation-delay:.3s}.wave i:nth-child(4){animation-delay:.45s}.wave i:nth-child(5){animation-delay:.6s}
+@keyframes wv{0%,100%{height:3px}50%{height:12px}}
+#mic[aria-pressed="true"]{background:#22d3ee;border-color:#22d3ee;color:#06222a;font-weight:700}
+button.mini.wake{padding:2px 8px;font-size:11px}
+/* ================= responsive =================
+   wide screens → roomier column · mid → tighter sidebar · narrow → single column
+   · short/landscape phones → side-by-side again with a minimal avatar */
+@media(max-width:1180px){main{max-width:100%}}
+@media(max-width:980px){
+ .stage{grid-template-columns:minmax(240px,290px) minmax(0,1fr)}
+ #main{width:250px;height:250px}
+ .avcol,.sidepanels{padding-left:11px;padding-right:11px}
+ h1{font-size:26px}
+ .sub{max-width:34ch}
+ select{max-width:190px}
+}
+@media(max-width:820px){
+ main{height:auto;min-height:100vh;min-height:100dvh;overflow:visible;padding:14px 10px 20px}
+ .sub{display:none}
+ .screen{flex:none}
+ .stage{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto;grid-template-areas:"av" "chat" "side"}
+ .avcol{border-right:0;border-bottom:1px solid var(--line);flex-direction:row;flex-wrap:wrap;justify-content:center;align-items:center;padding:10px 12px;overflow:visible}
+ .sidepanels{border-right:0;border-top:1px solid var(--line);overflow:visible;padding:12px}
+ .avatar{padding:0}
+ #main{width:150px;height:150px}
+ .cap{display:none}
+ .logbox{display:none}
+ .chat{height:58vh;height:58dvh;min-height:300px}
+ .composer{position:sticky;bottom:0;z-index:3;box-shadow:0 -6px 16px rgba(0,0,0,.10)}
+ .dockframe{max-width:min(100%,280px)}
+ .toolbox{max-height:none}
+}
+@media(max-width:640px){
+ .tools{gap:6px}
+ .tools button,.tools select{padding:6px 11px;font-size:13px}
+ .msgs{padding:12px}
+ .notch span{display:none}
+}
+@media(max-width:560px){
+ .logo{width:40px;height:40px}
+ .sub{display:none}
+ h1{font-size:24px}
+ main{padding:14px 10px 24px}
+ #model{max-width:150px}
+ .chat{height:54vh;height:54dvh;min-height:260px}
+ #main{width:120px;height:120px}
+ textarea{max-height:110px}
+ .avatar .quip{font-size:12px;white-space:normal;max-width:170px}
+}
+@media(max-width:400px){
+ .tools button,.tools select{padding:5px 8px;font-size:12px}
+ #model{max-width:112px}
+ #send{min-width:62px}
+ .msgs{padding:10px}
+ .msgrow{max-width:92%}
+ #main{width:104px;height:104px}
+}
+/* short viewports: laptops with the browser chrome open, and phones in landscape */
+@media(max-height:720px) and (min-width:821px){
+ #main{width:210px;height:210px}
+ .cap{display:none}
+}
+@media(max-height:560px) and (orientation:landscape){
+ main{padding:8px 10px 10px}
+ header{gap:8px}
+ .sub{display:none}
+ .logo{width:34px;height:34px}
+ h1{font-size:21px}
+ .notch{display:none}
+ .tools{gap:5px}
+ .tools button,.tools select{padding:5px 10px;font-size:12px}
+ select{max-width:140px}
+ .stage{grid-template-columns:168px minmax(0,1fr);grid-template-areas:"av chat" "side chat"}
+ .screen{min-height:0}
+ .sphead span:nth-child(2){display:none}
+ .avcol{padding:8px;gap:5px}
+ .sidepanels{padding:0 8px 8px;gap:8px}
+ #main{width:104px;height:104px}
+ .cap{display:none}
+ .logbox{display:none}
+ .dockframe{max-width:min(100%,150px)}
+ textarea{max-height:70px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<main>
+<header>
+ <div class="brand">
+  <svg class="logo" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+  <title>Arki Chat</title>
+  <defs>
+    <linearGradient id="arkiBody" x1="6" y1="13" x2="58" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#9BD8FF"/>
+      <stop offset=".45" stop-color="#45A5FF"/>
+      <stop offset="1" stop-color="#1B6FD0"/>
+    </linearGradient>
+  </defs>
+  <!-- the same little geometric fringe the character has, in the same pill language.
+       the body spans x 4..60, so the strands are centred on x=32 and hide their bases
+       behind it (tips y 3..7, bodies running down into the bubble) -->
+  <g fill="#33343C">
+    <rect x="16.4" y="7" width="5.2" height="16" rx="2.6" transform="rotate(-18 19 7)"/>
+    <rect x="22.2" y="4" width="5.6" height="19" rx="2.8" transform="rotate(-10 25 4)"/>
+    <rect x="29" y="3" width="6" height="21" rx="3"/>
+    <rect x="36.2" y="4" width="5.6" height="19" rx="2.8" transform="rotate(9 39 4)"/>
+    <rect x="42.4" y="7" width="5.2" height="16" rx="2.6" transform="rotate(18 45 7)"/>
+  </g>
+  <g fill="url(#arkiBody)">
+    <!-- the squircle body, plus a curved chat tail tucked under the corner -->
+    <rect x="4" y="12" width="56" height="41" rx="16"/>
+    <path d="M21 47c-3 5.2-5.6 10-7.5 15 6.2-1.8 12.8-5 18.5-9.9z"/>
+  </g>
+  <ellipse cx="22" cy="21" rx="12" ry="5.5" fill="#fff" opacity=".14"/>
+  <!-- the two pill eyes that make Arki Arki -->
+  <g fill="#17181D" class="eyes">
+    <rect x="18.5" y="23" width="9" height="19" rx="4.5"/>
+    <rect x="36.5" y="23" width="9" height="19" rx="4.5"/>
+  </g>
+</svg>
+  <div class="brandtext">
+   <h1>Arki<span>Chat</span></h1>
+   <p class="sub">A squircle companion that lives on your screen — powered entirely by your local Ollama models.</p>
+  </div>
+ </div>
+ <div class="tools">
+  <div class="notch" id="notch" title="Arki mini status"><canvas id="mini" width="52" height="52" style="width:26px;height:26px"></canvas><span id="miniLabel">idle</span><i id="dot" title="Ollama"></i></div>
+  <select id="model" aria-label="Ollama model"></select>
+  <button id="think" aria-pressed="false" title="Let Arki reason before answering (much slower)">🧠 Deep off</button>
+  <button id="mic" aria-pressed="false" title="Wake word — say “Arki” to wake Arki, pause/resume music, or speak a command">🎤 Wake “Arki”</button>
+  <button id="theme" title="Toggle theme" aria-label="Toggle theme">🌙</button>
+  <button id="snd" aria-pressed="false">Sound off</button>
+  <button id="new">New chat</button>
+  <a id="about" class="linkbtn" href="about.html" target="_blank" rel="noopener" title="About Arki Chat (opens in a new tab)">About</a>
+ </div>
+</header>
+
+<section class="screen" aria-label="Arki chat">
+ <div class="stage" id="stage">
+  <div class="avcol">
+   <div class="avatar" id="av">
+    <div class="quip" id="quip" role="status"></div>
+    <canvas id="main" aria-label="Arki avatar. Click to poke, click three times fast to make it dizzy, or drop an image on it."></canvas>
+   </div>
+   <div class="cap">Drop an image on Arki to attach it · poke it · 3 fast clicks = dizzy</div>
+   <div class="statusrow"><span class="pill" id="pill" aria-live="polite">Idle</span></div>
+   <button class="mini wake" id="wake" title="Click to change the wake word">wake word: <span id="wakeWord">Arki</span></button>
+   <div class="waverow" id="waverow" hidden><span class="wave"><i></i><i></i><i></i><i></i><i></i></span><span id="heard">listening…</span></div>
+  </div>
+  <div class="sidepanels">
+   <div class="dock" id="dock" hidden aria-label="Now playing">
+    <div class="dockhead">
+     <div class="dockicon" id="dockIcon">▶</div>
+     <div class="dockmeta"><div class="docktitle" id="dockTitle">Nothing playing</div><div class="docksub" id="dockSub">—</div></div>
+     <button class="mini" id="dockPlay" title="Pause / resume">❚❚</button>
+     <button class="mini" id="dockStop" title="Stop">■</button>
+     <button class="mini" id="dockToggle" title="Show / hide the video">▾</button>
+    </div>
+    <div class="dockframe" id="dockFrame" hidden></div>
+    <div class="dockbtns">
+     <input type="range" class="dockvol" id="dockVol" min="0" max="100" value="80" title="Volume" aria-label="Music volume">
+     <button class="mini" id="dockExt" title="Open in a new tab">↗</button>
+     <button class="mini" id="dockClose" title="Close the player">✕</button>
+    </div>
+   </div>
+   <div class="toolpanel" id="toolpanel" hidden aria-label="Tool activity">
+    <div class="sphead"><span>⚡</span><span>Tool activity</span><button class="mini spclear" id="toolClear" title="Clear the list">clear</button></div>
+    <div class="toolbox" id="toolbox" aria-live="polite"></div>
+   </div>
+   <details class="logbox"><summary>Event log</summary><ul id="log"></ul></details>
+  </div>
+  <div class="chat">
+   <div class="msgswrap">
+    <div class="msgs" id="msgs" aria-live="polite"></div>
+    <button id="jump" class="jump" hidden aria-label="Jump to latest message">↓ latest</button>
+   </div>
+   <div class="banner" id="banner">Can't reach Ollama — start it with <code>ollama serve</code> (retrying every 5s…)</div>
+   <div class="attach" id="attach"></div>
+   <div class="composer">
+    <button id="attachBtn" title="Attach images" aria-label="Attach images">📎</button>
+    <textarea id="input" rows="1" placeholder="Message Arki…  (Enter to send, Shift+Enter for newline)"></textarea>
+    <button id="send" class="pri">Send</button>
+   </div>
+   <input type="file" id="fileInput" accept="image/*" multiple hidden>
+  </div>
+ </div>
+</section>
+</main>
+
+<script>
+(()=>{
+/* ================= avatar engine (Arki) =================
+   Inspired by Mochi from Coucou (MIT © 2026 Louis Raillé) — see README Credits */
+const S={
+ idle:{c:'#EDEDEF',eye:'pill',l:'Idle'},
+ working:{c:'#3B9EFF',eye:'pill',l:'Working'},
+ thinking:{c:'#8B5CF6',eye:'pill',l:'Thinking'},
+ searching:{c:'#6366F1',eye:'pill',l:'Searching'},
+ finished:{c:'#34D399',eye:'happy',l:'Finished'},
+ error:{c:'#F87171',eye:'flat',l:'Error'},
+ annoyed:{c:'#EDEDEF',eye:'line',l:'Annoyed'},
+ dizzy:{c:'#F472B6',eye:'spiral',l:'Dizzy'},
+ upload:{c:'#EDEDEF',eye:'cup',l:'Upload'},
+ listening:{c:'#22D3EE',eye:'dot',l:'Listening'},
+ playing:{c:'#A78BFA',eye:'happy',l:'Playing'}
+};
+const $=id=>document.getElementById(id);
+const hex=h=>[1,3,5].map(i=>parseInt(h.substr(i,2),16));
+let state='idle',override=null,cur=hex('#EDEDEF'),morph=0,sq=0,jump=0,lx=0,ly=0,mx=0,my=0,tilt=0;
+let glow=0,online=false,nextBlink=2,blinkStart=-9,parts=[],clicks=[],sound=false,runId=0;
+const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let paintQ=false;
+function paint(fn){if(paintQ)return;paintQ=true;requestAnimationFrame(()=>{paintQ=false;fn();});}
+function paintOnce(){const t=now();render(mc,mainC.width/dprM,dprM,true,t,eff());render(nc,26,2,false,t,eff());}
+
+// ---------- sound (WebAudio blips) ----------
+let ac;
+function beep(f,d=.12,type='sine'){ if(!sound)return; try{ ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+ const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.value=f;g.gain.value=.06;
+ g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+d);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d);}catch(e){}}
+const SND={working:440,thinking:330,searching:520,finished:880,error:180,dizzy:260,annoyed:150,upload:300,listening:990,playing:620};
+
+// ---------- state ----------
+const log=m=>{const li=document.createElement('li');if(/ready|done|available|connected/i.test(m))li.className='good';li.textContent=new Date().toLocaleTimeString([],{hour12:false})+'  '+m;$('log').prepend(li);};
+function now(){return performance.now()/1000;}
+function eff(){return override&&override.until>now()?override.s:state;}
+function setState(s,msg){
+ runId++;state=s;override=null;
+ if(s==='finished'){jump=1;for(let i=0;i<10;i++)spawn('star');}
+ if(SND[s])beep(SND[s],.15,s==='error'?'sawtooth':'sine');
+ log(msg||('state → '+s));syncUI();
+ if(s==='finished'||s==='error'){const id=++runId;setTimeout(()=>{if(id===runId&&state===s)setState('idle','state → idle');},2400);}
+}
+function temp(s,secs){override={s,until:now()+secs};if(SND[s])beep(SND[s],.15,'triangle');syncUI();}
+function syncUI(){const k=eff(),p=$('pill');p.textContent=S[k].l;p.style.background=S[k].c;p.classList.toggle('live',k!=='idle');
+ $('miniLabel').textContent=S[k].l.toLowerCase();$('notch').title='Arki is '+S[k].l.toLowerCase();if(REDUCED)paintOnce();}
+
+// speech bubble
+let quipT;
+function quip(t){const q=$('quip');q.textContent=t;q.classList.add('on');clearTimeout(quipT);quipT=setTimeout(()=>q.classList.remove('on'),1600);}
+const QUIPS=['hey!','that tickles','ow!','poking won\'t speed me up','I live here','boop','I felt that','yes?'];
+
+// ---------- interaction ----------
+addEventListener('pointermove',e=>{const r=$('main').getBoundingClientRect();
+ mx=Math.max(-1,Math.min(1,(e.clientX-(r.left+r.width/2))/400));my=Math.max(-1,Math.min(1,(e.clientY-(r.top+r.height/2))/400));});
+$('main').addEventListener('click',()=>{
+ const t=now();clicks=clicks.filter(c=>t-c<1.7);clicks.push(t);sq=1;
+ if(clicks.length>=3){clicks=[];temp('dizzy',2.6);log('3 rapid clicks → dizzy');}
+ else{temp('annoyed',.7);spawn('drop',0);quip(QUIPS[Math.floor(Math.random()*QUIPS.length)]);}
+});
+
+// ---------- image attachments (drag & drop or paste) ----------
+const av=$('av');
+let attachImages=[]; // {name, dataUrl, b64}
+function modelHasVision(){const m=models.find(x=>x.model===model);return !m||!m.details||!m.details.capabilities||m.details.capabilities.includes('vision');}
+async function addFiles(files){
+ const imgs=[...files].filter(f=>f.type.startsWith('image/'));
+ const skipped=files.length-imgs.length;
+ if(skipped)log(skipped+' non-image file(s) ignored');
+ for(const f of imgs){
+  if(attachImages.length>=4){log('max 4 images per message');break;}
+  if(f.size>6*1024*1024){log(f.name+' skipped (over 6MB)');continue;}
+  const dataUrl=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(f);});
+  attachImages.push({name:f.name,dataUrl,b64:dataUrl.split(',')[1]});
+ }
+ if(imgs.length){jump=.6;for(let i=0;i<5;i++)spawn('heart');beep(200,.2,'square');log('attached '+imgs.length+' image(s)');
+  if(!modelHasVision())log('⚠ '+model+' has no vision — switch model (📷) before sending');}
+ renderAttach();syncUI();
+}
+av.addEventListener('dragover',e=>{e.preventDefault();av.classList.add('drop');if(!override||override.s!=='upload')temp('upload',60);});
+av.addEventListener('dragleave',()=>{av.classList.remove('drop');override=null;syncUI();});
+av.addEventListener('drop',e=>{e.preventDefault();av.classList.remove('drop');override=null;addFiles(e.dataTransfer.files||[]);syncUI();});
+document.addEventListener('paste',e=>{const fs=[...(e.clipboardData?.files||[])];if(fs.length){e.preventDefault();addFiles(fs);}});
+function renderAttach(){
+ const box=$('attach');box.innerHTML='';
+ attachImages.forEach((a,i)=>{
+  const c=document.createElement('div');c.className='chip';
+  const im=document.createElement('img');im.src=a.dataUrl;im.alt=a.name;c.appendChild(im);
+  const nm=document.createElement('span');nm.textContent=a.name.length>16?a.name.slice(0,15)+'…':a.name;c.appendChild(nm);
+  const x=document.createElement('button');x.textContent='×';x.title='Remove';x.setAttribute('aria-label','Remove '+a.name);
+  x.onclick=()=>{attachImages.splice(i,1);renderAttach();};c.appendChild(x);
+  box.appendChild(c);
+ });
+ refreshComposer();
+}
+
+// ---------- particles & drawing ----------
+function spawn(type){parts.push({type,x:200+(Math.random()-.5)*160,y:180,vx:(Math.random()-.5)*120,vy:-120-Math.random()*120,life:0,max:1.4,rot:Math.random()*6});}
+function heart(c,x,y,s){c.beginPath();c.moveTo(x,y+s*.35);c.bezierCurveTo(x-s,y-s*.3,x-s*.5,y-s,x,y-s*.45);c.bezierCurveTo(x+s*.5,y-s,x+s,y-s*.3,x,y+s*.35);c.fill();}
+function star(c,x,y,r,rot){c.beginPath();for(let i=0;i<10;i++){const a=rot+i*Math.PI/5,rr=i%2?r*.45:r;c.lineTo(x+Math.cos(a)*rr,y+Math.sin(a)*rr);}c.closePath();c.fill();}
+// a small geometric fringe, built from the same rounded-pill language as the eyes.
+// drawn BEFORE the body so the silhouette cuts the bases cleanly.
+// each strand is [x, tipY, angle°, length, width] and hangs down into the head.
+const HAIR=[[-64,-134,-20,74,19],[-32,-150,-11,90,22],[-2,-158,-3,100,23],[30,-150,9,88,22],[62,-132,20,70,19]];
+function drawHair(c,t,k,morph,hop){
+ const sway=Math.sin(t*1.7)*1.7+lx*2.2+(k==='dizzy'?Math.sin(t*9)*9:0);
+ c.save();
+ c.scale(1-morph*.55,1-morph*.30);            // flattens with the body into the mailbox
+ c.translate(0,-hop*9);                        // lifts a little on the celebration jump
+ c.fillStyle='#33343C';
+ HAIR.forEach(([x,ty,a,len,w],i)=>{
+  c.save();c.translate(x,ty);c.rotate((a+sway*(1+i*.14))*Math.PI/180);
+  c.beginPath();c.roundRect(-w/2,0,w,len,w/2);c.fill();c.restore();
+ });
+ c.restore();
+}
+function eye(c,shape,x,y,w,h,side,t){
+ c.fillStyle=c.strokeStyle='#17181d';c.lineWidth=9;c.lineCap='round';
+ const pill=(ww,hh)=>{c.beginPath();c.roundRect(x-ww/2,y-hh/2,ww,hh,ww/2);c.fill();};
+ if(shape==='wink')shape=side>0?'happy':'pill';
+ switch(shape){
+  case'pill':pill(w,h);break;
+  case'wide':pill(w*1.15,h*1.2);break;
+  case'dot':pill(w*.6,w*.6);break;
+  case'line':c.beginPath();c.moveTo(x-w/2,y);c.lineTo(x+w/2,y);c.stroke();break;
+  case'flat':pill(w*1.1,10);break;
+  case'happy':c.beginPath();c.arc(x,y+14,w*.55,Math.PI*1.12,Math.PI*1.88);c.stroke();break;
+  case'closed':c.beginPath();c.arc(x,y-14,w*.55,Math.PI*.12,Math.PI*.88);c.stroke();break;
+  case'cup':c.beginPath();c.arc(x,y-8,w*.55,Math.PI*.1,Math.PI*.9);c.stroke();break;
+  case'tired':c.save();c.beginPath();c.rect(x-w,y-h*.05,w*2,h);c.clip();pill(w,h);c.restore();break;
+  case'heart':c.fillStyle='#ff5c8a';heart(c,x,y,w*.8);break;
+  case'star':c.fillStyle='#ffc933';star(c,x,y,w*.7,-Math.PI/2);break;
+  case'spiral':c.lineWidth=5;c.beginPath();for(let a=0;a<12;a+=.3){const rr=2+a*2.4,aa=a+t*9*(side||1);c.lineTo(x+Math.cos(aa)*rr,y+Math.sin(aa)*rr);}c.stroke();break;
+ }
+}
+function render(c,size,dpr,full,t,k){
+ const cfg=S[k];
+ c.setTransform(dpr*size/400,0,0,dpr*size/400,0,0);c.clearRect(0,0,400,400);
+ const by=Math.sin(t*1.8)*3,jy=-Math.sin(Math.min(1,(1-jump))*Math.PI)*70*(jump>0?1:0);
+ c.save();c.translate(200,215+by+(jump>0?jy:0));c.rotate(tilt+(k==='dizzy'?Math.sin(t*10)*.12:0));
+ c.scale(1+sq*.1,1-sq*.1);
+ drawHair(c,t,k,morph,jump>0?jump:0);
+ // body: superellipse, lerped toward a mailbox shape when morphing (upload)
+ const n=4+morph*5,Rw=118*(1+morph*.18),Rh=112*(1-morph*.3);
+ c.beginPath();for(let i=0;i<72;i++){const a=i/72*Math.PI*2,ca=Math.cos(a),sa=Math.sin(a);
+  c.lineTo(Rw*Math.sign(ca)*Math.pow(Math.abs(ca),2/n),Rh*Math.sign(sa)*Math.pow(Math.abs(sa),2/n));}c.closePath();
+ const col=`rgb(${cur.map(Math.round)})`;
+ c.shadowColor=col;c.shadowBlur=(k==='idle'||k==='annoyed')?8+26*glow:34;
+ let g=c.createLinearGradient(Rw,-Rh,-Rw,Rh);g.addColorStop(0,'#EDEDEF');g.addColorStop(1,'#C4C5CA');c.fillStyle=g;c.fill();c.shadowBlur=0;
+ c.save();c.clip();
+ g=c.createLinearGradient(0,-Rh,0,Rh);g.addColorStop(0,`rgba(${cur.map(Math.round)},0)`);g.addColorStop(1,`rgba(${cur.map(Math.round)},${k==='idle'?glow*.6:.6})`);c.fillStyle=g;c.fillRect(-150,-150,300,300);
+ g=c.createRadialGradient(0,0,60,0,0,Rw*1.1);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.2)');c.fillStyle=g;c.fillRect(-150,-150,300,300);
+ g=c.createRadialGradient(-45,-65,0,-45,-65,85);g.addColorStop(0,'rgba(255,255,255,.65)');g.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=g;c.fillRect(-150,-150,300,300);
+ if(k==='finished'||k==='upload'||jump>0){c.fillStyle='rgba(255,120,150,.28)';[-1,1].forEach(s=>{c.beginPath();c.ellipse(s*62,28,17,10,0,0,7);c.fill();});}
+ c.restore();
+ // eyes: projected on a sphere, yaw/pitch follow look target
+ const R=95,yaw=lx*.5,pitch=ly*.4;let bk=0;if(t-blinkStart<.16)bk=Math.sin((t-blinkStart)/.16*Math.PI);
+ [-1,1].forEach(s=>{const a=s*.46,A=a+yaw,sx=Math.cos(A)/Math.cos(a);
+  const ex=Math.sin(A)*R,ey=-6+Math.sin(pitch)*R*.55-(k==='upload'?10:0);
+  eye(c,cfg.eye,ex,ey,34*sx,60*(1-.92*bk)*(1-Math.abs(pitch)*.15),s,t);});
+ if(morph>.05){const sh=34*morph;c.fillStyle='#17181d';c.beginPath();c.roundRect(-52,34,104,Math.max(2,sh),12);c.fill();}
+ c.restore();
+ if(full){
+  if(k==='error'&&Math.random()<.04)parts.push({type:'drop',x:140+Math.random()*120,y:130,vx:0,vy:20,life:0,max:1.2,rot:0});
+  if(k==='thinking'){c.fillStyle='rgba(139,92,246,.5)';for(let i=0;i<3;i++){c.beginPath();c.arc(300+i*18,95-i*16-Math.sin(t*3+i)*3,4+i*2,0,7);c.fill();}}
+  parts=parts.filter(p=>p.life<p.max);
+  parts.forEach(p=>{p.life+=1/60;p.x+=p.vx/60;p.y+=p.vy/60;p.vy+=(p.type==='drop'?240:260)/60;p.rot+=.05;
+   c.globalAlpha=1-p.life/p.max;
+   if(p.type==='star'){c.fillStyle='#ffc933';star(c,p.x,p.y,10,p.rot);}
+   else if(p.type==='heart'){c.fillStyle='#ff5c8a';heart(c,p.x,p.y,10);}
+   else{c.fillStyle='#6cc3ff';c.beginPath();c.ellipse(p.x,p.y,4,7,0,0,7);c.fill();}
+   c.globalAlpha=1;});
+ }
+}
+
+// ---------- render loop ----------
+const mainC=$('main'),mini=$('mini'),mc=mainC.getContext('2d'),nc=mini.getContext('2d');
+let dprM=1;
+function fit(){const r=mainC.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);dprM=d;mainC.width=r.width*d;mainC.height=r.height*d;if(REDUCED)paintOnce();}
+fit();addEventListener('resize',()=>{fit();autoGrow();});
+let last=now(),visible=true,shown='idle';
+document.addEventListener('visibilitychange',()=>visible=!document.hidden);
+function frame(){
+ requestAnimationFrame(frame);if(!visible)return;
+ const t=now(),dt=Math.min(.05,t-last);last=t;const k=eff();
+ if(k==='finished')glow=1;else glow*=.992;if(glow<.02)glow=0;
+ if(k!==shown){shown=k;syncUI();}
+ if(t>nextBlink){blinkStart=t;nextBlink=t+2+Math.random()*3;}
+ let tx=mx,ty=my;
+ if(k==='thinking'){tx=.35;ty=-1;}else if(k==='searching'){tx=Math.sin(t*2.4);ty=.1;}else if(k==='dizzy'){tx=Math.sin(t*7)*.6;ty=0;}
+ lx+=(tx-lx)*.12;ly+=(ty-ly)*.12;tilt+=((lx*.06)-tilt)*.1;
+ const tc=hex(k==='idle'&&glow>0?'#34D399':S[k].c);cur=cur.map((v,i)=>v+(tc[i]-v)*.12);
+ morph+=((k==='upload'?1:0)-morph)*.18;
+ sq*=.88;if(jump>0)jump=Math.max(0,jump-dt*1.6);
+ render(mc,mainC.width/dprM,dprM,true,t,k);
+ render(nc,26,2,false,t,k);
+}
+
+/* ================= Ollama chat ================= */
+const SYSTEM='You are Arki, a cute and friendly squircle companion who lives on the user\'s screen. Be helpful, concise and warm. Use markdown when it helps (code blocks for code, bold for emphasis).\n'+
+'You can ACT on the user\'s computer by calling tools. Always call a tool instead of only describing it when the user asks to play music, pause or skip it, change the volume, or open a website/app (gmail, youtube, spotify, github, drive, maps…). '+
+'After a tool runs, confirm briefly in one sentence what you did — never paste raw URLs the user did not ask for.\n'+
+'Never pause, resume, skip or change the volume unless the user explicitly asked for it. If they just asked for music, leave it playing.\n'+
+'Wake word: the user may talk to you hands-free. When they say “Arki” on its own, that pauses or resumes their music; when they say “Arki” plus a request, treat the rest as the request.';
+const DEF_MODEL='qwen3.5:2b';
+let models=[],model=localStorage.getItem('arki.model')||'';
+let history=[],generating=false,ctrl=null,lastUserImgs=[],toolNotes=[];
+const msgs=$('msgs'),input=$('input'),sendBtn=$('send');
+// never split a user/assistant pair, and never ship client-only fields to Ollama
+function buildMessages(){
+ let h=history.slice(-20);
+ if(h[0]&&h[0].role==='assistant')h=h.slice(1);
+ const sys=[{role:'system',content:SYSTEM}];
+ // so follow-ups like "play the next one" know what is already on screen
+ if(toolNotes.length)sys.push({role:'system',content:'Actions you just performed on this page: '+toolNotes.join(' | ')});
+ return [...sys,...h.map(m=>({role:m.role,content:m.content,...(m.images&&m.images.length?{images:m.images}:{})}))];
+}
+
+function setOnline(v,msg){online=v;$('dot').className=v?'':'off';$('dot').title=v?'Ollama connected':'Ollama offline';
+ $('banner').classList.toggle('on',!v);if(msg)log(msg);}
+async function loadModels(){
+ try{
+  const r=await fetch('/api/tags');if(!r.ok)throw new Error('HTTP '+r.status);
+  const j=await r.json();
+  models=(j.models||[]).filter(m=>!m.details||!m.details.capabilities||m.details.capabilities.includes('completion'));
+  if(!models.length){setOnline(false,'no chat models found — try `ollama pull '+DEF_MODEL+'`');return;}
+  models.sort((a,b)=>(a.model===DEF_MODEL?-1:b.model===DEF_MODEL?1:a.model.localeCompare(b.model)));
+  const sel=$('model');sel.innerHTML='';
+  models.forEach(m=>{const caps=(m.details&&m.details.capabilities)||[];
+   const o=document.createElement('option');o.value=m.model;o.textContent=m.model+(caps.includes('vision')?'  📷':'');sel.appendChild(o);});
+  if(!models.find(m=>m.model===model))model=models[0].model;
+  sel.value=model;localStorage.setItem('arki.model',model);
+  setOnline(true,'ollama connected — '+models.length+' chat model(s)');
+ }catch(e){setOnline(false,'ollama unreachable — run `ollama serve`');}
+}
+$('model').addEventListener('change',e=>{model=e.target.value;localStorage.setItem('arki.model',model);log('model → '+model);});
+// thinking-capable models can spend hundreds of tokens reasoning and answer nothing,
+// so reasoning is opt-in: `think:false` makes replies fast and reliable
+let thinkMode=localStorage.getItem('arki.think')==='1';
+function applyThink(){const b=$('think');b.setAttribute('aria-pressed',String(thinkMode));b.textContent=thinkMode?'🧠 Deep on':'🧠 Deep off';}
+$('think').addEventListener('click',()=>{thinkMode=!thinkMode;localStorage.setItem('arki.think',thinkMode?'1':'0');applyThink();log('deep think '+(thinkMode?'on — slower, deeper':'off — fast replies'));});
+applyThink();
+loadModels();setInterval(()=>{if(!online)loadModels();},5000);
+
+// ---------- markdown-lite ----------
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function fmt(s){
+ s=esc(s);
+ s=s.replace(/```[a-zA-Z0-9_+#-]*\n?([\s\S]*?)(```|$)/g,(m,code)=>'<pre><code>'+code.replace(/\n$/,'')+'</code></pre>');
+ s=s.replace(/`([^`\n]+)`/g,'<code>$1</code>');
+ s=s.replace(/\*\*([^*\n]+)\*\*/g,'<strong>$1</strong>');
+ s=s.replace(/(^|[\s(])\*([^*\n]+)\*(?=[\s).,!?;:]|$)/g,'$1<em>$2</em>');
+ return s.replace(/\n/g,'<br>');
+}
+
+// ---------- messages ----------
+function scrollBottom(force){const near=msgs.scrollHeight-msgs.scrollTop-msgs.clientHeight<90;if(near||force)msgs.scrollTop=msgs.scrollHeight;}
+function updateJump(){$('jump').hidden=msgs.scrollHeight-msgs.scrollTop-msgs.clientHeight<140;}
+msgs.addEventListener('scroll',updateJump,{passive:true});
+function addMsg(role,content,imgs){
+ const who=role==='assistant'?'arki':role;
+ const row=document.createElement('div');row.className='msgrow '+who;
+ const d=document.createElement('div');d.className='msg '+who;
+ if(who==='user'&&imgs&&imgs.length)imgs.forEach(a=>{const im=document.createElement('img');im.src=a.dataUrl;im.alt=a.name;d.appendChild(im);});
+ const span=document.createElement('span');span.className='body';
+ span.innerHTML=content?fmt(content):'<span class="dots"><i></i><i></i><i></i></span>';
+ d.appendChild(span);row.appendChild(d);
+ let meta=null,tools=null;
+ if(who==='arki'){
+  meta=document.createElement('div');meta.className='msgmeta';row.appendChild(meta);
+  tools=document.createElement('div');tools.className='msgtools';
+  const cp=document.createElement('button');cp.className='mini';cp.textContent='Copy';cp.setAttribute('aria-label','Copy reply');
+  cp.onclick=()=>copyText(span.textContent,cp);
+  tools.appendChild(cp);row.appendChild(tools);
+ }
+ msgs.appendChild(row);scrollBottom(true);updateJump();
+ return {el:d,span,row,meta,tools};
+}
+function copyText(t,btn){
+ const done=()=>{btn.textContent='Copied';log('copied reply');setTimeout(()=>{btn.textContent='Copy';},1200);};
+ const fail=()=>{btn.textContent='Press ⌘C';setTimeout(()=>{btn.textContent='Copy';},1400);};
+ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(done,fail);return;}
+ const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';
+ document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done();}catch(e){fail();}ta.remove();
+}
+function addRetry(b){if(!b.tools)return;const r=document.createElement('button');r.className='mini';r.textContent='Retry';
+ r.setAttribute('aria-label','Retry last message');r.onclick=retryLast;b.tools.appendChild(r);}
+function removeStarters(){const s=$('starters');if(s)s.remove();}
+const STARTERS=[['What can you do?','What can you do? What are you good at?'],
+ ['Play music','Play some lofi hip hop beats so I can study while we chat.'],
+ ['Open a site','Open my Gmail in a new tab.'],
+ ['Explain simply','Explain retrieval-augmented generation in simple words.'],
+ ['Write code','Write a JavaScript function that debounces another function, with brief comments.'],
+ ['Be playful','Say something delightful about being a squircle.']];
+function showStarters(){
+ removeStarters();const box=document.createElement('div');box.className='starters';box.id='starters';
+ STARTERS.forEach(([label,prompt])=>{const bt=document.createElement('button');bt.textContent=label;
+  bt.onclick=()=>{input.value=prompt;autoGrow();refreshComposer();send();};box.appendChild(bt);});
+ msgs.appendChild(box);scrollBottom(true);
+}
+function retryLast(){
+ if(generating||!history.length)return;
+ const u=history.pop();
+ [...msgs.children].slice(-2).forEach(r=>r.remove());
+ attachImages=lastUserImgs.slice();lastUserImgs=[];renderAttach();
+ input.value=u.content;autoGrow();refreshComposer();send();
+}
+
+// ---------- send / stop ----------
+function refreshComposer(){sendBtn.textContent=generating?'■ Stop':'Send';sendBtn.disabled=!generating&&!input.value.trim()&&!attachImages.length;}
+let streamPhase='thinking',bubbleFinal=false;
+// one model turn: streams text into the bubble and reports any tool_calls it wants
+async function streamTurn(messages,useTools){
+ const body={model,think:thinkMode,stream:true,options:{temperature:.7},messages};
+ if(useTools)body.tools=TOOLS;
+ const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},signal:ctrl.signal,body:JSON.stringify(body)});
+ if(!res.ok){
+  if(res.status===502)setOnline(false,'connection to ollama lost');
+  const t=await res.text().catch(()=>'');
+  throw new Error('HTTP '+res.status+(t?' — '+t.slice(0,140):''));
+ }
+ const reader=res.body.getReader(),dec=new TextDecoder();
+ let buf='',full='',think='',calls=[],stats=null;
+ while(true){
+  const {done,value}=await reader.read();if(done)break;
+  buf+=dec.decode(value,{stream:true});let nl;
+  while((nl=buf.indexOf('\n'))>=0){
+   const line=buf.slice(0,nl).trim();buf=buf.slice(nl+1);if(!line)continue;
+   let j;try{j=JSON.parse(line)}catch{continue}
+   if(j.error)throw new Error(j.error);
+   if(j.done&&j.eval_count)stats={sec:(j.total_duration||0)/1e9,ec:j.eval_count,ed:(j.eval_duration||0)/1e9};
+   const tc=(j.message&&j.message.tool_calls)||[];
+   for(const t of tc){const ex=calls.find(c=>c.id===t.id);if(ex)Object.assign(ex,t);else calls.push(t);}
+   const tk=(j.message&&j.message.thinking)||'';
+   if(tk)think+=tk;
+   const tok=(j.message&&j.message.content)||'';
+   if(tok)full+=tok;
+  }
+ }
+ return {full,think,calls,stats};
+}
+function renderBubble(b,full,think){
+ if(bubbleFinal)return; // a queued rAF must never clobber the finished reply
+ b.span.innerHTML=fmt(full)+(generating?'<span class="cursor"></span>':'');
+ if(think.trim()){const t=document.createElement('span');t.className='think';
+  t.textContent=think.length>600?'…'+think.slice(-600):think;b.span.prepend(t);}
+}
+// every terminal assignment goes through here so a late rAF cannot wipe it
+function finalise(b,html){
+ bubbleFinal=true;b.span.innerHTML=html;
+}
+async function send(){
+ if(generating)return;
+ if(!online){log('offline — cannot send');temp('annoyed',.7);return;}
+ const text=input.value.trim();
+ if(!text&&!attachImages.length)return;
+ // a slash command runs the tool directly — but still clear the composer, like a real send
+ if(text.trim().startsWith('/')&&runCommand(text.trim())){input.value='';autoGrow();refreshComposer();return;}
+ runId++;
+ const imgs=attachImages;attachImages=[];renderAttach();
+ input.value='';autoGrow();
+ addMsg('user',text,imgs);
+ history.push({role:'user',content:text||'What do you see in this image?',...(imgs.length?{images:imgs.map(a=>a.b64)}:{})});
+ if(history.length>40)history=history.slice(-40);
+ lastUserImgs=imgs;removeStarters();
+ log('→ '+model+(imgs.length?' +'+imgs.length+' img':''));
+ generating=true;refreshComposer();
+ setState('thinking','arki: thinking');
+ bubbleFinal=false;
+ const b=addMsg('assistant','');
+ ctrl=new AbortController();
+ let full='',think='',streamed='',usedTools=false,turns=0;
+ const t0=Date.now();
+ const tick=setInterval(()=>{if(b.meta)b.meta.textContent=(streamPhase==='writing'?'writing… ':'thinking… ')+Math.round((Date.now()-t0)/1000)+'s';},500);
+ const paintNow=()=>paint(()=>{renderBubble(b,streamed,think);scrollBottom();});
+ try{
+  let convo=buildMessages();
+  let useTools=true;
+  while(turns<4){
+   turns++;
+   let r;
+   try{ r=await streamTurn(convo,useTools); }
+   catch(e){
+    // not every model handles the tools array — degrade instead of dying
+    if(useTools&&/tool|schema/i.test(e.message)){log('⚠ '+model+' rejected the tools — retrying without');useTools=false;turns--;continue;}
+    throw e;
+   }
+   streamed+=r.full;
+   full+=r.full;
+   if(r.think)think+=r.think;
+   streamPhase='writing';paintNow();
+   if(b.meta&&r.stats)b.meta.textContent=model+' · '+r.stats.sec.toFixed(1)+'s · '+r.stats.ec+' tok'+(r.stats.ec&&r.stats.ed?' · '+(r.stats.ec/r.stats.ed).toFixed(1)+' tok/s':'');
+   if(!r.calls.length)break;
+   usedTools=true;
+   const results=[];
+   for(const c of r.calls){
+    const fn=(c.function)||{};const name=fn.name||'unknown';const args=fn.arguments||{};
+    const card=addToolCard(name,args,null,'working…');card.classList.add('run');
+    let summary;
+    try{ summary=await execTool(name,args); }
+    catch(e){ summary='Tool error: '+e.message;card.classList.add('bad');log('⚠ tool '+name+': '+e.message);}
+    card.querySelector('.toolres').textContent=summary;card.classList.remove('run');
+    log('⚙ '+name+' → '+summary);
+    toolNotes.push(name+'('+Object.entries(args).map(([k,v])=>k+'="'+v+'"').join(', ')+') → '+summary);
+    if(toolNotes.length>6)toolNotes.shift();
+    results.push({role:'tool',content:summary});
+   }
+   convo=[...convo,{role:'assistant',content:r.full||'',tool_calls:r.calls},...results];
+   setState('working','arki: acting on it');
+  }
+  if(!full.trim()&&!usedTools){
+   const note=think.trim()?'Arki reasoned it all through but said nothing back. Try **Deep think**, or rephrase.':'Empty response — try a chat-capable model.';
+   finalise(b,think.trim()?'<span class="think"></span>'+fmt(' '+note):fmt('⚠️ '+note));
+   if(think.trim())b.span.querySelector('.think').textContent=think.length>600?'…'+think.slice(-600):think;
+   if(b.meta)b.meta.textContent='';
+   log('empty reply from '+model);addRetry(b);setState('error','empty reply');
+   return;
+  }
+  if(!full.trim())full='Done.';
+  history.push({role:'assistant',content:full});
+  finalise(b,fmt(full));
+  if(b.meta&&/…/.test(b.meta.textContent))b.meta.textContent=(usedTools?'tools · ':'')+Math.round((Date.now()-t0)/1000)+'s';
+  log('arki: done');setState('finished','arki: finished');
+ }catch(e){
+  if(e.name==='AbortError'){
+   if(streamed.trim()){full=streamed;history.push({role:'assistant',content:full});finalise(b,fmt(full));if(b.meta)b.meta.textContent='stopped';}
+   else finalise(b,fmt('*stopped*'));
+   log('stopped by user');setState('idle','state → idle');
+  }else{
+   log('error: '+e.message);
+   finalise(b,fmt('⚠️ '+e.message));
+   if(b.meta)b.meta.textContent='failed';
+   addRetry(b);
+   setState('error','state → error');
+  }
+ }finally{clearInterval(tick);generating=false;ctrl=null;refreshComposer();}
+}
+function stop(){if(ctrl)ctrl.abort();}
+function autoGrow(){input.style.height='auto';input.style.height=Math.min(input.scrollHeight,140)+'px';}
+input.addEventListener('input',()=>{autoGrow();refreshComposer();});
+input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});
+sendBtn.addEventListener('click',()=>{generating?stop():send();});
+$('new').addEventListener('click',()=>{runId++;if(generating&&ctrl)ctrl.abort();history=[];lastUserImgs=[];attachImages=[];renderAttach();
+ msgs.innerHTML='';setState('idle','new chat');addMsg('assistant','Fresh canvas! What should we make? 🟦');showStarters();refreshComposer();input.focus();});
+$('snd').addEventListener('click',e=>{sound=!sound;e.target.textContent=sound?'Sound on':'Sound off';e.target.setAttribute('aria-pressed',String(sound));beep(660);});
+$('attachBtn').addEventListener('click',()=>$('fileInput').click());
+$('fileInput').addEventListener('change',e=>{addFiles(e.target.files||[]);e.target.value='';});
+$('jump').addEventListener('click',()=>msgs.scrollTo({top:msgs.scrollHeight,behavior:'smooth'}));
+const applyTheme=t=>{document.documentElement.dataset.theme=t;$('theme').textContent=t==='dark'?'☀️':'🌙';
+ $('theme').setAttribute('aria-label','Theme: '+t);localStorage.setItem('arki.theme',t);};
+$('theme').addEventListener('click',()=>applyTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'));
+applyTheme(localStorage.getItem('arki.theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
+
+/* ================= tools, in-page media dock, wake word ================= */
+// Small local models cope far better with a handful of sharply-named tools than
+// with a big catalogue, so everything the app can *do* lives here.
+const TOOLS=[
+ {type:'function',function:{name:'play_music',description:'Play music, a song, an album, a playlist, a lofi/ambient mix or a podcast in the page\'s built-in player so the user can keep chatting while it plays. Use this whenever the user asks to play/put on/hear music.',parameters:{type:'object',properties:{query:{type:'string',description:'song, artist, album, playlist or mix name — or a youtube/spotify/audio URL'},service:{type:'string',enum:['youtube','spotify'],description:'defaults to youtube'}},required:['query']}}},
+ {type:'function',function:{name:'control_music',description:'Pause, resume, stop or skip what is currently playing in the page. ONLY call this when the user explicitly asks to pause, resume, stop or skip — never on your own.',parameters:{type:'object',properties:{action:{type:'string',enum:['pause','resume','stop','next']}},required:['action']}}},
+ {type:'function',function:{name:'set_volume',description:'Set the volume of the in-page music player, 0 to 100. ONLY call this when the user explicitly mentions loudness or volume.',parameters:{type:'object',properties:{level:{type:'integer',minimum:0,maximum:100}},required:['level']}}},
+ {type:'function',function:{name:'open_app',description:'Open a website or web app in a new browser tab. Works with gmail, youtube, spotify, google drive, calendar, maps, netflix, reddit, wikipedia, github, x/twitter, notion, figma, amazon, chatgpt, weather, news — or any full URL.',parameters:{type:'object',properties:{name:{type:'string',description:'app name such as gmail, or a full url'}},required:['name']}}}
+];
+const T_ICONS={play_music:'🎵',control_music:'⏯',set_volume:'🔊',open_app:'🚀'};
+const APPS={
+ gmail:'https://mail.google.com/',mail:'https://mail.google.com/',email:'https://mail.google.com/',
+ youtube:'https://www.youtube.com/',yt:'https://www.youtube.com/',spotify:'https://open.spotify.com/',
+ github:'https://github.com/',gitlab:'https://gitlab.com/',drive:'https://drive.google.com/',docs:'https://docs.google.com/',
+ sheets:'https://sheets.google.com/',calendar:'https://calendar.google.com/',maps:'https://www.google.com/maps',
+ netflix:'https://www.netflix.com/',reddit:'https://www.reddit.com/',wikipedia:'https://www.wikipedia.org/',
+ x:'https://x.com/',twitter:'https://x.com/',linkedin:'https://www.linkedin.com/',notion:'https://www.notion.so/',
+ figma:'https://www.figma.com/',amazon:'https://www.amazon.com/',twitch:'https://www.twitch.tv/',
+ chatgpt:'https://chatgpt.com/',claude:'https://claude.ai/',perplexity:'https://www.perplexity.ai/',
+ weather:'https://weather.com/',news:'https://news.google.com/',translate:'https://translate.google.com/',
+ codepen:'https://codepen.io/',stackoverflow:'https://stackoverflow.com/',npm:'https://www.npmjs.com/',
+ huggingface:'https://huggingface.co/',imdb:'https://www.imdb.com/',goodreads:'https://www.goodreads.com/',
+ applemusic:'https://music.apple.com/',deezer:'https://www.deezer.com/',bandcamp:'https://bandcamp.com/',
+ airbnb:'https://www.airbnb.com/',uber:'https://www.uber.com/',booking:'https://www.booking.com/'
+};
+function resolveApp(name){
+ const n=String(name||'').trim();
+ if(!n)return '';
+ if(/^https?:\/\//i.test(n))return n;
+ const key=n.toLowerCase().replace(/[^a-z0-9]/g,'');
+ for(const k in APPS)if(k===key)return APPS[k];
+ for(const k in APPS){if(key.length>2&&key.includes(k))return APPS[k];}
+ for(const k in APPS){if(k.length>3&&k.includes(key))return APPS[k];}
+ return '';
+}
+// ---------- the media dock ----------
+const media={active:false,kind:'',playing:false,vol:Number(localStorage.getItem('arki.vol')||80),url:'',label:'',audio:null,lastQuery:'',lastService:''};
+function ytCmd(func,args){
+ const f=$('dockFrame').querySelector('iframe');
+ if(!f)return;
+ try{f.contentWindow.postMessage(JSON.stringify({event:'command',func,args:args===undefined?'':args}),'*');}catch(e){}
+}
+function dockShow(title,sub,url){
+ media.active=true;media.url=url;
+ $('dock').hidden=false;$('dockTitle').textContent=title;$('dockSub').textContent=sub;
+ media.playing=true;dockSync();
+}
+function dockSync(){
+ $('dockIcon').textContent=media.playing?'❚❚':'▶';
+ $('dockIcon').classList.toggle('playing',media.playing);
+ const p=$('dockPlay');p.textContent=media.playing?'❚❚':'▶';
+ const ext=media.kind==='spotify';
+ p.disabled=ext;stopBtn.disabled=ext;
+ p.title=ext?'Spotify plays inside its own player':'Pause / resume';
+ $('dockExt').onclick=()=>window.open(media.url,'_blank','noopener');
+}
+const stopBtn=$('dockStop');
+// audio keeps playing whether or not the video is on screen, so the choice sticks
+const showVideo=localStorage.getItem('arki.dockVideo')!=='0';
+function setVideo(on){localStorage.setItem('arki.dockVideo',on?'1':'0');
+ $('dockFrame').hidden=!on;$('dockToggle').textContent=on?'▾':'▴';
+ $('dockToggle').title=on?'Hide the video, keep the audio':'Show the video';}
+function dockFrame(html){$('dockFrame').innerHTML=html;setVideo(showVideo);return $('dockFrame');}
+$('dockToggle').addEventListener('click',()=>{const on=$('dockFrame').hidden;setVideo(on);log(on?'video shown':'video hidden — audio only');});
+function dockClose(){
+ if(media.audio){try{media.audio.pause();}catch(e){}media.audio=null;}
+ $('dockFrame').hidden=true;$('dockFrame').innerHTML='';$('dockToggle').textContent='▴';
+ $('dock').hidden=true;
+ media.active=false;media.playing=false;media.kind='';media.url='';media.label='';
+ log('player closed');
+}
+function dockYouTube(id,label){
+ media.kind='yt';
+ const src='https://www.youtube-nocookie.com/embed/'+encodeURIComponent(id)+
+  '?autoplay=1&enablejsapi=1&rel=0&modestbranding=1&playsinline=1&mute=0&origin='+encodeURIComponent(location.origin);
+ dockFrame('<iframe title="Arki player" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen src="'+src+'"></iframe>');
+ dockShow(label,'YouTube · in-page player','https://www.youtube.com/watch?v='+id);
+ // some browsers refuse an un-muted autoplay before the page has "engagement";
+ // nudge the player once it has loaded, and the dock's ⏸/▶ is the manual fallback
+ setTimeout(()=>ytCmd(media.playing?'playVideo':'pauseVideo'),1600);
+ temp('playing',1.6);
+}
+function dockAudio(url){
+ media.kind='audio';
+ dockFrame('<audio controls autoplay preload="none" src="'+url.replace(/"/g,'%22')+'"></audio>');
+ const a=$('dockFrame').querySelector('audio');
+ media.audio=a;a.volume=media.vol/100;
+ a.addEventListener('play',()=>{media.playing=true;dockSync();});
+ a.addEventListener('pause',()=>{media.playing=false;dockSync();});
+ a.addEventListener('ended',()=>{media.playing=false;dockSync();});
+ dockShow(url.split('/').pop()||url,'Direct audio file',url);
+ temp('playing',1.6);
+}
+function dockSpotify(kind,id,label){
+ media.kind='spotify';
+ const embed='https://open.spotify.com/embed/'+kind+'/'+id+'?utm_source=generator';
+ dockFrame('<iframe title="Arki player" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" src="'+embed+'"></iframe>');
+ dockShow(label,'Spotify · in-page player','https://open.spotify.com/'+(kind==='track'?'track/':'playlist/')+id);
+ temp('playing',1.6);
+}
+function mediaPlay(){
+ if(!media.active)return false;
+ if(media.kind==='yt')ytCmd(media.playing?'pauseVideo':'playVideo');
+ else if(media.audio){try{media.audio.played?media.audio.pause():media.audio.play();}catch(e){}}
+ else return false;
+ media.playing=!media.playing;dockSync();return true;
+}
+function mediaStop(){
+ if(media.kind==='yt'){ytCmd('stopVideo');ytCmd('seekTo',0);}
+ else if(media.audio){try{media.audio.pause();media.audio.currentTime=0;}catch(e){}}
+ media.playing=false;dockSync();
+}
+$('dockPlay').addEventListener('click',mediaPlay);
+stopBtn.addEventListener('click',()=>{log('stopped playback');mediaStop();});
+$('dockClose').addEventListener('click',dockClose);
+$('dockVol').addEventListener('input',e=>{media.vol=+e.target.value;localStorage.setItem('arki.vol',media.vol);
+ if(media.audio)media.audio.volume=media.vol/100;if(media.kind==='yt')ytCmd('setVolume',{value:media.vol});});
+// ---------- tool implementations ----------
+async function toolPlayMusic(args){
+ const q=String(args.query||'').trim();
+ if(!q)throw new Error('no song or search term given');
+ const low=q.toLowerCase();
+ media.lastQuery=q;media.lastService=args.service||'';
+ if(/^https?:\/\/\S+\.(mp3|m4a|aac|ogg|wav|flac|opus|mp4)(\?|#|$)/i.test(q)){dockAudio(q);return 'Playing the audio file directly in the page player.';}
+ const sp=q.match(/(?:open\.spotify\.com\/(track|album|playlist|show|episode)\/|spotify:(track|album|playlist):)([A-Za-z0-9]{10,})/i);
+ if(sp){const kind=(sp[1]||sp[2]||'track').toLowerCase();
+  dockSpotify(kind,sp[3],(kind==='track'?'Spotify track':'Spotify '+kind)+' · '+sp[3].slice(0,8));
+  return 'Now playing a Spotify '+(kind==='track'?'track':kind)+' in the page player.';}
+ const yt=q.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|live\/|shorts\/))([\w-]{11})/i);
+ if(yt){dockYouTube(yt[1],'YouTube · '+q.slice(0,50));return 'Now playing the YouTube video you linked, in the page player.';}
+ if(/spotify/.test(low)||/spotify/.test(String(args.service||'').toLowerCase())){
+  window.open('https://open.spotify.com/search/'+encodeURIComponent(q),'_blank','noopener');
+  return 'Opened a Spotify search for “'+q+'” in a new tab. Spotify can only be embedded from a real track/playlist link — send me that link and I will play it right here.';
+ }
+ setState('searching','arki: searching youtube');
+ let j;
+ try{
+  const r=await fetch('/api/ytsearch?q='+encodeURIComponent(q));
+  j=await r.json();
+  if(!r.ok)throw new Error(j.error||('HTTP '+r.status));
+ }catch(e){
+  window.open('https://www.youtube.com/results?search_query='+encodeURIComponent(q),'_blank','noopener');
+  return 'YouTube search failed ('+e.message+'), so I opened the search page in a new tab instead.';
+ }
+ const v=j.results[0];
+ dockYouTube(v.videoId,v.title);
+ return 'Now playing on YouTube: “'+v.title+'” by '+v.channel+(v.duration?' ('+v.duration+')':'')+'.';
+}
+async function toolControlMusic(args){
+ const a=String(args.action||'').toLowerCase();
+ if(!media.active)return 'Nothing is playing right now.';
+ if(a==='pause'){if(media.playing)mediaPlay();return 'Paused the music.';}
+ if(a==='resume'||a==='play'){if(!media.playing)mediaPlay();return 'Resumed the music.';}
+ if(a==='stop'){mediaStop();return 'Stopped the music.';}
+ if(a==='next'||a==='skip'){
+  if(!media.lastQuery)return 'There is nothing to skip to.';
+  dockClose();
+  return 'Skipping — here is another one. '+await toolPlayMusic({query:media.lastQuery.replace(/\s*\d{4}\s*/g,'')+' mix'});
+ }
+ return 'I do not know how to '+a+'.';
+}
+async function toolSetVolume(args){
+ let n=Number(args.level);
+ if(!isFinite(n))throw new Error('level must be a number 0-100');
+ n=Math.max(0,Math.min(100,Math.round(n)));
+ media.vol=n;localStorage.setItem('arki.vol',n);$('dockVol').value=n;
+ if(media.audio)media.audio.volume=n/100;
+ if(media.kind==='yt')ytCmd('setVolume',{value:n});
+ return 'Volume set to '+n+'%.';
+}
+async function toolOpenApp(args){
+ const url=resolveApp(args.name);
+ if(!url){window.open('https://duckduckgo.com/?q='+encodeURIComponent(String(args.name||'')),'_blank','noopener');
+  return 'I did not recognise “'+args.name+'”, so I searched the web for it instead.';}
+ window.open(url,'_blank','noopener');
+ let host='';try{host=new URL(url).hostname.replace(/^www\./,'');}catch(e){}
+ return 'Opened '+host+' in a new tab.';
+}
+const TOOL_IMPL={play_music:toolPlayMusic,control_music:toolControlMusic,set_volume:toolSetVolume,open_app:toolOpenApp};
+async function execTool(name,args){const f=TOOL_IMPL[name];if(!f)throw new Error('unknown tool “'+name+'”');return f(args||{});}
+// ---------- tool-call cards (sidebar, so the transcript stays a conversation) ----------
+const TOOL_MAX=8;
+function addToolCard(name,args,ok,summary){
+ const box=$('toolbox');
+ const c=document.createElement('div');c.className='toolcall'+(ok===false?' bad':ok===true?' run':'');
+ const head=document.createElement('div');head.className='toolhead';
+ const tag=document.createElement('span');tag.className='tag';tag.textContent=T_ICONS[name]||'⚙';
+ const tn=document.createElement('span');tn.className='tn';tn.textContent=name;
+ const ar=document.createElement('span');ar.className='toolarg';
+ ar.textContent=typeof args==='string'?args:Object.entries(args||{}).map(([k,v])=>k+'='+JSON.stringify(v)).join(' ');
+ ar.title=ar.textContent;
+ const res=document.createElement('div');res.className='toolres';res.textContent=summary||'…';res.title=res.textContent;
+ head.append(tag,tn,ar);c.append(head,res);box.appendChild(c);
+ while(box.children.length>TOOL_MAX)box.firstElementChild.remove();
+ $('toolpanel').hidden=false;
+ box.scrollTop=box.scrollHeight; // newest card first, without hijacking the sidebar scroll
+ return c;
+}
+function updateToolPanel(){const b=$('toolbox');$('toolpanel').hidden=!b.children.length;}
+$('toolClear').addEventListener('click',()=>{$('toolbox').innerHTML='';updateToolPanel();log('tool activity cleared');});
+// ---------- slash commands (work without a mic, and make the tools testable) ----------
+// bare=true lets the wake word run them without a slash, so "Arki, pause that" works
+function runCommand(text,bare){
+ const m=text.trim().match(new RegExp('^\\/?'+(bare?'':'\\/')+'(play|pause|resume|stop|next|skip|vol|volume|open)\\b\\s*(.*)$','is'));
+ if(!m)return false;
+ const cmd=m[1].toLowerCase(),rest=m[2].trim();
+ const note=txt=>{toolNotes.push(txt);if(toolNotes.length>6)toolNotes.shift();
+  history.push({role:'assistant',content:txt});if(history.length>40)history=history.slice(-40);};
+ const run=(name,fn,argstr)=>{Promise.resolve().then(fn).then(sum=>{
+   addToolCard(name,argstr,true,sum);log('⌘ /'+cmd+' → '+sum);note(name+'('+rest+') → '+sum);
+   if(!generating)setState('idle','state → idle');},
+  e=>{addToolCard(name,argstr,false,e.message);log('⌘ /'+cmd+' failed: '+e.message);
+   if(!generating)setState('error','tool error');});};
+ if(cmd==='play'){run('play_music',()=>toolPlayMusic({query:rest||'lofi hip hop',service:null}),{query:rest||'lofi hip hop'});return true;}
+ if(cmd==='pause'){run('control_music',()=>toolControlMusic({action:'pause'}),{action:'pause'});return true;}
+ if(cmd==='resume'){run('control_music',()=>toolControlMusic({action:'resume'}),{action:'resume'});return true;}
+ if(cmd==='stop'){run('control_music',()=>toolControlMusic({action:'stop'}),{action:'stop'});return true;}
+ if(cmd==='next'||cmd==='skip'){run('control_music',()=>toolControlMusic({action:'next'}),{action:'next'});return true;}
+ if(cmd==='vol'||cmd==='volume'){
+  const n=parseInt(rest,10),lv=isNaN(n)?media.vol:n;
+  run('set_volume',()=>toolSetVolume({level:lv}),{level:lv});return true;}
+ const url=resolveApp(rest);
+ // spoken "open question about…" isn't an app — let the model have it instead
+ if(!url){if(bare)return false;addToolCard('open_app',{name:rest},false,'unknown app “'+rest+'” — try /open github');return true;}
+ window.open(url,'_blank','noopener');
+ const host=url.replace(/^https?:\/\/(www\.)?/,'').split('/')[0];
+ addToolCard('open_app',{name:rest},true,'Opened '+host+' in a new tab.');
+ log('⌘ /open '+rest);note('open_app('+rest+') → opened '+host);return true;
+}
+/* ================= wake word / hands-free ================= */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let rec=null,voiceOn=false,awake=false,finalTxt='',interim='',awakeAt=0,silenceT=null,ignoreUntil=0;
+let wakeWord=localStorage.getItem('arki.wake')||'Arki';
+function wakeRe(){try{return new RegExp('\\b'+wakeWord.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','i');}catch(e){return /arki/i;}}
+function setMicUI(on){const b=$('mic');b.setAttribute('aria-pressed',String(on));
+ b.textContent=on?'🎤 Listening…':'🎤 Wake “'+wakeWord+'”';$('waverow').hidden=!on;}
+function sayHeard(t){$('heard').textContent=t||'listening…';}
+function startVoice(){
+ if(!SR){log('⚠ this browser has no SpeechRecognition (Chrome or Safari needed)');quip('no ears 😢');temp('annoyed',1.4);setMicUI(false);return;}
+ try{rec=new SR();}catch(e){log('🎤 could not start recognition');setMicUI(false);return;}
+ rec.continuous=true;rec.interimResults=true;rec.lang=navigator.language||'en-US';
+ rec.onresult=e=>{
+  interim='';
+  for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];
+   if(r.isFinal)finalTxt=(finalTxt+' '+r[0].transcript).trim();else interim+=r[0].transcript;}
+  const live=(finalTxt+' '+interim).replace(/\s+/g,' ').trim();
+  sayHeard(live.slice(-42));
+  if(now()<ignoreUntil){finalTxt='';interim='';return;}
+  if(!awake){
+   if(live.match(wakeRe())){awake=true;awakeAt=now();finalTxt=live.replace(wakeRe(),' ').trim();interim='';
+    log('🎤 wake word heard');beep(1180,.1,'triangle');quip('yes?');temp('listening',12);clearTimeout(silenceT);
+    silenceT=setTimeout(wakeToggle,1700);}
+   else if(live.length<16)finalTxt='';
+   return;
+  }
+  const cmd=live.replace(wakeRe(),' ').replace(/\b(hey|hi|ok|okay|please|now|can you|could you|would you)\b/gi,' ').replace(/\s+/g,' ').trim();
+  if(cmd.length>1){clearTimeout(silenceT);voiceSay(cmd);}
+  else if(now()-awakeAt>1700){clearTimeout(silenceT);wakeToggle();}
+ };
+ rec.onerror=e=>{const k=e.error;
+  if(k==='not-allowed'||k==='service-not-allowed'){log('🎤 microphone blocked — allow mic access and try again');quip('no ears 😢');voiceOn=false;setMicUI(false);}
+  else if(k!=='no-speech'&&k!=='aborted')log('🎤 '+k);};
+ rec.onend=()=>{if(voiceOn)setTimeout(()=>{if(!voiceOn)return;try{rec.start();}catch(_){}},300);};
+ try{rec.start();}catch(e){}
+}
+function wakeToggle(){
+ clearTimeout(silenceT);awake=false;finalTxt='';interim='';ignoreUntil=now()+2.5;
+ if(media.active&&media.playing){mediaPlay();quip('paused ♪');log('wake word → paused');}
+ else if(media.active){mediaPlay();quip('back on ♪');log('wake word → resumed');}
+ else{quip('I’m here — what can I do?');log('wake word heard, nothing playing');}
+}
+function voiceSay(text){
+ awake=false;finalTxt='';interim='';ignoreUntil=now()+3;clearTimeout(silenceT);
+ log('🎤 heard: '+text);sayHeard(text.slice(-42));
+ const t=text.replace(wakeRe(),' ').replace(/\s+/g,' ').trim();
+ if(!t)return wakeToggle();
+ if(!runCommand(t,true)){input.value=t;autoGrow();refreshComposer();send();}
+}
+$('mic').addEventListener('click',()=>{
+ if(voiceOn){voiceOn=false;ignoreUntil=now()+1;clearTimeout(silenceT);try{rec&&rec.stop();}catch(e){}
+  setMicUI(false);log('🎤 off');return;}
+ voiceOn=true;setMicUI(true);sayHeard('');log('🎤 on — say “'+wakeWord+'”');startVoice();
+});
+$('wake').addEventListener('click',()=>{
+ const v=prompt('Wake word for Arki (say it out loud to wake Arki up):',wakeWord);
+ if(v&&v.trim()){wakeWord=v.trim();localStorage.setItem('arki.wake',wakeWord);$('wakeWord').textContent=wakeWord;setMicUI(voiceOn);log('wake word → “'+wakeWord+'”');}
+});
+$('wakeWord').textContent=wakeWord;
+$('dockVol').value=media.vol;
+// ---------- boot ----------
+syncUI();
+log('Arki ready');
+addMsg('assistant','Hi! I\'m **Arki** 🟦 — your local squircle companion.\nEverything runs on *your* machine via Ollama. Ask me anything, drop an image on me to talk about it, or just poke me 👋\n\nI can also **play music right here** while we chat, and open sites like Gmail or YouTube for you. Hit 🎤 and say **“Arki”** to pause or resume the music hands-free. You can also type `/play lofi`, `/pause`, `/vol 40`, `/open gmail`.');
+showStarters();
+refreshComposer();
+if(matchMedia('(hover:hover)').matches)input.focus();
+if(REDUCED)paintOnce();else frame();
+})();
+</script>
+</body>
+</html>

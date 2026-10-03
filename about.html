@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>About — Arki Chat</title>
+<meta name="description" content="Arki Chat is a friendly front for Ollama: a squircle companion that chats with your local models, plays music, opens websites for you and listens for the wake word “Arki”.">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f2f0;--panel:#fff;--ink:#1b1c22;--mute:#6b6d78;--line:#dcdbd7;--acc:#3b9eff;--ok:#2bbf8a;--soft:#eef4fc;--screen:#e6e5e2}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121317;--panel:#1b1d23;--ink:#ececf0;--mute:#8d909c;--line:#2c2e36;--acc:#45a5ff;--ok:#2bbf8a;--soft:#16202c;--screen:#0b0c0f}}
+:root[data-theme="dark"]{--bg:#121317;--panel:#1b1d23;--ink:#ececf0;--mute:#8d909c;--line:#2c2e36;--acc:#45a5ff;--ok:#2bbf8a;--soft:#16202c;--screen:#0b0c0f}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 "Nunito","Trebuchet MS",system-ui,sans-serif;
+ padding:0 18px 64px}
+.wrap{max-width:760px;margin:0 auto}
+h1,h2,h3{font-family:"Fredoka","Trebuchet MS",system-ui,sans-serif;font-weight:600;letter-spacing:-.3px;line-height:1.2}
+a{color:var(--acc)}
+code{font:13.5px ui-monospace,Menlo,monospace;background:rgba(127,127,127,.16);padding:1px 6px;border-radius:6px}
+pre{background:rgba(127,127,127,.13);padding:14px 16px;border-radius:12px;overflow-x:auto;font:13px ui-monospace,Menlo,monospace;line-height:1.55}
+pre code{background:none;padding:0}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:6px 14px;border-radius:999px}
+button:hover{border-color:var(--mute)}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+/* header */
+.top{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:22px 0 6px}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.logo{width:42px;height:42px;flex:none;filter:drop-shadow(0 4px 11px rgba(59,158,255,.32))}
+.logo .eyes{transform-box:fill-box;transform-origin:center;animation:blink 7.5s ease-in-out infinite}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}95%,97.5%{transform:scaleY(.08)}}
+.brandname{font-family:"Fredoka","Trebuchet MS",system-ui,sans-serif;font-weight:600;font-size:25px;line-height:1}
+.brandname span{color:var(--acc);margin-left:.26em}
+.brandsub{font-size:13px;color:var(--mute);margin-top:3px}
+/* hero */
+.hero{padding:26px 0 10px;border-bottom:1px solid var(--line)}
+.hero h1{font-size:clamp(30px,6.5vw,44px);margin:0 0 10px}
+.hero p{font-size:clamp(16px,2.3vw,19px);color:var(--mute);margin:0;max-width:56ch}
+.badges{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}
+.badge{font-size:12.5px;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--mute)}
+.badge.ok{border-color:color-mix(in srgb,var(--ok) 45%,transparent);color:var(--ok)}
+section{padding:30px 0;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:0}
+h2{font-size:clamp(20px,3.4vw,25px);margin:0 0 12px}
+h3{font-size:16px;margin:22px 0 7px}
+p{margin:0 0 13px}
+.lead{color:var(--mute)}
+/* feature cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(232px,1fr));gap:12px;margin-top:6px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 17px}
+.card b{display:block;font-size:14.5px;margin-bottom:4px}
+.card span{font-size:14px;color:var(--mute);line-height:1.55}
+.card .ico{font-size:17px;display:block;margin-bottom:7px}
+/* callout */
+.note{background:var(--soft);border:1px solid var(--line);border-left:3px solid var(--acc);border-radius:10px;padding:14px 17px;margin:14px 0;font-size:14.5px}
+.note.warn{border-left-color:#f0a13c}
+.note b{color:var(--ink)}
+ul{margin:0 0 13px;padding-left:22px}
+li{margin-bottom:7px}
+/* steps */
+ol.steps{margin:0;padding-left:22px}
+ol.steps li{margin-bottom:9px}
+/* people */
+.who{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-top:4px}
+.who img{width:52px;height:52px;border-radius:14px;flex:none}
+.who b{font-size:16px}
+.who div{font-size:14px;color:var(--mute)}
+/* table */
+.kv{width:100%;border-collapse:collapse;margin:4px 0 6px;font-size:14.5px}
+.kv th,.kv td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.kv th{width:42%;font-weight:600;color:var(--mute)}
+footer{padding:26px 0 0;color:var(--mute);font-size:14px}
+footer .run{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px}
+.backlink{display:inline-block;margin-top:14px;font-size:14.5px}
+@media(max-width:560px){
+ body{padding:0 14px 48px}
+ .logo{width:36px;height:36px}
+ .brandname{font-size:22px}
+ .kv th{width:46%}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="top">
+ <div class="brand">
+  <svg class="logo" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+  <title>Arki Chat</title>
+  <defs>
+    <linearGradient id="arkiBody" x1="6" y1="13" x2="58" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#9BD8FF"/>
+      <stop offset=".45" stop-color="#45A5FF"/>
+      <stop offset="1" stop-color="#1B6FD0"/>
+    </linearGradient>
+  </defs>
+  <!-- the same little geometric fringe the character has, in the same pill language.
+       the body spans x 4..60, so the strands are centred on x=32 and hide their bases
+       behind it (tips y 3..7, bodies running down into the bubble) -->
+  <g fill="#33343C">
+    <rect x="16.4" y="7" width="5.2" height="16" rx="2.6" transform="rotate(-18 19 7)"/>
+    <rect x="22.2" y="4" width="5.6" height="19" rx="2.8" transform="rotate(-10 25 4)"/>
+    <rect x="29" y="3" width="6" height="21" rx="3"/>
+    <rect x="36.2" y="4" width="5.6" height="19" rx="2.8" transform="rotate(9 39 4)"/>
+    <rect x="42.4" y="7" width="5.2" height="16" rx="2.6" transform="rotate(18 45 7)"/>
+  </g>
+  <g fill="url(#arkiBody)">
+    <!-- the squircle body, plus a curved chat tail tucked under the corner -->
+    <rect x="4" y="12" width="56" height="41" rx="16"/>
+    <path d="M21 47c-3 5.2-5.6 10-7.5 15 6.2-1.8 12.8-5 18.5-9.9z"/>
+  </g>
+  <ellipse cx="22" cy="21" rx="12" ry="5.5" fill="#fff" opacity=".14"/>
+  <!-- the two pill eyes that make Arki Arki -->
+  <g fill="#17181D" class="eyes">
+    <rect x="18.5" y="23" width="9" height="19" rx="4.5"/>
+    <rect x="36.5" y="23" width="9" height="19" rx="4.5"/>
+  </g>
+</svg>
+  <div>
+   <div class="brandname">Arki<span>Chat</span></div>
+   <div class="brandsub">About this project</div>
+  </div>
+ </div>
+ <button id="theme" aria-label="Toggle theme">🌙</button>
+</div>
+
+<header class="hero">
+ <h1>A friendly front for Ollama.</h1>
+ <p>Ollama is the easiest way to run an AI model on your own computer. Its built-in web page was
+ made for checking that a model is running — not for actually using it. Arki Chat is the other
+ front door: the same local models, the same machine, but a companion instead of a dashboard.</p>
+ <div class="badges">
+  <span class="badge ok">Runs entirely on your machine</span>
+  <span class="badge">No API keys</span>
+  <span class="badge">No build step</span>
+  <span class="badge">Zero dependencies</span>
+ </div>
+</header>
+
+<section>
+ <h2>What it does</h2>
+ <div class="cards">
+  <div class="card"><span class="ico">💬</span><b>Chats with your models</b><span>Streaming replies from any chat model you have installed, with a model picker and a toggle for deep reasoning.</span></div>
+  <div class="card"><span class="ico">👀</span><b>Sees images</b><span>Drop, paste or attach up to four pictures and ask about them on vision-capable models.</span></div>
+  <div class="card"><span class="ico">🎵</span><b>Plays music while you chat</b><span>Ask for lofi or a playlist and it plays in a sidebar player without interrupting the conversation.</span></div>
+  <div class="card"><span class="ico">🚀</span><b>Opens things for you</b><span>“Open my Gmail” and it opens Gmail. Every action it takes is listed in the sidebar so nothing is hidden.</span></div>
+  <div class="card"><span class="ico">🎤</span><b>Listens for “Arki”</b><span>A wake word pauses the music or runs a request hands-free, so you don't have to touch the keyboard.</span></div>
+  <div class="card"><span class="ico">🟦</span><b>Has a face</b><span>Arki blinks, breathes, follows your cursor, gets annoyed when poked and dizzy when you insist.</span></div>
+ </div>
+</section>
+
+<section>
+ <h2>How to use it</h2>
+ <p class="lead">There is nothing to install. If Ollama is running, Arki runs.</p>
+ <ol class="steps">
+  <li>Make sure <a href="https://ollama.com" rel="noopener">Ollama</a> is running — <code>ollama serve</code>, or just open the Ollama app.</li>
+  <li>Pull a model you like: <code>ollama pull qwen3.5:2b</code></li>
+  <li>Start Arki: <code>node server.js</code></li>
+  <li>Open <a href="http://localhost:5177">http://localhost:5177</a></li>
+ </ol>
+ <div class="note">Ollama listens on <code>127.0.0.1:11434</code> by default and Arki expects that. If yours runs
+ somewhere else, set <code>OLLAMA_HOST</code> before starting.</div>
+</section>
+
+<section>
+ <h2>Your privacy, honestly</h2>
+ <p>Arki is built so that your conversations stay on your computer. That claim deserves precision,
+so here is exactly what happens.</p>
+ <table class="kv">
+  <tr><th>Your messages</th><td>Go from your browser to your own machine, to Ollama, and nowhere else.</td></tr>
+  <tr><th>Storage</th><td>None. Your conversation is kept in memory in the tab and is gone when you close it.</td></tr>
+  <tr><th>Server logs</th><td>Two startup lines. Requests and messages are never logged.</td></tr>
+  <tr><th>Accounts &amp; telemetry</th><td>None. There is no sign-in and nothing is measured.</td></tr>
+ </table>
+ <div class="note warn"><b>Two honest exceptions.</b> If you turn on the 🎤 wake word, Chrome and Safari
+ do speech recognition in the cloud — in Chrome that means your microphone audio is sent to Google
+ for the length of the listening session. That is the browser, not Arki. And the music player is a
+ YouTube or Spotify iframe, which is a third party that sets its own cookies; Arki never sends your
+ prompts to them. Chat, tools and music selection all stay local.</div>
+</section>
+
+<section>
+ <h2>Who made it</h2>
+ <div class="who">
+  <img src="logo.svg" width="52" height="52" alt="">
+  <div>
+   <b>Adnuri Mohamidi</b>
+   <div>Maintainer</div>
+  </div>
+ </div>
+ <p style="margin-top:16px">Arki's squircle avatar engine — the superellipse body, eyes that track your
+ cursor, blinking, and the reactions when you poke it — is inspired by <b>Mochi</b>, the character
+ from <a href="https://github.com/Louis-CFM/coucou" rel="noopener">Coucou</a> by Louis Raillé.
+ Coucou is MIT licensed, and Arki's engine is a reimplementation of those ideas for the browser.
+ Everything else here — the layout, the tools, the player, the wake word and the logo — is
+ original to this project.</p>
+</section>
+
+<section>
+ <h2>Credits</h2>
+ <ul>
+  <li><a href="https://github.com/Louis-CFM/coucou" rel="noopener">Coucou</a> by Louis Raillé — the inspiration for Arki</li>
+  <li><a href="https://ollama.com" rel="noopener">Ollama</a> — runs the models</li>
+  <li><a href="https://fonts.google.com/specimen/Fredoka" rel="noopener">Fredoka</a> and <a href="https://fonts.google.com/specimen/Nunito" rel="noopener">Nunito</a> — the type</li>
+  <li>YouTube and Spotify — the embedded players</li>
+ </ul>
+</section>
+
+<section>
+ <h2>Licence</h2>
+ <p>Arki Chat is released under the <a href="https://opensource.org/licenses/MIT" rel="noopener">MIT
+ Licence</a>, so you can read it, change it and ship it. It includes work derived from Coucou, which
+ is also MIT licensed:</p>
+ <pre><code>MIT License
+Copyright (c) 2026 Louis Raillé
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.</code></pre>
+</section>
+
+<footer>
+ <div>
+  <b>Arki Chat</b> · a squircle companion for your local models<br>
+  MIT licensed · made by Adnuri Mohamidi
+ </div>
+ <div class="run">
+  <code>ollama serve</code>
+  <code>node server.js</code>
+  <a class="backlink" href="index.html">← Back to the chat</a>
+ </div>
+</footer>
+
+</div>
+<script>
+(()=>{
+ const btn=document.getElementById('theme');
+ const apply=t=>{document.documentElement.dataset.theme=t;btn.textContent=t==='dark'?'☀️':'🌙';
+  btn.setAttribute('aria-label','Theme: '+t);localStorage.setItem('arki.theme',t);};
+ // shares the key with the chat page, so both always agree
+ apply(localStorage.getItem('arki.theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));
+ btn.addEventListener('click',()=>apply(document.documentElement.dataset.theme==='dark'?'light':'dark'));
+})();
+</script>
+</body>
+</html>
