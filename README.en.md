@@ -39,6 +39,7 @@ open http://localhost:5177
 - [Quick start](#quick-start)
 - [Why](#why)
 - [Tools — Arki can act](#tools--arki-can-act)
+- [Opening desktop apps](#opening-desktop-apps)
 - [Playing music in the page](#playing-music-in-the-page)
 - [The wake word](#the-wake-word)
 - [Slash commands](#slash-commands)
@@ -51,6 +52,7 @@ open http://localhost:5177
 - [What's remembered](#whats-remembered)
 - [Troubleshooting](#troubleshooting)
 - [Good to know](#good-to-know)
+- [The name](#the-name)
 - [Brand](#brand)
 - [Files](#files)
 - [Credits](#credits)
@@ -78,7 +80,7 @@ Or read the [About page](about.html) first if you would rather know what you are
 If port 5177 is busy, Arki quietly moves to the next free one and prints the URL it used.
 
 Nothing is installed, built or bundled. `index.html` is the whole frontend; `server.js` is a
-~150-line static server plus a proxy.
+~380-line static server, a proxy and a desktop app launcher.
 
 ---
 
@@ -119,7 +121,7 @@ confirm what actually happened.
 | `play_music` | `query`, `service?` | Searches YouTube and plays the top hit in the sidebar player. Also accepts a YouTube URL, a Spotify track/album/playlist link or URI, or a direct audio file URL. |
 | `control_music` | `action` | `pause` · `resume` · `stop` · `next` on the sidebar player. |
 | `set_volume` | `level` | In-page volume, 0–100. |
-| `open_app` | `name` | Opens a site in a new tab — gmail, youtube, github, drive, calendar, maps, netflix, reddit, wikipedia, x, notion, figma, amazon, chatgpt, claude, weather, news, npm, huggingface and more, via 41 name shortcuts covering ~37 sites. Any full URL works; an unrecognised name falls back to a web search. |
+| `open_app` | `name` | Opens a site in a new tab — gmail, youtube, github, drive, calendar, maps, netflix, reddit, wikipedia, x, notion, figma, amazon, chatgpt, claude, weather, news, npm, huggingface and more, via 41 name shortcuts covering ~37 sites. Any full URL works; an unrecognised name falls back to a web search. **It also launches any installed desktop program by name** — on the machine running Arki. |
 
 **Where the output goes.** Tool calls render as cards in the sidebar under *Tool activity* —
 arguments and the actual result — capped at the last 8 with a **clear** button. The transcript
@@ -148,6 +150,58 @@ arka   ▸ Here you go — smooth piano jazz is playing in the sidebar.
 **Tool-calling needs a tool-capable model.** Verified working here with `qwen3.5:2b`,
 `granite4.2`, `gemma4`, `ornith-1.5:9b` and `Spark-X2.5-4B`. `phi4-mini` and `gemma2:9b` ignored
 the tools and only chatted — with those, everything still works through the slash commands.
+
+---
+
+## Opening desktop apps
+
+A browser page can never start a desktop program — that is the sandbox every web app lives
+in, not a limit of Arki. So the launch happens on the server:
+
+| Endpoint | What it does |
+|---|---|
+| `GET /api/apps` | the curated shortcuts this machine knows about; the page builds its `open_app` tool description from them |
+| `POST /api/launch` | body `{ "name": "vlc" }` → resolves the name and spawns the program |
+
+**Any name works — LibreOffice, VLC and VS Code are only examples.** A name goes through
+this order:
+
+1. **The curated table** in `server.js` — a verified command per OS plus friendly aliases
+   (`vscode`, `vs code`, `code` → VS Code; `soffice` → LibreOffice). Curated first, so
+   `code` opens VS Code rather than codepen.io.
+2. **A known website** — `gmail`, `github` and `codepen` still open a tab, as before.
+3. **The operating system itself**, for anything else — see the table below.
+4. **A DuckDuckGo search**, if nothing launched, so an unknown word is still useful.
+
+`/open` follows exactly the same order, with no model involved.
+
+| OS | How the OS resolves an unknown name |
+|---|---|
+| macOS | `open -a "<name>"` — LaunchServices, so any installed application |
+| Linux | the `Name=`/`Exec=` of a matching `.desktop` file, else the name as a binary on `PATH` |
+| Windows | `cmd /c start "<name>"` — App Paths / Start Menu |
+
+**Nothing goes through a shell.** Every attempt is a fixed argv array handed to
+`spawn()`, and the name itself must be letters, digits, spaces and `.'+_ -` — no path
+separators, no leading dash, and none of the characters `cmd.exe` could read as syntax —
+so a request still cannot slip in an arbitrary command string. Windows paths that are not
+installed are dropped before the first attempt, so a partial install still works.
+
+**When it fails, you hear why.** `Could not launch VLC — Unable to find application named
+'VLC'` reaches the tool card, the model repeats it, and the chat keeps going. An
+unrecognised word instead falls through to a web search: *Could not launch “zzz” — …, so I
+searched the web for it instead.* Slash commands do the same job with no model involved:
+`/open vscode`.
+
+**The program starts on the machine running `node server.js`**, which is not always the
+one with the browser — worth remembering if you serve Arki to a phone. The server is
+unauthenticated by design, so anything that can reach the port can ask it to start an
+installed application; only serve it on a network you trust.
+
+**Adding an app is optional.** A `LOCAL_APPS` entry in `server.js` (`id`, `label`,
+`aliases`, `cmds` per platform) is only worth writing for a friendlier alias or a name the
+OS will not recognise on its own — Linux ships the binary `libreoffice` while the display
+name is "LibreOffice". Everything else works without an entry.
 
 ---
 
@@ -341,7 +395,7 @@ browser  ──►  server.js  ──►  Ollama  (/api/chat, streaming NDJSON)
    └── iframe ──► youtube-nocookie.com / open.spotify.com
 ```
 
-**`server.js`** is ~150 lines and does four things:
+**`server.js`** is ~380 lines and does five things:
 
 1. serves the static files from its own directory (with path-traversal protection)
 2. proxies every `/api/*` request to Ollama, streaming NDJSON straight through — this exists
@@ -349,6 +403,8 @@ browser  ──►  server.js  ──►  Ollama  (/api/chat, streaming NDJSON)
 3. serves `/api/ytsearch`, which fetches YouTube's search page and extracts up to 5 results,
    cached for 10 minutes
 4. listens on `PORT`, stepping up a port at a time if it's taken
+5. answers `GET /api/apps` and `POST /api/launch` — resolves any application name for the
+   current OS and spawns it — see [Opening desktop apps](#opening-desktop-apps)
 
 **`index.html`** is the entire frontend — avatar engine on canvas, chat UI, markdown-lite
 renderer, tool definitions, the tool-call loop, the player and the wake word. Tools are executed
@@ -414,6 +470,15 @@ was denied. Use the slash commands.
   exists so you can always see exactly what happened.
 - YouTube may change its results page markup, which would break `/api/ytsearch`. When that
   happens `/play` falls back to opening the search page in a new tab rather than failing.
+- Launching a desktop app spawns one validated, fixed command on the machine running
+  `server.js`. A name must be letters, digits, spaces and `.'+_ -`, and nothing is ever
+  passed through a shell, so a request cannot run an arbitrary command string.
+
+---
+
+## The name
+
+**Arki** is a blend of my kids' names: **Ar** from **Arvin** and **ki** from **Wiki**. Arvin and Wiki became Arki — two names, one companion that lives in your browser, and one wake word that's easy to say.
 
 ---
 
@@ -433,7 +498,7 @@ doubles as the favicon.
 
 ```
 logo.svg       The Arki Chat brand mark (also the favicon)
-server.js      Static server + Ollama streaming proxy + /api/ytsearch
+server.js      Static server + Ollama streaming proxy + /api/ytsearch + desktop app launcher
 index.html     Avatar engine (inspired by Coucou), chat UI, tools, player and wake word
 about.html     The About page — what it is, privacy, credits and licence
 screenshots/   The images in this file

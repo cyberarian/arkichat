@@ -35,6 +35,7 @@ open http://localhost:5177
 * [Mulai cepat](#mulai-cepat)
 * [Mengapa](#mengapa)
 * [Tools — Arki bisa bertindak](#tools--arki-bisa-bertindak)
+* [Membuka aplikasi desktop](#membuka-aplikasi-desktop)
 * [Memutar musik di halaman](#memutar-musik-di-halaman)
 * [Kata pemicu](#kata-pemicu)
 * [Slash command](#slash-command)
@@ -47,6 +48,7 @@ open http://localhost:5177
 * [Apa yang diingat](#apa-yang-diingat)
 * [Pemecahan masalah](#pemecahan-masalah)
 * [Hal yang perlu diketahui](#hal-yang-perlu-diketahui)
+* [Asal nama](#asal-nama)
 * [Brand](#brand)
 * [File](#file)
 * [Kredit](#kredit)
@@ -72,7 +74,7 @@ Atau baca [halaman About](about.html) terlebih dahulu jika kamu ingin mengetahui
 
 Jika port 5177 sedang digunakan, Arki akan berpindah secara otomatis ke port kosong berikutnya dan menampilkan URL yang digunakannya.
 
-Tidak ada yang diinstal, dibangun, atau dibundel. `index.html` adalah seluruh frontend; `server.js` adalah server statis sekitar 150 baris sekaligus proxy.
+Tidak ada yang diinstal, dibangun, atau dibundel. `index.html` adalah seluruh frontend; `server.js` adalah server statis sekitar 380 baris, sebuah proxy, sekaligus peluncur aplikasi desktop.
 
 ---
 
@@ -100,8 +102,7 @@ Empat tool terhubung ke setiap request. Ketika model memutuskan bahwa salah satu
 | --------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `play_music`    | `query`, `service?` | Mencari YouTube dan memutar hasil teratas di pemutar sidebar. Juga menerima URL YouTube, link atau URI track/album/playlist Spotify, maupun URL file audio langsung.                                                                                                                                                                                 |
 | `control_music` | `action`            | `pause` · `resume` · `stop` · `next` pada pemutar sidebar.                                                                                                                                                                                                                                                                                           |
-| `set_volume`    | `level`             | Mengatur volume di dalam halaman, 0–100.                                                                                                                                                                                                                                                                                                             |
-| `open_app`      | `name`              | Membuka situs di tab baru — gmail, youtube, github, drive, calendar, maps, netflix, reddit, wikipedia, x, notion, figma, amazon, chatgpt, claude, weather, news, npm, huggingface, dan lainnya, melalui 41 shortcut nama yang mencakup sekitar 37 situs. URL lengkap juga dapat digunakan; nama yang tidak dikenali akan dialihkan ke pencarian web. |
+| `set_volume`    | `level`             | Mengatur volume di dalam halaman, 0–100.                                                                                                                                                                                                                                                                                                             || `open_app` | `name` | Membuka situs di tab baru — gmail, youtube, github, drive, calendar, maps, netflix, reddit, wikipedia, x, notion, figma, amazon, chatgpt, claude, weather, news, npm, huggingface, dan lainnya, melalui 41 shortcut nama yang mencakup sekitar 37 situs. URL lengkap juga dapat digunakan; nama yang tidak dikenali akan dialihkan ke pencarian web. **Tool ini juga meluncurkan program desktop terpasang apa pun, berdasarkan nama** — di mesin tempat Arki berjalan. |
 
 **Ke mana hasilnya ditampilkan.** Pemanggilan tool ditampilkan sebagai kartu di sidebar pada bagian *Tool activity* — termasuk argumen dan hasil aktual — dengan maksimum 8 aktivitas terakhir serta tombol **clear**. Transkrip percakapan tetap bersih; Arki hanya mengatakan apa yang dilakukannya dalam satu kalimat.
 
@@ -121,6 +122,40 @@ arki    ▸ Silakan — piano jazz yang lembut sedang diputar di sidebar.
 * Model lokal kecil sangat bersemangat membantu — model 2B mungkin memanggil `set_volume` sendiri. Deskripsi tool dan system prompt sama-sama secara eksplisit melarangnya, tetapi jika model mengabaikannya, kartu di sidebar akan menunjukkan secara tepat apa yang dilakukan.
 
 **Pemanggilan tool membutuhkan model yang mendukung tool.** Telah diverifikasi bekerja dengan `qwen3.5:2b`, `granite4.2`, `gemma4`, `ornith-1.5:9b`, dan `Spark-X2.5-4B`. `phi4-mini` dan `gemma2:9b` mengabaikan tools dan hanya mengobrol — dengan model tersebut semuanya tetap dapat digunakan melalui slash command.
+
+---
+
+## Membuka aplikasi desktop
+
+Halaman web tidak pernah bisa menjalankan program desktop — itu batasan semua aplikasi web, bukan khusus Arki. Jadi peluncurannya dilakukan oleh server:
+
+| Endpoint | Fungsinya |
+|---|---|
+| `GET /api/apps` | shortcut terkurasi yang dikenal mesin ini; halaman membangun deskripsi tool `open_app` dari sana |
+| `POST /api/launch` | body `{ "name": "vlc" }` → mencocokkan nama lalu menjalankan programnya |
+
+**Nama apa pun bisa — LibreOffice, VLC, dan VS Code hanyalah contoh.** Sebuah nama ditempuh dengan urutan ini:
+
+1. **Tabel terkurasi** di `server.js` — perintah terverifikasi per OS plus alias yang bersahabat (`vscode`, `vs code`, `code` → VS Code; `soffice` → LibreOffice). Terkurasi dulu, supaya `code` membuka VS Code dan bukan codepen.io.
+2. **Situs yang dikenal** — `gmail`, `github`, dan `codepen` tetap membuka tab, seperti sebelumnya.
+3. **Operating system-nya sendiri**, untuk apa pun selain itu — lihat tabel di bawah.
+4. **Pencarian DuckDuckGo**, jika tidak ada yang terbuka, supaya kata yang tak dikenal tetap berguna.
+
+`/open` menempuh urutan yang sama persis, tanpa melibatkan model.
+
+| OS | Bagaimana OS mencocokkan nama yang tidak dikenal |
+|---|---|
+| macOS | `open -a "<nama>"` — LaunchServices, sehingga aplikasi terpasang apa pun bisa |
+| Linux | `Name=`/`Exec=` dari file `.desktop` yang cocok, selain itu nama sebagai binary di `PATH` |
+| Windows | `cmd /c start "<nama>"` — App Paths / Start Menu |
+
+**Tidak ada yang lewat shell.** Setiap percobaan adalah array argv tetap yang diberikan ke `spawn()`, dan nama itu sendiri harus berupa huruf, angka, spasi, dan `.'+_ -` — tanpa pemisah path, tanpa tanda hubung di awal, dan tanpa karakter apa pun yang bisa dibaca `cmd.exe` sebagai sintaks — sehingga sebuah request tetap tidak bisa menyelipkan string perintah sembarang. Path Windows yang tidak terpasang dibuang sebelum percobaan pertama, sehingga instalasi sebagian tetap berfungsi.
+
+**Ketika gagal, kamu tahu alasannya.** `Could not launch VLC — Unable to find application named 'VLC'` sampai ke kartu tool, model mengulanginya, dan chat tetap berjalan. Kata yang tak dikenal justru dialihkan ke pencarian web: *Could not launch “zzz” — …, so I searched the web for it instead.* Slash command melakukan hal yang sama tanpa melibatkan model: `/open vscode`.
+
+**Program dijalankan pada mesin tempat `node server.js` berjalan**, yang belum tentu mesin tempat browser berada — perlu diingat jika kamu menyajikan Arki ke ponsel. Server ini secara desain tidak terautentikasi, sehingga apa pun yang bisa menjangkau port-nya bisa memintanya membuka aplikasi yang terpasang; sajikan hanya di jaringan yang kamu percaya.
+
+**Menambahkan aplikasi bersifat opsional.** Entri `LOCAL_APPS` di `server.js` (`id`, `label`, `aliases`, `cmds` per platform) hanya layak ditulis untuk alias yang lebih bersahabat atau nama yang tidak dikenali sendiri oleh OS — Linux mengirim binary `libreoffice` sementara nama tampilannya "LibreOffice". Semuanya yang lain tanpa entri tetap berfungsi.
 
 ---
 
@@ -280,12 +315,13 @@ browser  ──►  server.js  ──►  Ollama  (/api/chat, streaming NDJSON)
    └── iframe ──► youtube-nocookie.com / open.spotify.com
 ```
 
-**`server.js`** berisi sekitar 150 baris dan melakukan empat hal:
+**`server.js`** berisi sekitar 380 baris dan melakukan lima hal:
 
 1. menyajikan file statis dari direktorinya sendiri (dengan perlindungan terhadap path traversal)
 2. melakukan proxy terhadap setiap request `/api/*` ke Ollama, melakukan streaming NDJSON secara langsung — ini hanya diperlukan untuk menghindari CORS browser
 3. menyediakan `/api/ytsearch`, yang mengambil halaman pencarian YouTube dan mengekstrak hingga 5 hasil, dengan cache selama 10 menit
 4. mendengarkan pada `PORT`, menaikkan port satu per satu jika port tersebut sedang digunakan
+5. menjawab `GET /api/apps` dan `POST /api/launch` — mencocokkan nama aplikasi apa pun sesuai OS lalu menjalankannya, lihat [Membuka aplikasi desktop](#membuka-aplikasi-desktop)
 
 **`index.html`** adalah seluruh frontend — engine avatar pada canvas, UI chat, renderer markdown-lite, definisi tool, loop pemanggilan tool, player, dan wake word. Tools dijalankan **di sisi client**; server tidak pernah melihatnya.
 
@@ -334,6 +370,13 @@ Percakapan itu sendiri **tidak disimpan secara permanen**. Tidak ada apa pun yan
 * Web Speech API melakukan transkripsi di browser. Di Chrome, ini berarti audio dikirim ke Google selama sesi pengenalan berlangsung. Selain itu — chat, tools, dan musik — tetap lokal.
 * Model lokal kecil bagus dalam *memanggil* tools tetapi kurang bagus dalam *menahan diri*. Log kartu Arki tersedia agar kamu selalu dapat melihat secara tepat apa yang terjadi.
 * YouTube dapat mengubah markup halaman hasil pencarian, yang dapat menyebabkan `/api/ytsearch` rusak. Jika hal tersebut terjadi, `/play` akan beralih membuka halaman pencarian di tab baru daripada gagal.
+* Meluncurkan aplikasi desktop menjalankan satu perintah tetap yang divalidasi di mesin yang menjalankan `server.js`. Sebuah nama harus berupa huruf, angka, spasi, dan `.'+_ -`, dan tidak ada yang pernah lewat shell, sehingga sebuah request tidak bisa mengeksekusi string perintah sembarang.
+
+---
+
+## Asal nama
+
+**Arki** adalah gabungan nama anak saya: **Arvin** dan **Wiki**— dua nama, satu pendamping yang hidup di browser, dan satu kata pemicu yang mudah diucapkan.
 
 ---
 
@@ -349,7 +392,7 @@ Di dalam aplikasi, logo muncul sebagai lockup 46px di samping wordmark, berkedip
 
 ```text
 logo.svg       Identitas visual Arki Chat (juga favicon)
-server.js      Static server + proxy streaming Ollama + /api/ytsearch
+server.js      Static server + proxy streaming Ollama + /api/ytsearch + peluncur aplikasi desktop
 index.html     Avatar engine (terinspirasi Coucou), UI chat, tools, player dan wake word
 about.html     Halaman About — apa itu Arki, privasi, kredit dan lisensi
 screenshots/   Gambar yang digunakan dalam file ini
