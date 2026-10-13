@@ -260,6 +260,9 @@ button.mini.wake{padding:2px 8px;font-size:11.5px}
 }
 @media(max-width:560px){
  .topbar{padding:12px 14px}.topbar h1{font-size:21px}.sub{display:none}
+ .composer{gap:4px}.composer textarea{font-size:15px;padding:9px 6px}
+ #attachBtn,#mic{width:34px;height:34px;font-size:16px}
+ #send{min-width:74px;padding:10px 14px;font-size:15px}
  .controlpanel,.attach{padding-left:14px;padding-right:14px}
  .composerwrap{padding:8px 14px 14px}
  #model{max-width:150px}
@@ -1143,6 +1146,10 @@ async function send(){
 }
 function stop(){if(ctrl)ctrl.abort();}
 function autoGrow(){input.style.height='auto';input.style.height=Math.min(input.scrollHeight,140)+'px';}
+// the full hint wraps to three lines on a phone, so narrow screens get the short one
+const narrow=matchMedia('(max-width:560px)');
+function placeholderForWidth(){input.placeholder=narrow.matches?'Message Arki, or type /':'Message Arki, or type / for commands';}
+narrow.addEventListener('change',placeholderForWidth);placeholderForWidth();
 input.addEventListener('input',()=>{autoGrow();refreshComposer();});
 input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});
 sendBtn.addEventListener('click',()=>{generating?stop():send();});

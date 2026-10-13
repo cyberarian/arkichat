@@ -163,19 +163,22 @@ Halaman web tidak pernah bisa menjalankan program desktop — itu batasan semua 
 
 ## Memutar musik di halaman
 
-Pemutar berada di **sidebar**, tepat di bawah avatar, sehingga musik tidak pernah mengganggu kolom percakapan.
+Pemutar berada di **sidebar**, tepat di bawah kartu Arki, sehingga musik tidak pernah mengganggu kolom percakapan.
 
 ```text
-❚❚ ■ ▾   4K Cozy Coffee Shop with Smooth Piano Jazz Music for Relaxing…
-         YouTube · pemutar dalam halaman
-         ┌────────────────┐
-         │   video 16:9   │
-         └────────────────┘
-         ────────●────  ↗  ✕
+┌ NOW PLAYING ────────────────────── ✕ ┐
+│  ┌────────────────────────────────┐  │
+│  │           video 16:9           │  │
+│  └────────────────────────────────┘  │
+│  lofi hip hop radio 📚 beats to …    │
+│  YouTube · pemutar dalam halaman     │
+│  · Vol 80%                           │
+│  ❚❚   ■   ────────●────   ▾   ↗      │
+└──────────────────────────────────────┘
 ```
 
-* ❚❚ / ▶ menjeda dan melanjutkan · ■ berhenti · ▾ menyembunyikan video tetapi **tetap memutar audio** (diingat antar-sesi) · slider volume · ↗ membuka sumber di tab · ✕ menutup
-* Sidebar terdiri dari dua sel yang dapat di-scroll secara independen: Arki tetap pada ukuran penuh 290px dan pemutar melakukan scroll di bawahnya, sehingga memulai track tidak akan pernah mendorong Arki keluar dari frame.
+* ❚❚ / ▶ menjeda dan melanjutkan · ■ berhenti · slider volume · ▾ menyembunyikan video tetapi **tetap memutar audio** (diingat antar-sesi) · ↗ membuka sumber di tab · ✕ menutup
+* Sidebar adalah **satu kolom kartu yang dapat di-scroll**: kartu Arki paling atas, lalu **Now playing**, **⚡ Tool activity**, **🕌 Prayer settings**, dan **Activity**. Kartu Now playing muncul di bawah Arki saat track pertama dimulai, sehingga menyalakan musik tidak pernah menggeser Arki keluar frame — hanya kartu-kartu di bawahnya yang bergerak.
 * Avatar mendapatkan cahaya violet *Playing* setiap kali sebuah track dimulai.
 
 **Dari mana audio berasal**
@@ -199,7 +202,7 @@ Lima waktu salat harian dan matahari terbit, dihitung untuk lokasimu dan ditampi
       ☪ Jumada I 1, 1448 H
 ```
 
-Baris itu berada di kolom avatar sehingga tidak pernah mengambil ruang percakapan; panel **🕌 Prayer settings** di sidebar menyimpan metode, lokasi, dan nada adzannya.
+Baris itu berada di dalam kartu Arki sehingga tidak pernah mengambil ruang percakapan; kartu **🕌 Prayer settings** di sidebar menyimpan metode, lokasi, dan nada adzannya.
 
 **Ia menanyakan lokasimu sekali saja.** Pada pemakaian pertama panel meminta izin lokasi ke browser (satu prompt, yang kemudian diingat browser). Jika ditolak, panel menawarkan **Enter a city** — ketik nama kota dan kota itu dicari melalui [Open-Meteo geocoding API](https://open-meteo.com/en/docs/geocoding-api), atau tempelkan `lat,lng` langsung untuk melewati jaringan sepenuhnya. Lokasinya disimpan secara lokal; pencarian hanya terjadi sekali dan tidak pernah diulang.
 
@@ -225,7 +228,7 @@ Klik **🎤 Wake “Arki”** untuk mulai mendengarkan (Chrome atau Safari, dan 
 
 Saat mendengarkan, Arki berubah menjadi cyan dengan status *Listening* dan menampilkan transkrip secara langsung sehingga kamu dapat melihat apa yang didengarnya. Klik `wake word: Arki` di bawah avatar untuk mengganti kata pemicu — bisa dengan kata apa pun, yang dicocokkan sebagai satu kata utuh.
 
-Pengenalan suara menggunakan Web Speech API yang **disediakan oleh browser** (di Chrome, audio dikirim ke Google untuk transkripsi) dan hanya tersedia di Chromium dan Safari. Firefox dan browser lainnya akan mendapatkan pesan yang jelas di event log dan tombol akan otomatis dinonaktifkan. Slash command di bawah menyediakan fungsi yang sama tanpa mikrofon.
+Pengenalan suara menggunakan Web Speech API yang **disediakan oleh browser** (di Chrome, audio dikirim ke Google untuk transkripsi) dan hanya tersedia di Chromium dan Safari. Firefox dan browser lainnya akan mendapatkan pesan yang jelas di kartu Activity dan tombol akan otomatis dinonaktifkan. Slash command di bawah menyediakan fungsi yang sama tanpa mikrofon.
 
 ---
 
@@ -256,7 +259,8 @@ Perintah ini melewati model sepenuhnya dan langsung menjalankan tool — berguna
 * **🕌 Waktu salat** untuk lokasimu, aktif secara default dan bisa dimatikan — teks berjalan di bawah avatar dengan hitung mundur salat berikutnya, tanggal Hijriah, dan nada adzan opsional. Lihat [Waktu salat](#waktu-salat).
 * **🎭 Karakter sungguhan** — napas saat idle, kedipan (tunggal, ganda, dan mengantuk yang lambat), mata pada bola yang mengikuti kursor, tiga belas emote, sapaan ketika pertama kali dibuka, dan **28 suara buatan sendiri**. Lihat [Avatar](#avatar) dan [Suara](#suara).
 * **Tema terang/gelap**, disimpan dan secara default mengikuti preferensi OS.
-* **Event log** di rail tersendiri setinggi penuh di sisi paling kiri — setiap request, pemanggilan tool, wake word, dan error dengan timestamp, plus tombol **clear**.
+* **Rail navigasi** di tepi kiri — logo Arki (tautan kembali ke chat), **Chat**, **Controls** (membuka baris 🧠 Deep / Sound / 🕌 Prayer times), tombol tema, dan **About**. Membuka Controls tidak pernah mengatur ulang percakapan.
+* **Activity** sebagai kartu di sidebar — setiap request, pemanggilan tool, wake word, dan error dengan timestamp, plus tombol **clear**. Daftarnya bergulir di dalam kartunya sendiri, jadi sepanjang apa pun isinya tidak pernah mengambil ruang percakapan.
 * Bunyi retro opsional saat terjadi perubahan status.
 
 ---
@@ -318,23 +322,22 @@ Untuk menghentikan jawaban di tengah streaming, klik **■ Stop** (tombol Send b
 
 Arki telah diverifikasi dari ukuran **320×568 hingga 2560×1440**, termasuk tablet dalam orientasi portrait, laptop dengan browser chrome terbuka, dan ponsel dalam orientasi landscape.
 
-| Lebar     | Layout                                                                   |
-| --------- | ------------------------------------------------------------------------ |
-| ≥ 981px   | sidebar + percakapan berdampingan                                        |
-| 821–980px | sama, tetapi sidebar lebih sempit dan Arki lebih kecil                   |
-| ≤ 820px   | satu kolom — identity bar, percakapan, panel, lalu event log             |
-| ≤ 560px   | mark dan avatar lebih kecil, nama model dipangkas                        |
-| ≤ 400px   | kontrol dibuat ringkas di seluruh aplikasi                               |
+| Lebar        | Layout                                                                    |
+| ------------ | ------------------------------------------------------------------------- |
+| ≥ 1181px     | rail ikon 72px + sidebar 326px + percakapan, berdampingan                 |
+| 1025–1180px  | sidebar 296px                                                             |
+| 861–1024px   | sidebar 270px dan Arki 150px                                              |
+| ≤ 860px      | rail ikon menjadi baris horizontal di atas — satu kolom, percakapan dulu, lalu kartu-kartu sidebar |
+| ≤ 560px      | header lebih kecil, tagline disembunyikan, Arki 120px, composer dipadatkan |
 
 Tinggi layar ditangani secara terpisah karena jendela yang lebar tetapi pendek merupakan masalah yang berbeda:
 
-| Tinggi              | Layout                                                                                   |
-| ------------------- | ---------------------------------------------------------------------------------------- |
-| ≤ 720px (desktop)   | Arki lebih kecil, caption disembunyikan                                                  |
-| ≤ 560px + landscape | dua kolom seperti ponsel dengan rail 168px, header mini, tagline dan notch disembunyikan |
-| ponsel (stacked)    | composer tetap menempel di bagian bawah viewport                                         |
+| Tinggi           | Layout                                                |
+| ---------------- | ----------------------------------------------------- |
+| ≤ 720px (≥ 861px) | Arki 140px                                           |
+| ponsel (stacked)  | composer tetap menempel di bagian bawah viewport      |
 
-Chat mengisi ruang yang tersedia, bukan memperbesar diri mengikuti jumlah pesan, sehingga composer tidak pernah terdorong keluar layar. Event log berjalan sebagai rail tersendiri setinggi penuh di sisi paling kiri, sehingga sepanjang apa pun daftar aktivitasnya hanya ia sendiri yang melakukan scroll; sidebar di sebelahnya memiliki dua sel yang dapat di-scroll secara independen — blok identitas Arki mempertahankan ukuran penuh, sementara player dan kartu tool melakukan scroll di bawahnya. Dengan demikian, membuka sebuah track tidak akan pernah mendorong Arki keluar dari frame.
+Chat mengisi ruang yang tersedia, bukan memperbesar diri mengikuti jumlah pesan, sehingga composer tidak pernah terdorong keluar layar. Rail ikon tidak pernah bergulir, sidebar bergulir sebagai satu kolom kartu, dan daftar aktivitas bergulir di dalam kartunya sendiri — sehingga sepanjang apa pun riwayatnya, ia tidak pernah mengambil ruang percakapan.
 
 Semuanya menggunakan `dvh` dengan fallback `vh`, dan composer memberikan padding untuk home indicator iPhone.
 
@@ -438,7 +441,7 @@ Percakapan itu sendiri **tidak disimpan secara permanen**. Tidak ada apa pun yan
 
 `logo.svg` adalah keseluruhan identitas visual: speech bubble biru berbentuk squircle yang membawa dua mata berbentuk pill milik Arki dan poni kecilnya — squircle *adalah* Arki, bubble *adalah* chat. Hanya menggunakan beberapa bentuk dan satu gradient, tanpa font dan tanpa dependensi, sehingga aman untuk di-inline, diberi warna ulang, atau diperbesar maupun diperkecil ke ukuran apa pun. Tetap mudah dibaca hingga ukuran 16px.
 
-Di dalam aplikasi, logo muncul sebagai lockup 46px di samping wordmark, berkedip sekali setiap 7,5 detik, dan juga berfungsi sebagai favicon.
+Di dalam aplikasi, logo muncul dua kali: sebagai ubin 38px di puncak rail navigasi (tautan kembali ke chat) dan sebagai lockup 46px di samping wordmark pada header percakapan, yang berkedip sekali setiap 7,5 detik. `logo.svg` juga berfungsi sebagai favicon.
 
 ---
 

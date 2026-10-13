@@ -209,22 +209,26 @@ name is "LibreOffice". Everything else works without an entry.
 
 ## Playing music in the page
 
-The player lives in the **sidebar**, under the avatar, so music never interrupts the
+The player lives in the **sidebar**, in a card just under Arki, so music never interrupts the
 conversation column.
 
 ```
-❚❚ ■ ▾   4K Cozy Coffee Shop with Smooth Piano Jazz Music for Relaxing…
-         YouTube · in-page player
-         ┌────────────────┐
-         │   video 16:9   │
-         └────────────────┘
-         ────────●────  ↗  ✕
+┌ NOW PLAYING ────────────────────── ✕ ┐
+│  ┌────────────────────────────────┐  │
+│  │           video 16:9           │  │
+│  └────────────────────────────────┘  │
+│  lofi hip hop radio 📚 beats to …    │
+│  YouTube · in-page player · Vol 80%  │
+│  ❚❚   ■   ────────●────   ▾   ↗      │
+└──────────────────────────────────────┘
 ```
 
-- ❚❚ / ▶ pause and resume · ■ stop · ▾ hide the video but **keep the audio playing**
-  (remembered across sessions) · volume slider · ↗ open the source in a tab · ✕ close
-- The sidebar is two independently scrolling cells: Arki stays at its full 290px and the player
-  scrolls beneath it, so starting a track can never shove Arki out of frame
+- ❚❚ / ▶ pause and resume · ■ stop · volume slider · ▾ hide the video but **keep the audio
+  playing** (remembered across sessions) · ↗ open the source in a tab · ✕ close
+- The sidebar is **one scrolling column of cards**: Arki on top, then **Now playing**,
+  **⚡ Tool activity**, **🕌 Prayer settings** and **Activity** below it. The Now playing card
+  appears under Arki when the first track starts, so playing music never pushes Arki out of
+  frame — only the cards beneath it move
 - The avatar picks up a violet *Playing* glow each time a track starts
 
 **Where the audio comes from**
@@ -260,8 +264,8 @@ Controls (or the small *off* in the settings panel) turns it off, and that choic
       ☪ Jumada I 1, 1448 AH
 ```
 
-The line lives in the avatar column, so it never takes space from the conversation; the
-**🕌 Prayer settings** panel in the sidebar holds the method, the location and the chime.
+The line lives inside Arki's card, so it never takes space from the conversation; the
+**🕌 Prayer settings** card in the sidebar holds the method, the location and the chime.
 
 **It asks where you are, once.** On the first run the panel asks the browser for your location
 (a single permission prompt, which the browser remembers afterwards). Deny it and the panel
@@ -307,7 +311,7 @@ you like, matched as a whole word.
 
 Recognition uses the Web Speech API, which is **browser-provided** (in Chrome it sends audio to
 Google for transcription) and only exists in Chromium and Safari. Firefox and friends get a
-clear message in the event log and the button turns itself off. The slash commands below do the
+clear message in the Activity card and the button turns itself off. The slash commands below do the
 same jobs without a microphone.
 
 ---
@@ -350,8 +354,12 @@ browsers without speech support, and for when you just want the thing to stop.
   a sphere that follow your cursor, thirteen emotes, a greeting on launch and **28 handcrafted
   sounds**. See [The avatar](#the-avatar) and [Sounds](#sounds).
 - **Light/dark theme**, remembered, defaulting to your OS preference.
-- **Event log** in its own full-height rail down the left edge — every request, tool call,
-  wake word and error with timestamps, and a **clear** button.
+- **Navigation rail** down the left edge — the Arki logo (a link back to the chat), **Chat**,
+  **Controls** (opens the 🧠 Deep / Sound / 🕌 Prayer times row), the theme toggle and **About**.
+  Opening Controls never resets a conversation.
+- **Activity** as a sidebar card — every request, tool call, wake word and error with timestamps,
+  and a **clear** button. It scrolls inside its own card, so however long it gets it never
+  takes space away from the conversation.
 - Optional retro beeps on state changes.
 
 ---
@@ -439,25 +447,23 @@ browser chrome open, and phones in landscape.
 
 | Width | Layout |
 |---|---|
-| ≥ 981px | sidebar + conversation side by side |
-| 821–980px | same, tighter sidebar and smaller Arki |
-| ≤ 820px | single column — identity bar, conversation, panels, then the event log |
-| ≤ 560px | smaller mark and avatar, model name trimmed |
-| ≤ 400px | compact controls throughout |
+| ≥ 1181px | 72px icon rail + 326px sidebar + conversation, side by side |
+| 1025–1180px | 296px sidebar |
+| 861–1024px | 270px sidebar and a 150px Arki |
+| ≤ 860px | the icon rail becomes a horizontal row on top — one column, conversation first, then the sidebar cards |
+| ≤ 560px | smaller header, tagline hidden, 120px Arki, compact composer |
 
 Height is handled separately, because a wide-but-short window is a different problem:
 
 | Height | Layout |
 |---|---|
-| ≤ 720px (desktop) | smaller Arki, caption hidden |
-| ≤ 560px + landscape | phone-like two columns with a 168px rail, mini header, tagline and notch hidden |
+| ≤ 720px (≥ 861px) | a 140px Arki |
 | phones (stacked) | the composer is sticky to the bottom of the viewport |
 
 The chat fills whatever height is left rather than growing to fit the messages, so it never
-pushes the composer off-screen. The event log runs down the far left as its own full-height
-rail, so however long the activity list gets it only ever scrolls itself, and the sidebar beside
-it is two independently scrolling cells — Arki's identity block keeps its full size, and the
-player and tool cards scroll beneath it, so opening a track can never shove Arki out of frame.
+pushes the composer off-screen. The icon rail never scrolls, the sidebar scrolls as one column
+of cards, and the activity list scrolls inside its own card — so however long the history gets,
+it never takes space away from the conversation.
 
 Everything uses `dvh` with a `vh` fallback, and the composer pads for the iPhone home indicator.
 
@@ -587,8 +593,9 @@ and its little fringe — the squircle *is* Arki, the bubble *is* chat. It's a h
 and one gradient, no fonts and no dependencies, so it's safe to inline, recolour or scale to any
 size. It stays legible down to 16px.
 
-In the app it appears as a 46px lockup beside the wordmark, blinks once every 7.5 seconds, and
-doubles as the favicon.
+In the app it appears twice: as a 38px tile at the top of the navigation rail (a link back to the
+chat) and as a 46px lockup beside the wordmark in the conversation header, blinking once every
+7.5 seconds. `logo.svg` doubles as the favicon.
 
 ---
 
