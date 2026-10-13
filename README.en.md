@@ -41,10 +41,12 @@ open http://localhost:5177
 - [Tools — Arki can act](#tools--arki-can-act)
 - [Opening desktop apps](#opening-desktop-apps)
 - [Playing music in the page](#playing-music-in-the-page)
+- [Prayer times](#prayer-times)
 - [The wake word](#the-wake-word)
 - [Slash commands](#slash-commands)
 - [Chat features](#chat-features)
 - [The avatar](#the-avatar)
+- [Sounds](#sounds)
 - [Keyboard](#keyboard)
 - [Responsive](#responsive)
 - [Configuration](#configuration)
@@ -244,6 +246,50 @@ conversation column.
 
 ---
 
+## Prayer times
+
+The five daily prayers and sunrise, computed for wherever you are and shown in your own clock.
+They read as one **running line of text under the avatar** — nothing to open and nothing to
+configure first — and the feature is **on by default**. The **🕌 Prayer times** button in
+Controls (or the small *off* in the settings panel) turns it off, and that choice sticks.
+
+```text
+      Fajr 4:23 AM · Sunrise 5:33 AM · Dhuhr 11:40 AM
+      · Asr 2:43 PM · Maghrib 5:46 PM · Isha 6:52 PM
+      Next Maghrib at 5:46 PM · in 1h 17m
+      ☪ Jumada I 1, 1448 AH
+```
+
+The line lives in the avatar column, so it never takes space from the conversation; the
+**🕌 Prayer settings** panel in the sidebar holds the method, the location and the chime.
+
+**It asks where you are, once.** On the first run the panel asks the browser for your location
+(a single permission prompt, which the browser remembers afterwards). Deny it and the panel
+offers **Enter a city** instead — type a city name and it is looked up through the
+[Open-Meteo geocoding API](https://open-meteo.com/en/docs/geocoding-api), or paste `lat,lng`
+directly to skip the network entirely. The location is stored locally; the lookup happens once
+and is never repeated.
+
+**The maths runs here, not on a server.** Times come from the well-known PrayTimes.org
+algorithm, ported into `index.html` as plain JavaScript — no library, no dependency, no API
+key, no network. It lands within about a minute of the `adhan` reference library across eight
+cities and four dates. Inside the polar circles, where the sun may not rise or set at all, the
+panel falls back to the nearest latitude where twilight happens and says so.
+
+**Choose your method.** The dropdown offers Muslim World League (the default), ISNA, Egyptian
+General Authority, Umm al-Qura (Makkah), Karachi, Tehran and Jafari. Asr uses the standard
+(Shafi'i) shadow length.
+
+**Countdown and adhan.** The line names the next prayer and counts down to it live. When
+a prayer time arrives, a soft four-note chime plays, Arki says which prayer it is, and the event
+lands in the log — switch the chime off with **🔔 Adhan**. Browsers only allow audio after you
+have interacted with the page, so click anywhere once if the first chime is silent.
+
+**Arki can answer about it.** Ask *“when is Maghrib?”* and the `prayer_times` tool returns
+today's list plus the time until the next prayer.
+
+---
+
 ## The wake word
 
 Click **🎤 Wake “Arki”** to start listening (Chrome or Safari, and you'll be asked for mic
@@ -297,33 +343,80 @@ browsers without speech support, and for when you just want the thing to stop.
   you want the slower, deeper answer.
 - **Starter prompts** on an empty conversation, and a **↓ latest** button when you scroll back.
 - **New chat** clears the transcript and starts fresh.
+- **🕌 Prayer times** for your location, on by default and switchable off — a running line
+  under the avatar with the next-prayer countdown, Hijri date and an optional adhan chime.
+  See [Prayer times](#prayer-times).
+- **🎭 A real character** — idle breathing, blinks (single, double and slow sleepy ones), eyes on
+  a sphere that follow your cursor, thirteen emotes, a greeting on launch and **28 handcrafted
+  sounds**. See [The avatar](#the-avatar) and [Sounds](#sounds).
 - **Light/dark theme**, remembered, defaulting to your OS preference.
-- **Event log** in the sidebar — every request, tool call, wake word and error with timestamps.
+- **Event log** in its own full-height rail down the left edge — every request, tool call,
+  wake word and error with timestamps, and a **clear** button.
 - Optional retro beeps on state changes.
 
 ---
 
 ## The avatar
 
-Arki is a superellipse that breathes, blinks, tracks your cursor, squashes when poked, and
-changes colour with what it's doing. A small geometric fringe — five rounded strands in the same
-pill language as the eyes — sways as you move, flattens when Arki turns into a mailbox to
-swallow a file, and whips about when dizzy. Tap it for a quip, tap it three times quickly to
-make it dizzy.
+Arki is a character, not an icon. It **breathes** on a slow cycle even when nothing is
+happening — deeper and faster while it works — and it **blinks**: quick blinks, the occasional
+double, and slower, heavier ones once the desk has been quiet for a few minutes.
+
+**The eyes sit on a sphere.** Both are projected onto the front of an imaginary ball 97 units
+across: they slide around it towards your cursor, the eye on the far side narrowing as it turns
+away while the near one widens, and both track up and down with you. A glossy highlight sits on
+each pupil, brows carry the mood, and a mouth morphs between a smile, a grin, a smirk, a frown,
+an o and a yawn. A small geometric fringe — five rounded strands in the same pill language as the
+eyes — sways as you move, flattens when Arki turns into a mailbox to swallow a file, and whips
+about mid-emote. Tap it for a quip, three fast taps to make it dizzy.
+
+**Emotes.** Thirteen named performances — `wave`, `happy`, `love`, `wink`, `wow`, `laugh`,
+`proud`, `curious`, `shy`, `sad`, `angry`, `sleepy`, `dizzy` — each with its own eyes, mouth,
+brows, body motion, particles and sound. While one runs it outranks the state, which is how a
+poke gets annoyed, three fast pokes get dizzy, a dropped file gets hearts, and a long silence
+gets a yawn: leave the desk alone for a while and the lids grow heavy, the log says
+`🥱 nothing for a while — Arki yawns`, and Arki stretches its mouth.
+
+**A greeting on launch.** The first thing the page does is say hello — Arki waves, the bubble
+greets you in words, and, if you have sound on, the `hello` sound plays (or waits for your first
+click, since browsers keep audio asleep until then). Once per load, never twice.
 
 <img src="screenshots/avatar.png" width="620" alt="Arki in the sidebar, with its fringe and the idle state">
 
-| State | Colour | When |
-|---|---|---|
-| Idle | soft white | nothing happening |
-| Thinking | violet | waiting for the first token |
-| Working | blue | streaming a reply |
-| Searching | indigo | looking something up on YouTube |
-| Finished | green | reply done (stars!) |
-| Error | red | Ollama unreachable or the model failed |
-| Listening | cyan | hands-free mode is on |
-| Playing | violet | a track just started |
-| Upload / Annoyed / Dizzy | — | attaching an image, poked, triple-poked |
+| State | Colour | Face | Motion | When |
+|---|---|---|---|---|
+| Idle | soft white | smile | breathing | nothing happening |
+| Thinking | violet | smirk, eyes up | slow sway | waiting for the first token |
+| Working | blue | flat | busy little bob | streaming a reply |
+| Searching | indigo | wide | slow scan | looking something up on YouTube |
+| Finished | green | grin | double bounce, stars | reply done |
+| Error | red | frown, brows down | shake | Ollama unreachable or the model failed |
+| Listening | cyan | two dots, small o | pulse | hands-free mode is on |
+| Playing | violet | grin | dances | a track just started |
+| Annoyed / Dizzy | — | flat line / spirals | shake / wobble | poked, triple-poked |
+| Upload | — | mailbox slot | flattens, swallows | a file is dropped on it |
+
+---
+
+## Sounds
+
+**28 handcrafted sounds**, every one synthesised in the page with plain oscillators and noise —
+no sound files, no assets, nothing to download:
+
+`hello` · `blip` · `hover` · `tick` · `pop` · `send` · `work` · `think` · `search` · `finish` ·
+`error` · `annoyed` · `dizzy` · `slap` · `attach` · `gulp` · `open` · `close` · `love` ·
+`proud` · `question` · `surprised` · `sleep` · `yawn` · `wink` · `approve` · `peek` · `rate`
+
+Each is a recipe of layers — a glide from one frequency to another, a noise burst through a
+sweeping band, a detuned second voice, an envelope — so they are *tuned* rather than generated:
+`finish` is a four-note arpeggio with a sparkle over it, `gulp` is a low swallow with a breath
+after it, `slap` is a noise crack over a falling thud, `yawn` is a slow filter sweep. States,
+emotes and everyday events are wired to them: a message sent, a tool card appearing, a poke, a
+file dropped, the control panel opening, the greeting.
+
+They are **off until you turn them on** with the **Sound** button in Controls — the choice is
+remembered, so the next launch greets you out loud too. And they are Arki's own: Coucou's audio
+files are not used and not copied (see [Credits](#credits)).
 
 ---
 
@@ -348,7 +441,7 @@ browser chrome open, and phones in landscape.
 |---|---|
 | ≥ 981px | sidebar + conversation side by side |
 | 821–980px | same, tighter sidebar and smaller Arki |
-| ≤ 820px | single column — identity bar, conversation, then the panels; tagline hidden |
+| ≤ 820px | single column — identity bar, conversation, panels, then the event log |
 | ≤ 560px | smaller mark and avatar, model name trimmed |
 | ≤ 400px | compact controls throughout |
 
@@ -361,9 +454,10 @@ Height is handled separately, because a wide-but-short window is a different pro
 | phones (stacked) | the composer is sticky to the bottom of the viewport |
 
 The chat fills whatever height is left rather than growing to fit the messages, so it never
-pushes the composer off-screen. The sidebar is two independently scrolling cells — Arki's
-identity block keeps its full size, and the player and tool cards scroll beneath it, so opening
-a track can never shove Arki out of frame.
+pushes the composer off-screen. The event log runs down the far left as its own full-height
+rail, so however long the activity list gets it only ever scrolls itself, and the sidebar beside
+it is two independently scrolling cells — Arki's identity block keeps its full size, and the
+player and tool cards scroll beneath it, so opening a track can never shove Arki out of frame.
 
 Everything uses `dvh` with a `vh` fallback, and the composer pads for the iPhone home indicator.
 
@@ -428,6 +522,10 @@ Stored in `localStorage`, all under the `arki.` prefix:
 | `arki.vol` | player volume |
 | `arki.dockVideo` | video preview shown or audio-only |
 | `arki.wake` | the wake word |
+| `arki.prayer` | prayer panel on/off |
+| `arki.pLat` / `arki.pLng` / `arki.pCity` | prayer-times location |
+| `arki.pMethod` | prayer calculation method |
+| `arki.pAdhan` | adhan chime on/off |
 
 The conversation itself is **not** persisted. Nothing is written to disk anywhere — reload and
 you're starting fresh. The server prints two startup lines and nothing else; it never logs
@@ -522,8 +620,12 @@ morph into a box when you drop a file — is inspired by **Mochi**, the characte
 **[Coucou](https://github.com/Louis-CFM/coucou)** by Louis Raillé.
 
 Coucou is MIT licensed, and Arki's engine is a JavaScript reimplementation of those ideas for
-the browser. Thanks to Louis for making it open — “every line of code, every animation, every
-sound — free to use, read, fork and remix.”
+the browser — breathing, blinks, the eyes on a sphere, the poke/annoy/dizzy reactions, the
+emotes and the launch greeting. Thanks to Louis for making it open.
+
+The **sounds are not**: Mochi's sound pack is © Louis Raillé under Coucou's asset licence, so
+Arki ships none of it. Its 28 sounds are made from scratch in `index.html` out of plain
+oscillators and noise (see [Sounds](#sounds)).
 
 Everything else in Arki Chat — the layout, the tool-calling system, the sidebar player, the
 wake word, the responsive design, Arki's fringe and `logo.svg` — is original to this project.

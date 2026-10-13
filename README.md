@@ -37,10 +37,12 @@ open http://localhost:5177
 * [Tools — Arki bisa bertindak](#tools--arki-bisa-bertindak)
 * [Membuka aplikasi desktop](#membuka-aplikasi-desktop)
 * [Memutar musik di halaman](#memutar-musik-di-halaman)
+* [Waktu salat](#waktu-salat)
 * [Kata pemicu](#kata-pemicu)
 * [Slash command](#slash-command)
 * [Fitur chat](#fitur-chat)
 * [Avatar](#avatar)
+* [Suara](#suara)
 * [Keyboard](#keyboard)
 * [Responsif](#responsif)
 * [Konfigurasi](#konfigurasi)
@@ -186,6 +188,31 @@ Pemutar berada di **sidebar**, tepat di bawah avatar, sehingga musik tidak perna
 
 ---
 
+## Waktu salat
+
+Lima waktu salat harian dan matahari terbit, dihitung untuk lokasimu dan ditampilkan sesuai jam lokalmu. Semuanya dibaca sebagai **satu baris teks berjalan di bawah avatar** — tidak ada yang perlu dibuka atau diatur lebih dulu — dan fiturnya **aktif secara default**. Tombol **🕌 Prayer times** di Controls (atau tulisan kecil *off* di panel pengaturan) mematikannya, dan pilihan itu diingat.
+
+```text
+      Fajr 4:23 · Sunrise 5:33 · Dhuhr 11:40
+      · Asr 14:43 · Maghrib 17:46 · Isha 18:52
+      Salat berikutnya Maghrib 17:46 · dalam 1j 17m
+      ☪ Jumada I 1, 1448 H
+```
+
+Baris itu berada di kolom avatar sehingga tidak pernah mengambil ruang percakapan; panel **🕌 Prayer settings** di sidebar menyimpan metode, lokasi, dan nada adzannya.
+
+**Ia menanyakan lokasimu sekali saja.** Pada pemakaian pertama panel meminta izin lokasi ke browser (satu prompt, yang kemudian diingat browser). Jika ditolak, panel menawarkan **Enter a city** — ketik nama kota dan kota itu dicari melalui [Open-Meteo geocoding API](https://open-meteo.com/en/docs/geocoding-api), atau tempelkan `lat,lng` langsung untuk melewati jaringan sepenuhnya. Lokasinya disimpan secara lokal; pencarian hanya terjadi sekali dan tidak pernah diulang.
+
+**Perhitungannya berjalan di sini, bukan di server.** Waktunya berasal dari algoritma PrayTimes.org yang sudah lama dikenal, diporting ke `index.html` sebagai JavaScript biasa — tanpa library, tanpa dependensi, tanpa API key, tanpa jaringan. Selisihnya sekitar satu menit dibanding library referensi `adhan` pada delapan kota dan empat tanggal. Di dalam lingkaran kutub, ketika matahari bisa saja tidak terbit atau tidak terbenam sama sekali, panel beralih ke lintang terdekat yang masih memiliki senja dan memberitahumu.
+
+**Pilih metodemu.** Dropdown menyediakan Muslim World League (default), ISNA, Egyptian General Authority, Umm al-Qura (Makkah), Karachi, Tehran, dan Jafari. Asr memakai panjang bayangan standar (Syafi'i).
+
+**Hitung mundur dan adzan.** Baris ini menyebutkan salat berikutnya dan menghitung mundurnya secara live. Saat waktu salat tiba, empat nada lembut berbunyi, Arki menyebutkan salat apa itu, dan kejadiannya tercatat di log — matikan dengan **🔔 Adhan**. Browser hanya mengizinkan audio setelah kamu berinteraksi dengan halaman, jadi klik di mana saja sekali jika nada pertama tidak terdengar.
+
+**Arki bisa menjawab soal ini.** Tanya *“kapan Maghrib?”* dan tool `prayer_times` mengembalikan daftar hari ini beserta sisa waktu ke salat berikutnya.
+
+---
+
 ## Kata pemicu
 
 Klik **🎤 Wake “Arki”** untuk mulai mendengarkan (Chrome atau Safari, dan izin mikrofon akan diminta satu kali).
@@ -226,29 +253,52 @@ Perintah ini melewati model sepenuhnya dan langsung menjalankan tool — berguna
 * **🧠 Deep toggle** — jawaban dikirim dengan `think:false` secara default karena model reasoning dapat menghabiskan 230 token untuk berpikir lalu tidak mengembalikan apa pun. Diukur pada mesin ini dengan prompt yang sama: **0,2 detik / 2 token dibandingkan 129 detik / 232 token dan jawaban kosong.** Aktifkan Deep ketika kamu menginginkan jawaban yang lebih lambat dan mendalam.
 * **Starter prompt** pada percakapan kosong, serta tombol **↓ latest** ketika kamu sedang menggulir ke belakang.
 * **New chat** menghapus transkrip dan memulai percakapan baru.
+* **🕌 Waktu salat** untuk lokasimu, aktif secara default dan bisa dimatikan — teks berjalan di bawah avatar dengan hitung mundur salat berikutnya, tanggal Hijriah, dan nada adzan opsional. Lihat [Waktu salat](#waktu-salat).
+* **🎭 Karakter sungguhan** — napas saat idle, kedipan (tunggal, ganda, dan mengantuk yang lambat), mata pada bola yang mengikuti kursor, tiga belas emote, sapaan ketika pertama kali dibuka, dan **28 suara buatan sendiri**. Lihat [Avatar](#avatar) dan [Suara](#suara).
 * **Tema terang/gelap**, disimpan dan secara default mengikuti preferensi OS.
-* **Event log** di sidebar — setiap request, pemanggilan tool, wake word, dan error dengan timestamp.
+* **Event log** di rail tersendiri setinggi penuh di sisi paling kiri — setiap request, pemanggilan tool, wake word, dan error dengan timestamp, plus tombol **clear**.
 * Bunyi retro opsional saat terjadi perubahan status.
 
 ---
 
 ## Avatar
 
-Arki adalah superellipse yang bernapas, berkedip, mengikuti kursor, mengempis ketika disentuh, dan berubah warna sesuai aktivitasnya. Sebuah poni geometris kecil — lima untaian membulat dengan bahasa bentuk yang sama seperti mata — bergerak mengikuti gerakanmu, menjadi rata ketika Arki berubah menjadi kotak untuk menelan file, dan bergerak liar ketika pusing. Ketuk avatar untuk mendapatkan komentar singkat; ketuk tiga kali dengan cepat untuk membuatnya pusing.
+Arki adalah karakter, bukan sekadar ikon. Ia **bernapas** dalam siklus lambat meskipun tidak ada apa pun yang terjadi — lebih dalam dan lebih cepat saat bekerja — dan ia **berkedip**: kedipan cepat, sesekali ganda, serta kedipan yang lebih berat ketika meja sudah sepi beberapa menit.
+
+**Matanya berada pada sebuah bola.** Keduanya diproyeksikan ke bagian depan bola khayalan berukuran 97 unit: keduanya meluncur di permukaan itu ke arah kursor, mata yang jauh menyempit ketika berputar menjauh sementara yang dekat melebar, dan keduanya mengikuti naik-turunnya kursor. Sebuah kilau mengilap ada di setiap pupil, alis membawa suasana hati, dan mulut berubah bentuk antara senyum, cengiran, seringai, cemberut, huruf o, dan menguap. Sebuah poni geometris kecil — lima untaian membulat dengan bahasa bentuk yang sama seperti mata — bergerak mengikuti gerakanmu, menjadi rata ketika Arki berubah menjadi kotak untuk menelan file, dan bergerak liar di tengah emote. Ketuk avatar untuk mendapatkan komentar singkat; ketuk tiga kali dengan cepat untuk membuatnya pusing.
+
+**Emote.** Tiga belas penampilan bernama — `wave`, `happy`, `love`, `wink`, `wow`, `laugh`, `proud`, `curious`, `shy`, `sad`, `angry`, `sleepy`, `dizzy` — masing-masing dengan mata, mulut, alis, gerakan tubuh, partikel, dan suaranya sendiri. Selama emote berjalan ia mengalahkan status. Itulah sebabnya sentuhan mendapat annoyed, tiga ketukan cepat mendapat dizzy, file yang jatuh mendapat hati, dan keheningan panjang mendapat menguap: biarkan mejanya lama tidak tersentuh dan kelopaknya menjadi berat, log mencatat `🥱 nothing for a while — Arki yawns`, dan Arki meregangkan mulutnya.
+
+**Sapaan saat dibuka.** Hal pertama yang dilakukan halaman ini adalah menyapa — Arki melambaikan tangan, balon ucapan menyapamu dengan kata-kata, dan jika suaramu aktif, bunyi `hello` diputar (atau menunggu klik pertamamu, karena browser menahan audio sampai saat itu). Sekali per pemuatan, tidak pernah dua kali.
 
 <img src="screenshots/avatar.png" width="620" alt="Arki di sidebar, dengan poninya dan kondisi idle">
 
-| Status                   | Warna        | Kapan                                                       |
-| ------------------------ | ------------ | ----------------------------------------------------------- |
-| Idle                     | putih lembut | tidak ada aktivitas                                         |
-| Thinking                 | violet       | menunggu token pertama                                      |
-| Working                  | biru         | sedang melakukan streaming jawaban                          |
-| Searching                | indigo       | sedang mencari sesuatu di YouTube                           |
-| Finished                 | hijau        | jawaban selesai (dengan bintang!)                           |
-| Error                    | merah        | Ollama tidak dapat dijangkau atau model mengalami kegagalan |
-| Listening                | cyan         | mode hands-free aktif                                       |
-| Playing                  | violet       | sebuah track baru saja dimulai                              |
-| Upload / Annoyed / Dizzy | —            | melampirkan gambar, disentuh, diketuk tiga kali             |
+| Status                   | Warna        | Wajah                          | Gerakan                        | Kapan                                                       |
+| ------------------------ | ------------ | ------------------------------ | ------------------------------ | ----------------------------------------------------------- |
+| Idle                     | putih lembut | senyum                         | bernapas                      | tidak ada aktivitas                                         |
+| Thinking                 | violet       | seringai, mata ke atas         | bergoyang pelan                | menunggu token pertama                                      |
+| Working                  | biru         | datar                          | bergerak naik-turun            | sedang melakukan streaming jawaban                          |
+| Searching                | indigo       | mata lebar                     | memindai pelan                 | sedang mencari sesuatu di YouTube                           |
+| Finished                 | hijau        | cengiran                       | lompat dua kali, bintang       | jawaban selesai                                             |
+| Error                    | merah        | cemberut, alis turun           | bergetar                       | Ollama tidak dapat dijangkau atau model mengalami kegagalan |
+| Listening                | cyan         | dua titik, huruf o kecil       | berdenyut                      | mode hands-free aktif                                       |
+| Playing                  | violet       | cengiran                       | menari                         | sebuah track baru saja dimulai                              |
+| Annoyed / Dizzy          | —            | garis datar / spiral           | bergetar / bergoyang           | disentuh, diketuk tiga kali                                 |
+| Upload                   | —            | celah kotak surat              | mengempis, menelan             | ada file yang dijatuhkan ke atasnya                         |
+
+---
+
+## Suara
+
+**28 suara buatan sendiri**, semuanya disintesis di dalam halaman menggunakan osilator dan noise biasa — tanpa file suara, tanpa aset, tanpa apa pun untuk diunduh:
+
+`hello` · `blip` · `hover` · `tick` · `pop` · `send` · `work` · `think` · `search` · `finish` ·
+`error` · `annoyed` · `dizzy` · `slap` · `attach` · `gulp` · `open` · `close` · `love` ·
+`proud` · `question` · `surprised` · `sleep` · `yawn` · `wink` · `approve` · `peek` · `rate`
+
+Masing-masing adalah resep berlapis — gelombang yang meluncur dari satu frekuensi ke frekuensi lain, ledakan noise melewati pita yang menyapu, suara kedua yang sedikit berbeda nadanya, sebuah envelope — sehingga hasilnya *dituning*, bukan sekadar dibangkitkan: `finish` adalah arpeggio empat nada dengan kilau di atasnya, `gulp` adalah suara menelan rendah dengan napas setelahnya, `slap` adalah letupan noise di atas dentuman yang menurun, `yawn` adalah sapuan filter yang lambat. Status, emote, dan kejadian sehari-hari tersambung ke sana: pesan terkirim, kartu tool muncul, sentuhan, file yang dijatuhkan, panel kontrol dibuka, dan sapaan.
+
+Suaranya **mati sampai kamu menyalakannya** lewat tombol **Sound** di Controls — pilihannya diingat, jadi pembukaan berikutnya juga menyapamu dengan suara. Dan semuanya milik Arki sendiri: file audio Coucou tidak dipakai dan tidak disalin (lihat [Kredit](#kredit)).
 
 ---
 
@@ -272,7 +322,7 @@ Arki telah diverifikasi dari ukuran **320×568 hingga 2560×1440**, termasuk tab
 | --------- | ------------------------------------------------------------------------ |
 | ≥ 981px   | sidebar + percakapan berdampingan                                        |
 | 821–980px | sama, tetapi sidebar lebih sempit dan Arki lebih kecil                   |
-| ≤ 820px   | satu kolom — identity bar, percakapan, lalu panel; tagline disembunyikan |
+| ≤ 820px   | satu kolom — identity bar, percakapan, panel, lalu event log             |
 | ≤ 560px   | mark dan avatar lebih kecil, nama model dipangkas                        |
 | ≤ 400px   | kontrol dibuat ringkas di seluruh aplikasi                               |
 
@@ -284,7 +334,7 @@ Tinggi layar ditangani secara terpisah karena jendela yang lebar tetapi pendek m
 | ≤ 560px + landscape | dua kolom seperti ponsel dengan rail 168px, header mini, tagline dan notch disembunyikan |
 | ponsel (stacked)    | composer tetap menempel di bagian bawah viewport                                         |
 
-Chat mengisi ruang yang tersedia, bukan memperbesar diri mengikuti jumlah pesan, sehingga composer tidak pernah terdorong keluar layar. Sidebar memiliki dua sel yang dapat di-scroll secara independen — blok identitas Arki mempertahankan ukuran penuh, sementara player dan kartu tool melakukan scroll di bawahnya. Dengan demikian, membuka sebuah track tidak akan pernah mendorong Arki keluar dari frame.
+Chat mengisi ruang yang tersedia, bukan memperbesar diri mengikuti jumlah pesan, sehingga composer tidak pernah terdorong keluar layar. Event log berjalan sebagai rail tersendiri setinggi penuh di sisi paling kiri, sehingga sepanjang apa pun daftar aktivitasnya hanya ia sendiri yang melakukan scroll; sidebar di sebelahnya memiliki dua sel yang dapat di-scroll secara independen — blok identitas Arki mempertahankan ukuran penuh, sementara player dan kartu tool melakukan scroll di bawahnya. Dengan demikian, membuka sebuah track tidak akan pernah mendorong Arki keluar dari frame.
 
 Semuanya menggunakan `dvh` dengan fallback `vh`, dan composer memberikan padding untuk home indicator iPhone.
 
@@ -341,6 +391,10 @@ Disimpan di `localStorage`, semuanya menggunakan prefix `arki.`:
 | `arki.vol`       | volume player                             |
 | `arki.dockVideo` | preview video ditampilkan atau audio-only |
 | `arki.wake`      | kata pemicu                               |
+| `arki.prayer`    | panel waktu salat aktif/nonaktif          |
+| `arki.pLat` / `arki.pLng` / `arki.pCity` | lokasi waktu salat     |
+| `arki.pMethod`   | metode perhitungan waktu salat            |
+| `arki.pAdhan`    | nada adzan aktif/nonaktif                 |
 
 Percakapan itu sendiri **tidak disimpan secara permanen**. Tidak ada apa pun yang ditulis ke disk — setelah reload kamu akan memulai dari awal. Server hanya mencetak dua baris saat startup dan tidak melakukan hal lainnya; server tidak pernah mencatat isi request atau pesan.
 
@@ -393,7 +447,7 @@ Di dalam aplikasi, logo muncul sebagai lockup 46px di samping wordmark, berkedip
 ```text
 logo.svg       Identitas visual Arki Chat (juga favicon)
 server.js      Static server + proxy streaming Ollama + /api/ytsearch + peluncur aplikasi desktop
-index.html     Avatar engine (terinspirasi Coucou), UI chat, tools, player dan wake word
+index.html     Avatar engine (inspirasi Coucou) + 28 suara, UI chat, tools, player dan wake word
 about.html     Halaman About — apa itu Arki, privasi, kredit dan lisensi
 screenshots/   Gambar yang digunakan dalam file ini
 package.json   Hanya metadata — tidak ada yang perlu diinstal
@@ -411,7 +465,9 @@ Dibuat dan dipelihara oleh **Adnuri Mohamidi**.
 
 Engine avatar squircle Arki — tubuh superellipse, mata yang diproyeksikan pada bola dan mengikuti kursor, kedipan, napas saat idle, reaksi ketika disentuh/diganggu/pusing, serta perubahan bentuk menjadi kotak ketika file dijatuhkan — terinspirasi oleh **Mochi**, karakter dari **[Coucou](https://github.com/Louis-CFM/coucou)** karya Louis Raillé.
 
-Coucou menggunakan lisensi MIT, dan engine Arki merupakan implementasi ulang JavaScript dari ide-ide tersebut untuk browser. Terima kasih kepada Louis karena telah membuatnya terbuka — “setiap baris kode, setiap animasi, setiap suara — bebas digunakan, dibaca, di-fork, dan di-remix.”
+Coucou menggunakan lisensi MIT, dan engine Arki merupakan implementasi ulang JavaScript dari ide-ide tersebut untuk browser — napas, kedipan, mata pada bola, reaksi sentuh/gangguan/pusing, emote, dan sapaan saat dibuka. Terima kasih kepada Louis karena telah membuatnya terbuka.
+
+Namun **suaranya tidak**: paket suara Mochi adalah © Louis Raillé di bawah lisensi aset Coucou, jadi Arki tidak menyertakan satu pun. Ke-28 suaranya dibuat dari nol di `index.html` menggunakan osilator dan noise biasa (lihat [Suara](#suara)).
 
 Semua hal lainnya dalam Arki Chat — layout, sistem tool-calling, player sidebar, wake word, desain responsif, poni Arki, dan `logo.svg` — merupakan karya asli proyek ini.
 

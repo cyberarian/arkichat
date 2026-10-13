@@ -15,361 +15,407 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f3f2f0;--panel:#fff;--ink:#1b1c22;--mute:#6b6d78;--line:#dcdbd7;--acc:#3b9eff;--ok:#2bbf8a;--screen:#e6e5e2}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121317;--panel:#1b1d23;--ink:#ececf0;--mute:#8d909c;--line:#2c2e36;--screen:#0b0c0f}}
-:root[data-theme="dark"]{--bg:#121317;--panel:#1b1d23;--ink:#ececf0;--mute:#8d909c;--line:#2c2e36;--screen:#0b0c0f}
+:root{
+  --bg:#0a0a0c;--panel:#141417;--panel2:#1a1a20;--ink:#f4f4f7;--mute:#8b8d98;
+  --line:#26262d;--acc:#2f6bff;--accsoft:rgba(47,107,255,.15);--ok:#2bbf8a;--bad:#f87171;
+  --card:#e9eaef;--cardink:#16171b;--screen:#0a0a0c}
+:root[data-theme="light"]{
+  --bg:#f1f1f4;--panel:#ffffff;--panel2:#ffffff;--ink:#15161a;--mute:#6b6d78;
+  --line:#e4e4ea;--acc:#2f6bff;--accsoft:rgba(47,107,255,.12);--card:#ffffff;--cardink:#15161a;--screen:#f1f1f4}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Nunito","Trebuchet MS",system-ui,sans-serif}
-h1{font-family:"Fredoka","Trebuchet MS",system-ui,sans-serif;margin:0;font-weight:600;font-size:29px;letter-spacing:-.5px;line-height:1.05}
-/* a definite height is what makes the chat's `1fr` grid row resolve to a real
-   scrollable box instead of growing to the height of every message */
-main{max-width:1180px;margin:0 auto;padding:20px 16px 24px;display:flex;flex-direction:column;
- height:100vh;height:100dvh;overflow:hidden}
-header{flex:none}
-header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-/* brand lockup: the squircle-chat mark sits beside the wordmark and blinks like Arki */
-.brand{display:flex;align-items:center;gap:13px;min-width:0}
-.logo{width:46px;height:46px;flex:none;filter:drop-shadow(0 4px 11px rgba(59,158,255,.32))}
-.logo .eyes{transform-box:fill-box;transform-origin:center;animation:logoBlink 7.5s ease-in-out infinite}
-@keyframes logoBlink{0%,93%,100%{transform:scaleY(1)}95%,97.5%{transform:scaleY(.08)}}
-.brandtext{min-width:0}
-h1 span{color:var(--acc);margin-left:.26em}
-.sub{color:var(--mute);margin:3px 0 0;max-width:46ch}
-.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:7px 14px;border-radius:999px}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+ font:15px/1.55 "Nunito","Trebuchet MS",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+h1{font-family:"Fredoka","Trebuchet MS",system-ui,sans-serif;margin:0;font-weight:600;font-size:24px;letter-spacing:-.4px;line-height:1.1}
+[hidden]{display:none!important}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--ink);
+ padding:8px 16px;border-radius:12px;transition:border-color .15s,background .15s,color .15s}
 button:hover{border-color:var(--mute)}
-button:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
-button.pri{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+button:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+button.pri{background:var(--acc);color:#fff;border-color:var(--acc)}
+button.pri:hover{background:#4d84ff;border-color:#4d84ff}
 button[aria-pressed="true"]{border-color:var(--ink);font-weight:700}
+button:disabled{opacity:.45;cursor:default}
 .linkbtn{display:inline-block;font:inherit;cursor:pointer;text-decoration:none;border:1px solid var(--line);
- background:var(--panel);color:var(--ink);padding:7px 14px;border-radius:999px}
-.linkbtn:hover{border-color:var(--mute)}
-select{font:inherit;padding:7px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);max-width:230px}
-/* notch pill with live mini avatar */
-.notch{display:flex;align-items:center;gap:8px;background:#000;border-radius:999px;padding:5px 14px 5px 8px;box-shadow:0 0 0 1px #222}
-.notch span{color:#9a9ca6;font-size:12px;min-width:70px}
-.notch i{width:7px;height:7px;border-radius:50%;background:var(--ok);flex:none}
-.notch i.off{background:#555}
-.screen{margin-top:20px;background:var(--screen);border:1px solid var(--line);border-radius:18px;overflow:hidden;
- display:flex;flex:1 1 auto;min-height:0}
-/* the sidebar is two stacked cells: the identity block keeps its size, the panels
-   scroll on their own so opening the player can never push Arki out of view.
-   the stage flexes into whatever height is left, so no guessed pixel offsets */
-.stage{display:grid;flex:1;min-height:0;grid-template-columns:minmax(268px,340px) minmax(0,1fr);
- grid-template-rows:auto minmax(0,1fr);grid-template-areas:"av chat" "side chat"}
-.avcol{grid-area:av;border-right:1px solid var(--line);padding:12px 14px;background:var(--panel);
- display:flex;flex-direction:column;align-items:center;gap:8px;overflow-y:auto;min-height:0}
-.sidepanels{grid-area:side;border-right:1px solid var(--line);background:var(--panel);
- padding:0 14px 12px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;min-height:0}
-.avatar{position:relative;display:flex;justify-content:center;padding:14px 0 2px}
-#main{width:290px;height:290px;max-width:100%;touch-action:manipulation;cursor:pointer;transition:width .25s ease,height .25s ease}
+ background:var(--panel2);color:var(--ink);padding:8px 16px;border-radius:12px}
+select{font:inherit;padding:8px 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);
+ color:var(--ink);max-width:240px}
+::selection{background:var(--acc);color:#fff}
+
+/* ================= app shell: icon rail + sidebar + chat ================= */
+main{display:flex;height:100vh;height:100dvh;overflow:hidden;background:var(--bg)}
+.rail{flex:none;width:72px;display:flex;flex-direction:column;align-items:center;gap:8px;
+ padding:16px 0;background:#0c0c0f}
+:root[data-theme="light"] .rail{background:#081018}
+.raillogo{width:44px;height:44px;display:grid;place-items:center;margin-bottom:10px;text-decoration:none;
+ border-radius:14px;transition:background .18s}
+.raillogo:hover{background:rgba(127,127,140,.12)}
+.raillogo svg{width:38px;height:38px;display:block;filter:drop-shadow(0 4px 11px rgba(59,158,255,.32))}
+.railbtn{width:46px;height:46px;border:0;background:transparent;border-radius:14px;display:grid;place-items:center;
+ color:#7e8390;padding:0}
+.railbtn svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.railbtn:hover{color:var(--ink);background:rgba(127,127,140,.12)}
+.railbtn[aria-current="page"],.railbtn[aria-expanded="true"]{color:var(--acc);background:var(--accsoft)}
+
+.workspace{flex:1;display:flex;min-width:0}
+
+/* ---- sidebar ---- */
+.sidebar{flex:none;width:326px;border-right:1px solid var(--line);background:var(--bg);
+ padding:16px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;min-height:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px}
+.cardlab{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.14em;
+ text-transform:uppercase;color:var(--mute);margin-bottom:10px}
+.cardlab .spclear{margin-left:auto;background:transparent;border:0;padding:0;color:var(--mute);
+ font-size:12px;font-weight:700;text-transform:none;letter-spacing:0;border-radius:8px}
+.cardlab .spclear:hover{color:var(--ink)}
+
+/* avatar card */
+.idcard{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+.avatar{position:relative;display:flex;justify-content:center;width:100%}
+#main{width:170px;height:170px;max-width:100%;touch-action:manipulation;cursor:pointer;
+ transition:width .25s ease,height .25s ease}
 .avatar.drop #main{filter:drop-shadow(0 0 18px var(--acc))}
-.cap{color:var(--mute);font-size:12.5px;text-align:center}
-.quip{position:absolute;top:2px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--line);box-shadow:0 2px 8px rgba(0,0,0,.08);padding:5px 12px;border-radius:12px;font-size:13px;opacity:0;transition:opacity .18s;pointer-events:none;white-space:nowrap;z-index:2}
+.quip{position:absolute;top:-4px;left:50%;transform:translateX(-50%);background:var(--panel2);
+ border:1px solid var(--line);box-shadow:0 6px 18px rgba(0,0,0,.35);padding:5px 12px;border-radius:12px;
+ font-size:13px;opacity:0;transition:opacity .18s;pointer-events:none;white-space:nowrap;z-index:3}
 .quip.on{opacity:1}
-.pill{display:inline-block;padding:2px 12px;border-radius:999px;font-weight:700;font-size:13px;color:#111;background:#ddd}
-.statusrow{display:flex;align-items:center;gap:8px}
-.logbox{width:100%;font-size:12px;color:var(--mute);margin-top:2px}
-.logbox summary{cursor:pointer;user-select:none}
-#log{margin:6px 0 0;padding:0 0 0 2px;list-style:none;font:11.5px ui-monospace,Menlo,monospace;max-height:130px;overflow:auto;text-align:left}
-#log li{padding:2px 0;border-bottom:1px dashed var(--line)}
-#log li.good::before{content:'✓ ';color:var(--ok);font-weight:700}
-/* chat column */
-.chat{grid-area:chat;display:flex;flex-direction:column;min-height:0}
-.msgswrap{position:relative;flex:1;min-height:0;display:flex;flex-direction:column}
-.msgs{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:10px;min-height:0;overscroll-behavior:contain;scrollbar-gutter:stable}
-.msgs::-webkit-scrollbar{width:10px}
-.msgs::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px;border:3px solid transparent;background-clip:content-box}
-.msgrow{max-width:82%;display:flex;flex-direction:column;gap:2px}
-.msgrow.user{align-self:flex-end;align-items:flex-end}
-.msgrow.arki{align-self:flex-start;align-items:flex-start}
-.msg{padding:10px 14px;border-radius:16px;line-height:1.5;font-size:14.5px;overflow-wrap:break-word;max-width:100%}
-.msgrow.user .msg{background:var(--ink);color:var(--bg);border-bottom-right-radius:6px}
-.msgrow.arki .msg{background:var(--panel);border:1px solid var(--line);border-bottom-left-radius:6px}
-.msgmeta{font-size:11px;color:var(--mute);padding:0 6px;font-variant-numeric:tabular-nums}
-.msgtools{display:flex;gap:6px;padding:0 4px;max-height:0;opacity:0;overflow:hidden;transition:max-height .18s ease,opacity .18s ease}
-.msgrow.arki:hover .msgtools,.msgrow.arki:focus-within .msgtools{max-height:34px;opacity:1}
-button.mini{font-size:11.5px;padding:3px 10px;color:var(--mute);background:transparent;border-color:transparent}
-button.mini:hover{color:var(--ink);border-color:var(--line)}
-@media(hover:none){.msgtools{max-height:34px;opacity:1}}
-.starters{display:flex;flex-wrap:wrap;gap:6px}
-.starters button{font-size:12.5px;padding:4px 12px;color:var(--mute)}
-.starters button:hover{color:var(--ink)}
-.jump{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);font-size:12px;padding:4px 12px;box-shadow:0 2px 12px rgba(0,0,0,.18)}
-.msg pre{background:rgba(127,127,127,.13);padding:10px 12px;border-radius:10px;overflow-x:auto;font:12.5px ui-monospace,Menlo,monospace;margin:6px 0}
-.msg code{font:12.5px ui-monospace,Menlo,monospace;background:rgba(127,127,127,.16);padding:1px 5px;border-radius:6px}
-.msg pre code{background:none;padding:0}
-.msg img{max-width:180px;max-height:180px;border-radius:10px;display:block;margin:2px 0 4px}
-.cursor{display:inline-block;width:8px;height:15px;background:var(--acc);border-radius:2px;vertical-align:-2px;animation:blink 1s steps(1) infinite;margin-left:2px}
-.think{display:block;color:var(--mute);font-size:12.5px;font-style:italic;white-space:pre-wrap;max-height:120px;overflow:hidden}
-.dots i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--mute);margin-right:4px;animation:pulse 1.2s infinite}
-.dots i:nth-child(2){animation-delay:.2s}.dots i:nth-child(3){animation-delay:.4s}
-@keyframes pulse{0%,80%,100%{opacity:.25}40%{opacity:1}}
-@keyframes blink{50%{opacity:0}}
-.banner{display:none;background:#f87171;color:#1b1c22;padding:8px 14px;border-radius:12px;font-size:13px;margin:0 14px}
-.banner.on{display:block}
-.banner code{font:12px ui-monospace,Menlo,monospace;background:rgba(0,0,0,.25);padding:1px 6px;border-radius:6px}
-.attach{display:flex;gap:8px;padding:8px 14px 0;flex-wrap:wrap}
-.attach:empty{display:none}
-.chip{display:flex;align-items:center;gap:6px;font-size:12px;padding:4px 6px;border:1px solid var(--line);border-radius:999px;background:var(--panel)}
-.chip img{width:32px;height:32px;object-fit:cover;border-radius:999px}
-.chip button{padding:0 6px;font-size:14px;line-height:1;border:none;background:none;color:var(--mute)}
-.chip button:hover{color:var(--ink)}
-.composer{display:flex;gap:8px;padding:12px 14px;padding-bottom:calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--panel);align-items:flex-end}
-textarea{flex:1;resize:none;font:inherit;padding:10px 14px;border-radius:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);max-height:140px;line-height:1.45}
-#send{min-width:82px}
-button:disabled{opacity:.45;cursor:default;border-color:var(--line)}
-#attachBtn{font-size:15px;padding:10px 13px;line-height:1}
-.pill.live{animation:pillPulse 1.6s ease-in-out infinite}
-@keyframes pillPulse{50%{box-shadow:0 0 0 6px rgba(59,158,255,.15)}}
-/* ---- sidebar panels: now playing + tool activity (the chat stays pure conversation) ---- */
-.dock,.toolpanel{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:14px;padding:9px 10px}
-.dock[hidden],.toolpanel[hidden]{display:none}
-.dockhead{display:flex;align-items:center;gap:8px}
-.dockicon{width:26px;height:26px;border-radius:8px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-size:12px;flex:none}
-.dockicon.playing{animation:pillPulse 1.4s ease-in-out infinite}
-.dockmeta{flex:1;min-width:0}
-.docktitle{font-size:12.5px;font-weight:700;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.docksub{font-size:11px;color:var(--mute);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dockframe{position:relative;margin:8px auto 0;border-radius:10px;overflow:hidden;background:#000;aspect-ratio:16/9;max-width:min(100%,236px)}
+.statusrow{display:flex;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap}
+.statusrow #mini{width:22px;height:22px;flex:none}
+.pill{display:inline-block;padding:3px 14px;border-radius:999px;font-weight:700;font-size:13px;color:#111;background:#ddd}
+.notch{display:flex;align-items:center;gap:6px;color:var(--mute);font-size:12.5px}
+.notch i{width:7px;height:7px;border-radius:50%;background:var(--ok);flex:none;display:block}
+.notch i.off{background:#666}
+.cap{color:var(--mute);font-size:12.5px;line-height:1.5;max-width:30ch;text-wrap:pretty}
+.waverow{display:flex;align-items:center;gap:8px;justify-content:center;font-size:12px;color:var(--mute)}
+.wave{display:inline-flex;gap:2px;align-items:flex-end;height:12px}
+.wave i{width:2.5px;background:var(--acc);border-radius:2px;height:4px;animation:wv .9s ease-in-out infinite}
+.wave i:nth-child(2){animation-delay:.15s}.wave i:nth-child(3){animation-delay:.3s}
+.wave i:nth-child(4){animation-delay:.45s}.wave i:nth-child(5){animation-delay:.6s}
+@keyframes wv{0%,100%{height:3px}50%{height:12px}}
+button.mini{background:transparent;border:0;padding:2px 6px;color:var(--mute);border-radius:8px;font-size:12px}
+button.mini:hover{color:var(--ink);background:rgba(127,127,140,.12)}
+button.mini.wake{padding:2px 8px;font-size:11.5px}
+.ptext{font-size:11.5px;line-height:1.6;color:var(--mute);text-align:center;text-wrap:pretty}
+.ptext .pline{display:block}
+.ptext b{color:var(--ink);font-weight:700}
+.ptext .pcount{font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* now playing */
+.dockicon{display:none}
+.dockframe{position:relative;margin:0 auto 12px;border-radius:14px;overflow:hidden;background:#000;
+ aspect-ratio:16/9;max-width:100%}
 .dockframe[hidden]{display:none}
 .dockframe iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .dockframe audio{width:100%;display:block}
-.dockbtns{display:flex;gap:3px;align-items:center;flex-wrap:wrap;margin-top:8px}
-.dockvol{flex:1;min-width:38px;accent-color:var(--acc);cursor:pointer}
-.sphead{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mute)}
-.sphead .spclear{margin-left:auto;text-transform:none;letter-spacing:0}
-/* ---- tool-call cards ---- */
-.toolbox{display:flex;flex-direction:column;gap:6px;max-height:min(23vh,164px);overflow-y:auto;margin-top:8px;padding-right:2px}
+.docktitle{font-size:14px;font-weight:700;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;
+ -webkit-box-orient:vertical;overflow:hidden}
+.docksub{font-size:12px;color:var(--mute);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dockbtns{display:flex;gap:8px;align-items:center;margin-top:14px}
+.dockbtns .rnd{width:40px;height:40px;border-radius:50%;padding:0;display:grid;place-items:center;
+ font-size:13px;flex:none;background:var(--panel2)}
+.dockbtns .rnd:hover{background:var(--acc);color:#fff;border-color:var(--acc)}
+.dockvol{flex:1;min-width:40px;accent-color:var(--acc);cursor:pointer}
+.dockbtns .mini{font-size:14px;padding:6px 8px}
+
+/* activity log */
+.logpanel{display:flex;flex-direction:column;min-height:0}
+#log{margin:0;padding:0;list-style:none;font:12px ui-monospace,Menlo,monospace;color:var(--mute);
+ max-height:230px;overflow-y:auto;line-height:1.45}
+#log li{padding:6px 0;border-bottom:1px dashed var(--line);overflow-wrap:break-word}
+#log li.good::before{content:'✓ ';color:var(--ok);font-weight:700}
+
+/* tool activity */
+.toolbox{display:flex;flex-direction:column;gap:8px;max-height:230px;overflow-y:auto}
 .toolbox:empty{display:none}
-.toolcall{border:1px solid var(--line);background:var(--panel);border-radius:11px;padding:6px 9px;font-size:11.5px;animation:toolIn .28s ease}
+.toolcall{border:1px solid var(--line);background:var(--panel2);border-radius:12px;padding:8px 11px;font-size:12px;
+ animation:toolIn .28s ease}
 @keyframes toolIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
 .toolcall.run{border-color:var(--acc)}
-.toolcall.bad{border-color:#f87171}
-.toolhead{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700}
-.toolhead .tag{font-size:12px;line-height:1;flex:none}
+.toolcall.bad{border-color:var(--bad)}
+.toolhead{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700}
+.toolhead .tag{font-size:13px;line-height:1;flex:none}
 .toolhead .tn{flex:none}
-.toolarg{color:var(--mute);font-weight:400;font-family:ui-monospace,Menlo,monospace;font-size:10.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
-.toolres{color:var(--mute);margin-top:3px;font-size:11px;overflow-wrap:break-word;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-/* ---- wake word / voice ---- */
-.waverow{display:flex;align-items:center;gap:7px;justify-content:center;font-size:11.5px;color:var(--mute)}
-.waverow[hidden]{display:none}
-.wave{display:inline-flex;gap:2px;align-items:flex-end;height:12px}
-.wave i{width:2.5px;background:var(--acc);border-radius:2px;height:4px;animation:wv .9s ease-in-out infinite}
-.wave i:nth-child(2){animation-delay:.15s}.wave i:nth-child(3){animation-delay:.3s}.wave i:nth-child(4){animation-delay:.45s}.wave i:nth-child(5){animation-delay:.6s}
-@keyframes wv{0%,100%{height:3px}50%{height:12px}}
-#mic[aria-pressed="true"]{background:#22d3ee;border-color:#22d3ee;color:#06222a;font-weight:700}
-button.mini.wake{padding:2px 8px;font-size:11px}
-/* ================= responsive =================
-   wide screens → roomier column · mid → tighter sidebar · narrow → single column
-   · short/landscape phones → side-by-side again with a minimal avatar */
-@media(max-width:1180px){main{max-width:100%}}
-@media(max-width:980px){
- .stage{grid-template-columns:minmax(240px,290px) minmax(0,1fr)}
- #main{width:250px;height:250px}
- .avcol,.sidepanels{padding-left:11px;padding-right:11px}
- h1{font-size:26px}
- .sub{max-width:34ch}
- select{max-width:190px}
-}
-@media(max-width:820px){
- main{height:auto;min-height:100vh;min-height:100dvh;overflow:visible;padding:14px 10px 20px}
- .sub{display:none}
- .screen{flex:none}
- .stage{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto;grid-template-areas:"av" "chat" "side"}
- .avcol{border-right:0;border-bottom:1px solid var(--line);flex-direction:row;flex-wrap:wrap;justify-content:center;align-items:center;padding:10px 12px;overflow:visible}
- .sidepanels{border-right:0;border-top:1px solid var(--line);overflow:visible;padding:12px}
- .avatar{padding:0}
- #main{width:150px;height:150px}
- .cap{display:none}
- .logbox{display:none}
- .chat{height:58vh;height:58dvh;min-height:300px}
- .composer{position:sticky;bottom:0;z-index:3;box-shadow:0 -6px 16px rgba(0,0,0,.10)}
- .dockframe{max-width:min(100%,280px)}
- .toolbox{max-height:none}
-}
-@media(max-width:640px){
- .tools{gap:6px}
- .tools button,.tools select{padding:6px 11px;font-size:13px}
- .msgs{padding:12px}
- .notch span{display:none}
+.toolarg{color:var(--mute);font-weight:400;font-family:ui-monospace,Menlo,monospace;font-size:11px;
+ overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
+.toolres{color:var(--mute);margin-top:4px;font-size:11.5px;overflow-wrap:break-word;display:-webkit-box;
+ -webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+
+/* prayer settings */
+.pctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.pctl select{flex:1;min-width:0;max-width:none;font-size:12px;padding:6px 10px;border-radius:10px}
+.pctl button{font-size:12px;padding:6px 12px}
+.pneed{margin-top:8px;font-size:12.5px;color:var(--mute);line-height:1.5;display:flex;flex-direction:column;
+ gap:8px;align-items:flex-start}
+.pneed .row{display:flex;gap:8px;flex-wrap:wrap}
+.pnote{margin-top:8px;font-size:11.5px;color:var(--mute);line-height:1.45}
+
+/* ---- chat column ---- */
+.chat{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0;background:var(--bg)}
+.topbar{flex:none;display:flex;align-items:center;gap:16px;padding:16px 24px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+/* brand lockup: the squircle-chat mark sits beside the wordmark and blinks like Arki */
+.brand{display:flex;align-items:center;gap:13px;min-width:0}
+.brand .logo{width:46px;height:46px;flex:none;filter:drop-shadow(0 4px 11px rgba(59,158,255,.32))}
+.brand .logo .eyes{transform-box:fill-box;transform-origin:center;animation:logoBlink 7.5s ease-in-out infinite}
+@keyframes logoBlink{0%,93%,100%{transform:scaleY(1)}95%,97.5%{transform:scaleY(.08)}}
+.brandtext{min-width:0}
+.sub{color:var(--mute);margin:2px 0 0;font-size:13px}
+.actions{display:flex;align-items:center;gap:10px;margin-left:auto}
+.actions #new{background:var(--panel2)}
+.controlpanel{flex:none;display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+ padding:12px 24px;border-bottom:1px solid var(--line);background:var(--panel)}
+.controlpanel button{font-size:13px;padding:6px 13px}
+
+.msgswrap{position:relative;flex:1;min-height:0;display:flex;flex-direction:column}
+.msgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:14px;min-height:0;
+ padding:24px max(24px,calc((100% - 780px)/2));overscroll-behavior:contain;scrollbar-gutter:stable}
+.msgs::-webkit-scrollbar{width:10px}
+.msgs::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px;border:3px solid transparent;background-clip:content-box}
+.msgrow{max-width:100%;display:flex;flex-direction:column;gap:4px}
+.msgrow.user{align-self:flex-end;align-items:flex-end;max-width:min(82%,560px)}
+.msgrow.arki{display:grid;grid-template-columns:36px minmax(0,1fr);column-gap:12px;align-items:start;
+ align-self:flex-start;width:100%}
+.msgrow.arki::before{content:'';width:36px;height:36px;border-radius:12px;background:var(--card);
+ grid-column:1;grid-row:1}
+.msgrow.arki>.msg,.msgrow.arki>.msgmeta,.msgrow.arki>.msgtools{grid-column:2}
+.msg{padding:14px 18px;border-radius:16px;line-height:1.55;font-size:14.5px;overflow-wrap:break-word;max-width:100%}
+.msgrow.user .msg{background:var(--acc);color:#fff;border-radius:16px;padding:11px 18px}
+.msgrow.arki .msg{background:var(--card);color:var(--cardink)}
+.msgmeta{font-size:11px;color:var(--mute);padding:2px 6px;font-variant-numeric:tabular-nums}
+.msgtools{display:flex;gap:6px;padding:0 4px;max-height:0;opacity:0;overflow:hidden;
+ transition:max-height .18s ease,opacity .18s ease}
+.msgrow.arki:hover .msgtools,.msgrow.arki:focus-within .msgtools{max-height:34px;opacity:1}
+@media(hover:none){.msgtools{max-height:34px;opacity:1}}
+.msgrow.arki .msg code{background:rgba(0,0,0,.08)}
+.msgrow.arki .msg pre{background:rgba(0,0,0,.06)}
+.starters{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.starters .row{display:flex;flex-wrap:wrap;gap:10px}
+.starters .row button{font-size:13.5px;padding:10px 18px;border-radius:999px;color:var(--cardink);
+ background:var(--card);border-color:transparent}
+.starters .row button:hover{border-color:var(--mute)}
+.starters .cmd button{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;padding:8px 15px;
+ color:var(--mute);background:var(--panel2);border-color:var(--line)}
+.jump{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);font-size:12px;padding:5px 14px;
+ box-shadow:0 4px 16px rgba(0,0,0,.35);border-radius:999px}
+.msg pre{background:rgba(127,127,140,.16);padding:10px 12px;border-radius:10px;overflow-x:auto;
+ font:12.5px ui-monospace,Menlo,monospace;margin:6px 0}
+.msg code{font:12.5px ui-monospace,Menlo,monospace;background:rgba(127,127,140,.16);padding:1px 5px;border-radius:6px}
+.msg pre code{background:none;padding:0}
+.msg img{max-width:190px;max-height:190px;border-radius:12px;display:block;margin:2px 0 4px}
+.cursor{display:inline-block;width:8px;height:15px;background:var(--acc);border-radius:2px;
+ vertical-align:-2px;animation:blink 1s steps(1) infinite;margin-left:2px}
+.think{display:block;color:var(--mute);font-size:12.5px;font-style:italic;white-space:pre-wrap;max-height:120px;overflow:hidden}
+.dots i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--mute);margin-right:4px;
+ animation:pulse 1.2s infinite}
+.dots i:nth-child(2){animation-delay:.2s}.dots i:nth-child(3){animation-delay:.4s}
+@keyframes pulse{0%,80%,100%{opacity:.25}40%{opacity:1}}
+@keyframes blink{50%{opacity:0}}
+.banner{display:none;background:var(--bad);color:#1b1c22;padding:9px 16px;border-radius:12px;font-size:13px;margin:0 24px}
+.banner.on{display:block}
+.banner code{font:12px ui-monospace,Menlo,monospace;background:rgba(0,0,0,.25);padding:1px 6px;border-radius:6px}
+.attach{display:flex;gap:8px;padding:10px 24px 0;flex-wrap:wrap}
+.attach:empty{display:none}
+.chip{display:flex;align-items:center;gap:6px;font-size:12px;padding:4px 6px;border:1px solid var(--line);
+ border-radius:999px;background:var(--panel)}
+.chip img{width:32px;height:32px;object-fit:cover;border-radius:999px}
+.chip button{padding:0 6px;font-size:14px;line-height:1;border:none;background:none;color:var(--mute)}
+.chip button:hover{color:var(--ink)}
+
+/* composer */
+.composerwrap{flex:none;display:flex;flex-direction:column;gap:8px;
+ padding:10px 24px calc(16px + env(safe-area-inset-bottom))}
+.composer{display:flex;align-items:flex-end;gap:6px;background:var(--panel);border:1px solid var(--line);
+ border-radius:16px;padding:7px 8px 7px 8px}
+.composer textarea{flex:1;resize:none;font:inherit;padding:10px 8px;border:0;background:transparent;color:var(--ink);
+ max-height:150px;line-height:1.45;outline:none;align-self:center}
+#attachBtn,#mic{width:40px;height:40px;flex:none;display:grid;place-items:center;font-size:17px;padding:0;
+ border:0;background:transparent;color:var(--mute);border-radius:11px}
+#attachBtn:hover,#mic:hover{color:var(--ink);background:rgba(127,127,140,.12)}
+#mic[aria-pressed="true"]{background:#22d3ee;color:#06222a}
+#mic.listening{background:#22d3ee;color:#06222a}
+#send{min-width:96px;padding:11px 22px;border-radius:12px;font-weight:700;align-self:center}
+.hint{text-align:center;color:var(--mute);font-size:12.5px}
+.hint kbd{font:11.5px ui-monospace,Menlo,monospace;background:var(--panel2);border:1px solid var(--line);
+ border-radius:6px;padding:1px 5px}
+.pill.live{animation:pillPulse 1.6s ease-in-out infinite}
+@keyframes pillPulse{50%{box-shadow:0 0 0 6px var(--accsoft)}}
+.dockicon.playing{animation:pillPulse 1.4s ease-in-out infinite}
+
+/* ================= responsive ================= */
+@media(max-width:1180px){.sidebar{width:296px}}
+@media(max-width:1024px){.sidebar{width:270px}#main{width:150px;height:150px}}
+@media(max-width:860px){
+ main{height:auto;min-height:100vh;min-height:100dvh;overflow:visible;flex-direction:column}
+ .rail{width:auto;flex-direction:row;justify-content:flex-start;padding:8px 14px;gap:6px;
+  border-bottom:1px solid var(--line);flex-wrap:wrap}
+ .raillogo{width:38px;height:38px;border-radius:12px;margin:0 6px 0 0}
+ .raillogo svg{width:32px;height:32px}
+ .railspacer{flex:1}
+ .workspace{flex-direction:column}
+ .sidebar{width:auto;border-right:0;border-bottom:1px solid var(--line);overflow:visible;order:2}
+ .chat{min-height:70vh;order:1}
+ .msgs{padding:18px 16px}
+ .composerwrap{padding:10px 16px 16px;position:sticky;bottom:0;background:var(--bg);z-index:4}
+ .topbar,.controlpanel,.attach{padding-left:16px;padding-right:16px}
+ .banner{margin:0 16px}
 }
 @media(max-width:560px){
- .logo{width:40px;height:40px}
- .sub{display:none}
- h1{font-size:24px}
- main{padding:14px 10px 24px}
+ .topbar{padding:12px 14px}.topbar h1{font-size:21px}.sub{display:none}
+ .controlpanel,.attach{padding-left:14px;padding-right:14px}
+ .composerwrap{padding:8px 14px 14px}
  #model{max-width:150px}
- .chat{height:54vh;height:54dvh;min-height:260px}
  #main{width:120px;height:120px}
- textarea{max-height:110px}
- .avatar .quip{font-size:12px;white-space:normal;max-width:170px}
+ .actions #new{padding:8px 12px}
 }
-@media(max-width:400px){
- .tools button,.tools select{padding:5px 8px;font-size:12px}
- #model{max-width:112px}
- #send{min-width:62px}
- .msgs{padding:10px}
- .msgrow{max-width:92%}
- #main{width:104px;height:104px}
-}
-/* short viewports: laptops with the browser chrome open, and phones in landscape */
-@media(max-height:720px) and (min-width:821px){
- #main{width:210px;height:210px}
- .cap{display:none}
-}
-@media(max-height:560px) and (orientation:landscape){
- main{padding:8px 10px 10px}
- header{gap:8px}
- .sub{display:none}
- .logo{width:34px;height:34px}
- h1{font-size:21px}
- .notch{display:none}
- .tools{gap:5px}
- .tools button,.tools select{padding:5px 10px;font-size:12px}
- select{max-width:140px}
- .stage{grid-template-columns:168px minmax(0,1fr);grid-template-areas:"av chat" "side chat"}
- .screen{min-height:0}
- .sphead span:nth-child(2){display:none}
- .avcol{padding:8px;gap:5px}
- .sidepanels{padding:0 8px 8px;gap:8px}
- #main{width:104px;height:104px}
- .cap{display:none}
- .logbox{display:none}
- .dockframe{max-width:min(100%,150px)}
- textarea{max-height:70px}
-}
-/* Raised icon navigation, adapted to Arki's palette. */
-.headernav{display:flex;align-items:center;gap:20px;padding-top:10px;margin-left:auto}
-.navrail{position:relative;display:flex;isolation:isolate;background:var(--panel);border-radius:999px;padding:4px;box-shadow:0 8px 24px rgba(0,0,0,.12)}
-.navrail .navitem{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;width:76px;min-height:56px;padding:5px 4px;border:0;border-radius:999px;background:transparent;color:var(--mute);text-decoration:none;font-size:11px;font-weight:700;-webkit-tap-highlight-color:transparent}
-.navitem svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:transform 240ms cubic-bezier(.23,1,.32,1)}
-.navitem span{transition:transform 240ms cubic-bezier(.23,1,.32,1)}
-.navrail .navitem[aria-current="page"],.navrail .navitem[aria-expanded="true"]{color:var(--ink)}
-.navitem[aria-current="page"] svg,.navitem[aria-expanded="true"] svg{transform:translateY(-14px);color:#fff}
-.navitem[aria-current="page"] span,.navitem[aria-expanded="true"] span{transform:translateY(-3px)}
-.navindicator{position:absolute;z-index:-1;top:-8px;left:23px;width:38px;height:38px;border-radius:50%;background:#1670c5;box-shadow:0 5px 12px rgba(0,0,0,.22);transition:transform 240ms cubic-bezier(.23,1,.32,1);pointer-events:none}
-.navrail.controls-open .navindicator{transform:translateX(76px)}
-.navitem:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
-.navrail.keyboard-nav *{transition:none}
-.controlpanel{flex-basis:100%;padding:12px 0 0;gap:8px;border-top:1px solid var(--line)}
-.controlpanel[hidden]{display:none}
-@media(hover:hover) and (pointer:fine){.navrail .navitem:hover{color:var(--ink)}}
-@media(max-width:640px){.headernav{width:100%;justify-content:space-between;padding-top:8px;gap:12px}.headernav .notch span{display:inline}.controlpanel #model{max-width:100%;flex:1;min-width:150px}}
-@media(max-width:400px){.headernav .notch{padding-right:8px}.headernav .notch span{display:none}}
+@media(max-height:720px) and (min-width:861px){#main{width:140px;height:140px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
 <main>
-<header>
- <div class="brand">
-  <svg class="logo" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+<nav class="rail" aria-label="Main navigation">
+ <a class="raillogo" href="index.html" title="Arki Chat" aria-label="Arki Chat"><svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
   <title>Arki Chat</title>
   <defs>
-    <linearGradient id="arkiBody" x1="6" y1="13" x2="58" y2="60" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#9BD8FF"/>
-      <stop offset=".45" stop-color="#45A5FF"/>
-      <stop offset="1" stop-color="#1B6FD0"/>
-    </linearGradient>
+   <linearGradient id="arkiBodyRail" x1="6" y1="13" x2="58" y2="60" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#9BD8FF"/><stop offset=".45" stop-color="#45A5FF"/><stop offset="1" stop-color="#1B6FD0"/>
+   </linearGradient>
   </defs>
-  <!-- the same little geometric fringe the character has, in the same pill language.
-       the body spans x 4..60, so the strands are centred on x=32 and hide their bases
-       behind it (tips y 3..7, bodies running down into the bubble) -->
   <g fill="#33343C">
-    <rect x="16.4" y="7" width="5.2" height="16" rx="2.6" transform="rotate(-18 19 7)"/>
-    <rect x="22.2" y="4" width="5.6" height="19" rx="2.8" transform="rotate(-10 25 4)"/>
-    <rect x="29" y="3" width="6" height="21" rx="3"/>
-    <rect x="36.2" y="4" width="5.6" height="19" rx="2.8" transform="rotate(9 39 4)"/>
-    <rect x="42.4" y="7" width="5.2" height="16" rx="2.6" transform="rotate(18 45 7)"/>
+   <rect x="16.4" y="7" width="5.2" height="16" rx="2.6" transform="rotate(-18 19 7)"/>
+   <rect x="22.2" y="4" width="5.6" height="19" rx="2.8" transform="rotate(-10 25 4)"/>
+   <rect x="29" y="3" width="6" height="21" rx="3"/>
+   <rect x="36.2" y="4" width="5.6" height="19" rx="2.8" transform="rotate(9 39 4)"/>
+   <rect x="42.4" y="7" width="5.2" height="16" rx="2.6" transform="rotate(18 45 7)"/>
   </g>
-  <g fill="url(#arkiBody)">
-    <!-- the squircle body, plus a curved chat tail tucked under the corner -->
-    <rect x="4" y="12" width="56" height="41" rx="16"/>
-    <path d="M21 47c-3 5.2-5.6 10-7.5 15 6.2-1.8 12.8-5 18.5-9.9z"/>
+  <g fill="url(#arkiBodyRail)">
+   <rect x="4" y="12" width="56" height="41" rx="16"/>
+   <path d="M21 47c-3 5.2-5.6 10-7.5 15 6.2-1.8 12.8-5 18.5-9.9z"/>
   </g>
   <ellipse cx="22" cy="21" rx="12" ry="5.5" fill="#fff" opacity=".14"/>
-  <!-- the two pill eyes that make Arki Arki -->
-  <g fill="#17181D" class="eyes">
-    <rect x="18.5" y="23" width="9" height="19" rx="4.5"/>
-    <rect x="36.5" y="23" width="9" height="19" rx="4.5"/>
-  </g>
-</svg>
-  <div class="brandtext">
-   <h1>Arki<span>Chat</span></h1>
-   <p class="sub">A squircle companion that lives on your screen — powered entirely by your local Ollama models.</p>
-  </div>
- </div>
- <div class="headernav">
-  <div class="notch" id="notch" title="Arki mini status"><canvas id="mini" width="52" height="52" style="width:26px;height:26px"></canvas><span id="miniLabel">idle</span><i id="dot" title="Ollama"></i></div>
-  <nav class="navrail" aria-label="Main navigation">
-   <span class="navindicator" aria-hidden="true"></span>
-   <button class="navitem" id="navChat" aria-current="page" title="Return to chat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8z"/></svg><span>Chat</span></button>
-   <button class="navitem" id="navControls" aria-expanded="false" aria-controls="chatControls" title="Chat controls"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9m4 0h3M4 17h3m4 0h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg><span>Controls</span></button>
-   <a class="navitem" id="about" href="about.html" target="_blank" rel="noopener" title="About Arki Chat (opens in a new tab)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.01"/></svg><span>About</span></a>
-  </nav>
- </div>
- <div class="tools controlpanel" id="chatControls" role="region" aria-label="Chat controls" hidden>
-  <select id="model" aria-label="Ollama model"></select>
-  <button id="think" aria-pressed="false" title="Let Arki reason before answering (much slower)">🧠 Deep off</button>
-  <button id="mic" aria-pressed="false" title="Wake word — say “Arki” to wake Arki, pause/resume music, or speak a command">🎤 Wake “Arki”</button>
-  <button id="theme" title="Toggle theme" aria-label="Toggle theme">🌙</button>
-  <button id="snd" aria-pressed="false">Sound off</button>
-  <button id="new">New chat</button>
- </div>
-</header>
+  <g fill="#17181D"><rect x="18.5" y="23" width="9" height="19" rx="4.5"/><rect x="36.5" y="23" width="9" height="19" rx="4.5"/></g>
+ </svg></a>
+ <button class="railbtn" id="navChat" aria-current="page" title="Chat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8z"/></svg></button>
+ <button class="railbtn" id="navControls" aria-expanded="false" aria-controls="chatControls" title="Chat controls"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9m4 0h3M4 17h3m4 0h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button>
+ <button class="railbtn" id="theme" title="Toggle theme" aria-label="Toggle theme">🌙</button>
+ <a class="railbtn" id="about" href="about.html" target="_blank" rel="noopener" title="About Arki Chat (opens in a new tab)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.01"/></svg></a>
+</nav>
 
-<section class="screen" aria-label="Arki chat">
- <div class="stage" id="stage">
-  <div class="avcol">
+<div class="workspace">
+ <aside class="sidebar" aria-label="Arki sidebar">
+  <section class="card idcard">
    <div class="avatar" id="av">
     <div class="quip" id="quip" role="status"></div>
     <canvas id="main" aria-label="Arki avatar. Click to poke, click three times fast to make it dizzy, or drop an image on it."></canvas>
    </div>
-   <div class="cap">Drop an image on Arki to attach it · poke it · 3 fast clicks = dizzy</div>
-   <div class="statusrow"><span class="pill" id="pill" aria-live="polite">Idle</span></div>
+   <div class="statusrow">
+    <canvas id="mini" width="52" height="52" aria-hidden="true"></canvas>
+    <span class="pill" id="pill" aria-live="polite">Idle</span>
+    <span class="notch" id="notch" title="Ollama"><i id="dot" title="Ollama"></i><span id="miniLabel">Ollama online</span></span>
+   </div>
+   <div class="cap">Say “Arki” to pause or resume music. Drop an image on Arki to attach it.</div>
    <button class="mini wake" id="wake" title="Click to change the wake word">wake word: <span id="wakeWord">Arki</span></button>
    <div class="waverow" id="waverow" hidden><span class="wave"><i></i><i></i><i></i><i></i><i></i></span><span id="heard">listening…</span></div>
-  </div>
-  <div class="sidepanels">
-   <div class="dock" id="dock" hidden aria-label="Now playing">
-    <div class="dockhead">
-     <div class="dockicon" id="dockIcon">▶</div>
-     <div class="dockmeta"><div class="docktitle" id="dockTitle">Nothing playing</div><div class="docksub" id="dockSub">—</div></div>
-     <button class="mini" id="dockPlay" title="Pause / resume">❚❚</button>
-     <button class="mini" id="dockStop" title="Stop">■</button>
-     <button class="mini" id="dockToggle" title="Show / hide the video">▾</button>
+   <div class="ptext" id="prayerText" hidden>
+    <span class="pline" id="pTimes"></span>
+    <span class="pline"><span id="pNextText"></span><span class="pcount" id="pNextCount"></span></span>
+    <span class="pline" id="pHijri"></span>
+   </div>
+  </section>
+
+  <section class="card dock" id="dock" hidden aria-label="Now playing">
+   <div class="cardlab"><span>Now playing</span><button class="spclear" id="dockClose" title="Close the player">✕</button></div>
+   <div class="dockframe" id="dockFrame" hidden></div>
+   <div class="dockicon" id="dockIcon">▶</div>
+   <div class="docktitle" id="dockTitle">Nothing playing</div>
+   <div class="docksub" id="dockSub">—</div>
+   <div class="dockbtns">
+    <button class="rnd" id="dockPlay" title="Pause / resume">❚❚</button>
+    <button class="rnd" id="dockStop" title="Stop">■</button>
+    <input type="range" class="dockvol" id="dockVol" min="0" max="100" value="80" title="Volume" aria-label="Music volume">
+    <button class="mini" id="dockToggle" title="Show / hide the video">▾</button>
+    <button class="mini" id="dockExt" title="Open in a new tab">↗</button>
+   </div>
+  </section>
+
+  <section class="card toolpanel" id="toolpanel" hidden aria-label="Tool activity">
+   <div class="cardlab"><span>⚡ Tool activity</span><button class="spclear" id="toolClear" title="Clear the list">clear</button></div>
+   <div class="toolbox" id="toolbox" aria-live="polite"></div>
+  </section>
+
+  <section class="card prayerpanel" id="prayerpanel" hidden aria-label="Prayer settings">
+   <div class="cardlab"><span>🕌 Prayer settings</span><button class="spclear" id="prayerOff" title="Turn prayer times off">off</button></div>
+   <div class="pneed" id="pNeed" hidden><span id="pNeedMsg"></span>
+    <div class="row"><button class="mini" id="pGeo">📍 Use my location</button><button class="mini" id="pManual">Enter a city</button></div></div>
+   <div class="pctl"><select id="pMethod" aria-label="Prayer calculation method"></select></div>
+   <div class="pctl"><button class="mini" id="pPlace" title="Change the location used for prayer times">📍 <span id="pPlaceLabel">set location</span></button><button class="mini" id="pAdhan" aria-pressed="true" title="Play a short chime at each prayer time">🔔 Adhan on</button></div>
+   <div class="pnote" id="pNote" hidden></div>
+  </section>
+
+  <section class="card logpanel" aria-label="Event log">
+   <div class="cardlab"><span>Activity</span><button class="spclear" id="logClear" title="Clear the log">clear</button></div>
+   <ul id="log"></ul>
+  </section>
+ </aside>
+
+ <div class="chat">
+  <header class="topbar">
+   <div class="brand">
+    <svg class="logo" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+     <title>Arki Chat</title>
+     <defs>
+      <linearGradient id="arkiBody" x1="6" y1="13" x2="58" y2="60" gradientUnits="userSpaceOnUse">
+       <stop offset="0" stop-color="#9BD8FF"/><stop offset=".45" stop-color="#45A5FF"/><stop offset="1" stop-color="#1B6FD0"/>
+      </linearGradient>
+     </defs>
+     <g fill="#33343C">
+      <rect x="16.4" y="7" width="5.2" height="16" rx="2.6" transform="rotate(-18 19 7)"/>
+      <rect x="22.2" y="4" width="5.6" height="19" rx="2.8" transform="rotate(-10 25 4)"/>
+      <rect x="29" y="3" width="6" height="21" rx="3"/>
+      <rect x="36.2" y="4" width="5.6" height="19" rx="2.8" transform="rotate(9 39 4)"/>
+      <rect x="42.4" y="7" width="5.2" height="16" rx="2.6" transform="rotate(18 45 7)"/>
+     </g>
+     <g fill="url(#arkiBody)">
+      <rect x="4" y="12" width="56" height="41" rx="16"/>
+      <path d="M21 47c-3 5.2-5.6 10-7.5 15 6.2-1.8 12.8-5 18.5-9.9z"/>
+     </g>
+     <ellipse cx="22" cy="21" rx="12" ry="5.5" fill="#fff" opacity=".14"/>
+     <g fill="#17181D" class="eyes"><rect x="18.5" y="23" width="9" height="19" rx="4.5"/><rect x="36.5" y="23" width="9" height="19" rx="4.5"/></g>
+    </svg>
+    <div class="brandtext">
+     <h1>Arki Chat</h1>
+     <p class="sub">Your squircle companion, powered by local Ollama models.</p>
     </div>
-    <div class="dockframe" id="dockFrame" hidden></div>
-    <div class="dockbtns">
-     <input type="range" class="dockvol" id="dockVol" min="0" max="100" value="80" title="Volume" aria-label="Music volume">
-     <button class="mini" id="dockExt" title="Open in a new tab">↗</button>
-     <button class="mini" id="dockClose" title="Close the player">✕</button>
-    </div>
    </div>
-   <div class="toolpanel" id="toolpanel" hidden aria-label="Tool activity">
-    <div class="sphead"><span>⚡</span><span>Tool activity</span><button class="mini spclear" id="toolClear" title="Clear the list">clear</button></div>
-    <div class="toolbox" id="toolbox" aria-live="polite"></div>
+   <div class="actions">
+    <button id="new">New chat</button>
+    <select id="model" aria-label="Ollama model"></select>
    </div>
-   <details class="logbox"><summary>Event log</summary><ul id="log"></ul></details>
+  </header>
+  <div class="tools controlpanel" id="chatControls" role="region" aria-label="Chat controls" hidden>
+   <button id="think" aria-pressed="false" title="Let Arki reason before answering (much slower)">🧠 Deep off</button>
+   <button id="snd" aria-pressed="false">Sound off</button>
+   <button id="prayer" aria-pressed="true" title="Muslim prayer times for your local area — click to turn off">🕌 Prayer times</button>
   </div>
-  <div class="chat">
-   <div class="msgswrap">
-    <div class="msgs" id="msgs" aria-live="polite"></div>
-    <button id="jump" class="jump" hidden aria-label="Jump to latest message">↓ latest</button>
-   </div>
-   <div class="banner" id="banner">Can't reach Ollama — start it with <code>ollama serve</code> (retrying every 5s…)</div>
-   <div class="attach" id="attach"></div>
+  <div class="msgswrap">
+   <div class="msgs" id="msgs" aria-live="polite"></div>
+   <button id="jump" class="jump" hidden aria-label="Jump to latest message">↓ latest</button>
+  </div>
+  <div class="banner" id="banner">Can't reach Ollama — start it with <code>ollama serve</code> (retrying every 5s…)</div>
+  <div class="attach" id="attach"></div>
+  <div class="composerwrap">
    <div class="composer">
     <button id="attachBtn" title="Attach images" aria-label="Attach images">📎</button>
-    <textarea id="input" rows="1" placeholder="Message Arki…  (Enter to send, Shift+Enter for newline)"></textarea>
+    <textarea id="input" rows="1" placeholder="Message Arki, or type / for commands"></textarea>
+    <button id="mic" aria-pressed="false" title="Wake word — say “Arki” to pause/resume music or speak a command">🎤</button>
     <button id="send" class="pri">Send</button>
    </div>
-   <input type="file" id="fileInput" accept="image/*" multiple hidden>
+   <p class="hint"><kbd>Enter</kbd> to send · <kbd>Shift</kbd>+<kbd>Enter</kbd> for a new line</p>
   </div>
+  <input type="file" id="fileInput" accept="image/*" multiple hidden>
  </div>
-</section>
+</div>
 </main>
+
 
 <script>
 (()=>{
@@ -379,6 +425,7 @@ const navControls=document.getElementById('navControls');
 const chatControls=document.getElementById('chatControls');
 const navRail=navChat.closest('nav');
 function showControls(open,keyboard=false){
+ if(open!==!chatControls.hidden){if(open)play('open');else play('close');}
  navRail.classList.toggle('keyboard-nav',keyboard);
  navRail.classList.toggle('controls-open',open);
  navControls.setAttribute('aria-expanded',String(open));
@@ -396,63 +443,223 @@ chatControls.addEventListener('keydown',event=>{
 });
 /* ================= avatar engine (Arki) =================
    Inspired by Mochi from Coucou (MIT © 2026 Louis Raillé) — see README Credits */
+// Every state carries a face (eye + mouth shape) and a way of moving, so Arki is
+// never a static sticker: working bobs, thinking sways, playing dances.
 const S={
- idle:{c:'#EDEDEF',eye:'pill',l:'Idle'},
- working:{c:'#3B9EFF',eye:'pill',l:'Working'},
- thinking:{c:'#8B5CF6',eye:'pill',l:'Thinking'},
- searching:{c:'#6366F1',eye:'pill',l:'Searching'},
- finished:{c:'#34D399',eye:'happy',l:'Finished'},
- error:{c:'#F87171',eye:'flat',l:'Error'},
- annoyed:{c:'#EDEDEF',eye:'line',l:'Annoyed'},
- dizzy:{c:'#F472B6',eye:'spiral',l:'Dizzy'},
- upload:{c:'#EDEDEF',eye:'cup',l:'Upload'},
- listening:{c:'#22D3EE',eye:'dot',l:'Listening'},
- playing:{c:'#A78BFA',eye:'happy',l:'Playing'}
+ idle:{c:'#EDEDEF',eye:'pill',mouth:'smile',l:'Idle',motion:'idle'},
+ working:{c:'#3B9EFF',eye:'pill',mouth:'flat',l:'Working',motion:'work'},
+ thinking:{c:'#8B5CF6',eye:'pill',mouth:'smirk',l:'Thinking',motion:'sway',look:[.4,-1]},
+ searching:{c:'#6366F1',eye:'wide',mouth:'flat',l:'Searching',motion:'scan'},
+ finished:{c:'#34D399',eye:'happy',mouth:'grin',l:'Finished',motion:'bounce'},
+ error:{c:'#F87171',eye:'flat',mouth:'frown',l:'Error',motion:'shake',brow:'sad'},
+ annoyed:{c:'#EDEDEF',eye:'line',mouth:'frown',l:'Annoyed',motion:'shake',brow:'angry'},
+ dizzy:{c:'#F472B6',eye:'spiral',mouth:'wave',l:'Dizzy',motion:'wobble'},
+ upload:{c:'#EDEDEF',eye:'cup',mouth:'o',l:'Upload',motion:'none'},
+ listening:{c:'#22D3EE',eye:'dot',mouth:'o',l:'Listening',motion:'pulse'},
+ playing:{c:'#A78BFA',eye:'happy',mouth:'grin',l:'Playing',motion:'dance'}
+};
+// ---------- emotes ----------
+// A named little performance: eyes, mouth, brows, body motion, particles and one
+// of the handcrafted sounds. Anything can fire one by name — emote('love') — and
+// while it runs it outranks the state Arki would otherwise be in. That is what
+// keeps him a character instead of an icon.
+const EMOTES={
+ wave:{eye:'happy',mouth:'smile',snd:'hello',dur:2.2,motion:'wave',bits:'star'},
+ happy:{eye:'happy',mouth:'grin',snd:'proud',dur:1.7,motion:'bounce',bits:'star'},
+ love:{eye:'heart',mouth:'smile',snd:'love',dur:2.0,motion:'sway',bits:'heart'},
+ wink:{eye:'wink',mouth:'smirk',snd:'wink',dur:1.1,motion:'tilt'},
+ wow:{eye:'wide',mouth:'o',snd:'surprised',dur:1.4,motion:'jump',brow:'up'},
+ laugh:{eye:'happy',mouth:'grin',snd:'proud',dur:1.5,motion:'shake',bits:'star'},
+ proud:{eye:'happy',mouth:'grin',snd:'approve',dur:1.8,motion:'puff',bits:'star'},
+ curious:{eye:'wide',mouth:'smirk',snd:'question',dur:1.6,motion:'sway',brow:'up'},
+ shy:{eye:'happy',mouth:'smirk',snd:'peek',dur:1.7,motion:'shrink',bits:'heart'},
+ sad:{eye:'closed',mouth:'frown',snd:'sleep',dur:2.4,motion:'droop',brow:'sad'},
+ angry:{eye:'line',mouth:'frown',snd:'annoyed',dur:1.3,motion:'shake',brow:'angry'},
+ sleepy:{eye:'tired',mouth:'yawn',snd:'yawn',dur:2.8,motion:'droop'},
+ dizzy:{eye:'spiral',mouth:'wave',snd:'dizzy',dur:2.6,motion:'wobble',bits:'star'}
 };
 const $=id=>document.getElementById(id);
 const hex=h=>[1,3,5].map(i=>parseInt(h.substr(i,2),16));
 let state='idle',override=null,cur=hex('#EDEDEF'),morph=0,sq=0,jump=0,lx=0,ly=0,mx=0,my=0,tilt=0;
-let glow=0,online=false,nextBlink=2,blinkStart=-9,parts=[],clicks=[],sound=false,runId=0;
+let glow=0,online=false,nextBlink=2,blinkStart=-9,blinkDur=.16,doubleBlink=0,parts=[],clicks=[],sound=false,runId=0;
+let emo=null,gazeX=0,gazeY=0,gazeUntil=0,lastMove=0,drop=0,nextYawn=0;
 const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let paintQ=false;
 function paint(fn){if(paintQ)return;paintQ=true;requestAnimationFrame(()=>{paintQ=false;fn();});}
 function paintOnce(){const t=now();render(mc,mainC.width/dprM,dprM,true,t,eff());render(nc,26,2,false,t,eff());}
 
-// ---------- sound (WebAudio blips) ----------
-let ac;
-function beep(f,d=.12,type='sine'){ if(!sound)return; try{ ac=ac||new (window.AudioContext||window.webkitAudioContext)();
- const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.value=f;g.gain.value=.06;
- g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+d);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d);}catch(e){}}
-const SND={working:440,thinking:330,searching:520,finished:880,error:180,dizzy:260,annoyed:150,upload:300,listening:990,playing:620};
+// ---------- 28 handcrafted sounds (WebAudio, nothing to download) ----------
+// Every sound is built here by hand out of plain oscillators and noise — no sound
+// files, no assets, nothing borrowed from anyone else's sound pack. A recipe is a
+// list of layers: [at, kind, f0, f1, dur, gain, opts]
+//   at    seconds after the sound starts
+//   kind  'sine' | 'tri' | 'saw' | 'sq'  tone gliding f0 → f1
+//         'nz'  a noise burst through a band that sweeps cut0 → cut1
+//   f0/f1 Hz at the start / end of the glide ('nz' has none: pass 0,0)
+//   dur   layer length · gain  peak level
+//   opts  {cut0,cut1,q} filter sweep, {det} cents of a second detuned voice,
+//         {lp} lowpass instead of bandpass
+const SOUNDS={
+ hello:[[0,'tri',523,784,.16,.09],[.12,'tri',784,1175,.30,.075],[.10,'tri',784,1175,.30,.04,{det:9}],[0,'nz',0,0,.05,.012,{cut0:2600,cut1:700,q:.9}]],
+ blip:[[0,'sine',1180,1180,.05,.05]],
+ hover:[[0,'sine',760,980,.07,.032]],
+ tick:[[0,'sq',2400,1500,.022,.028,{cut0:3000,cut1:1400,q:2}]],
+ pop:[[0,'sine',300,900,.09,.085],[0,'nz',0,0,.028,.02,{cut0:1800,cut1:600,q:1}]],
+ send:[[0,'nz',0,0,.16,.05,{cut0:420,cut1:2600,q:.8}],[.04,'sine',620,880,.12,.045]],
+ work:[[0,'tri',392,587,.18,.07],[0,'tri',392,587,.18,.035,{det:6}]],
+ think:[[0,'tri',330,294,.34,.055],[.06,'tri',330,294,.30,.028,{det:7}]],
+ search:[[0,'nz',0,0,.22,.04,{cut0:600,cut1:3200,q:1.2}],[.16,'sine',1200,1600,.18,.035]],
+ finish:[[0,'tri',523,523,.14,.075],[.11,'tri',659,659,.14,.07],[.22,'tri',784,784,.26,.065],[.22,'tri',784,784,.26,.03,{det:8}],[.26,'nz',0,0,.20,.014,{cut0:3000,cut1:1400,q:.7}]],
+ error:[[0,'saw',200,104,.34,.06,{lp:1,cut0:1200,cut1:320}],[0,'nz',0,0,.10,.02,{cut0:500,cut1:180,q:.8}]],
+ annoyed:[[0,'sq',150,104,.18,.05,{lp:1,cut0:900,cut1:400,q:1}],[0,'sq',150,110,.16,.03,{det:14,lp:1,cut0:800,cut1:380,q:1}]],
+ dizzy:[[0,'sine',520,470,.13,.045],[.13,'sine',470,560,.13,.045],[.26,'sine',560,430,.16,.04]],
+ slap:[[0,'nz',0,0,.035,.10,{cut0:2200,cut1:500,q:.7}],[0,'sine',190,88,.14,.07]],
+ attach:[[0,'sine',660,660,.08,.055],[.08,'sine',880,880,.14,.05],[0,'nz',0,0,.05,.012,{cut0:2400,cut1:1100,q:.8}]],
+ gulp:[[0,'sine',320,170,.22,.075,{lp:1,cut0:900,cut1:300,q:1}],[.14,'nz',0,0,.14,.02,{cut0:700,cut1:260,q:.9}]],
+ open:[[0,'sine',440,660,.16,.055],[0,'nz',0,0,.14,.02,{cut0:500,cut1:2400,q:.7}]],
+ close:[[0,'sine',660,420,.16,.055,{lp:1,cut0:2200,cut1:700,q:.8}]],
+ love:[[0,'tri',784,784,.20,.06],[.10,'tri',1046,1046,.30,.055],[.10,'tri',1046,1046,.30,.028,{det:10}]],
+ proud:[[0,'tri',523,523,.12,.07],[.10,'tri',659,659,.12,.065],[.20,'tri',784,784,.12,.06],[.30,'tri',1046,1046,.30,.055]],
+ question:[[0,'sine',600,880,.20,.05],[.16,'sine',880,980,.14,.032]],
+ surprised:[[0,'sine',700,1250,.10,.06],[.10,'sine',1250,760,.22,.05]],
+ sleep:[[0,'tri',300,180,.60,.055,{lp:1,cut0:900,cut1:260,q:.8}],[.30,'nz',0,0,.35,.012,{cut0:600,cut1:220,q:.7}]],
+ yawn:[[0,'nz',0,0,.70,.035,{cut0:1300,cut1:300,q:.8}],[.06,'sine',300,190,.70,.03,{lp:1,cut0:800,cut1:240,q:1}]],
+ wink:[[0,'sine',880,880,.07,.05],[.09,'sine',1320,1320,.12,.045]],
+ approve:[[0,'tri',1046,1046,.22,.055],[0,'tri',1568,1568,.28,.022,{det:6}],[.06,'nz',0,0,.06,.012,{cut0:3200,cut1:1600,q:.8}]],
+ peek:[[0,'sine',520,720,.13,.03]],
+ rate:[[0,'sine',1568,1568,.07,.032],[.05,'sine',2093,2093,.07,.026],[.10,'sine',2637,2637,.10,.02]]
+};
+const STATE_SND={working:'work',thinking:'think',searching:'search',finished:'finish',error:'error',annoyed:'annoyed',dizzy:'dizzy',upload:'attach',listening:'peek',playing:'blip'};
+let ac=null,bus=null,nbuf=null,pending=[],pendingAt=0;
+function audio(){
+ if(ac)return ac;
+ try{ac=new (window.AudioContext||window.webkitAudioContext)();bus=ac.createGain();bus.gain.value=.5;bus.connect(ac.destination);}catch(e){ac=null;}
+ return ac;
+}
+function noiseBuf(a){
+ if(nbuf&&nbuf.sr===a.sampleRate)return nbuf.buf;
+ const b=a.createBuffer(1,Math.ceil(a.sampleRate*.9),a.sampleRate),d=b.getChannelData(0);
+ for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+ nbuf={sr:a.sampleRate,buf:b};return b;
+}
+function play(name,vol=1){
+ if(!sound)return;
+ const rec=SOUNDS[name];if(!rec)return;
+ const a=audio();if(!a)return;
+ // browsers only allow audio after a gesture: hold what would have played and let the
+ // first click or key press release it, so the launch hello is not swallowed. It is a
+ // queue, not a single slot — the greeting fires its hello and a quip pop back to
+ // back, and both should arrive, in order, exactly as if audio had been awake.
+ if(a.state!=='running'){a.resume();pending.push([name,vol]);if(pending.length>4)pending.shift();pendingAt=Date.now();return;}
+ const t0=a.currentTime+.006,out=a.createGain();out.gain.value=vol;out.connect(bus);
+ for(const L of rec){
+  const at=L[0],kind=L[1],f0=L[2],f1=L[3],dur=L[4],gain=L[5],o=L[6]||{};
+  const start=t0+at,g=a.createGain();
+  g.gain.setValueAtTime(0,start);
+  g.gain.linearRampToValueAtTime(gain,start+.008);
+  g.gain.exponentialRampToValueAtTime(.0001,start+dur);
+  if(o.cut0||o.cut1){
+   const f=a.createBiquadFilter();f.type=o.lp?'lowpass':'bandpass';f.Q.value=o.q||1;
+   f.frequency.setValueAtTime(Math.max(40,o.cut0||1000),start);
+   f.frequency.exponentialRampToValueAtTime(Math.max(40,o.cut1||o.cut0||1000),start+dur);
+   g.connect(f);f.connect(out);
+  }else g.connect(out);
+  const voices=[0];if(o.det)voices.push(o.det);
+  voices.forEach(det=>{
+   let src;
+   if(kind==='nz'){src=a.createBufferSource();src.buffer=noiseBuf(a);src.loop=true;}
+   else{
+    src=a.createOscillator();src.type=kind;
+    if(det)src.detune.value=det;
+    src.frequency.setValueAtTime(Math.max(20,f0),start);
+    if(f1&&f1!==f0)src.frequency.exponentialRampToValueAtTime(Math.max(20,f1),start+dur);
+   }
+   src.connect(g);src.start(start);src.stop(start+dur+.03);
+  });
+ }
+}
+// the first gesture both unlocks audio and plays back whatever it swallowed. The
+// replay waits for resume() to actually land — the context is still "suspended" for
+// a moment after the gesture, and playing into it now would swallow the sound twice.
+addEventListener('pointerdown',()=>{const a=audio();if(!a)return;
+ const release=()=>{const q=pending;pending=[];if(Date.now()-pendingAt<8000)q.forEach(([n,v])=>play(n,v));};
+ if(a.state==='running')release();else a.resume().then(release,release);},{once:true});
+// ---------- emotes in motion ----------
+function emoteMotion(name,u,t){
+ const s=Math.sin(u*Math.PI),d=1-u;
+ switch(name){
+  case'wave':return{dy:-6*s,rot:Math.sin(u*Math.PI*6)*.15*s};
+  case'bounce':{const b=Math.abs(Math.sin(u*Math.PI*2.4))*s;return{dy:-26*b,sx:1-b*.09,sy:1+b*.1,rot:b*.05};}
+  case'shake':return{dx:Math.sin(u*Math.PI*18)*6*d,rot:Math.sin(u*Math.PI*18)*.06*d};
+  case'jump':{const j=Math.sin(u*Math.PI);return{dy:-72*j,sx:1-j*.1,sy:1+j*.12};}
+  case'droop':return{dy:5*s,sx:1+s*.04,sy:1-s*.06,rot:-.04*s};
+  case'shrink':return{dy:4*s,sx:1-s*.07,sy:1-s*.09};
+  case'puff':return{dy:-3*s,sx:1+s*.1,sy:1+s*.1};
+  case'sway':return{rot:Math.sin(u*Math.PI*2)*.13*s};
+  case'tilt':return{rot:.17*s,dx:5*s};
+  case'wobble':return{rot:Math.sin(t*12)*.13,dy:Math.sin(t*9)*3};
+  default:return{};
+ }
+}
+function stateMotion(k,t){
+ switch(k){
+  case'work':return{dy:Math.sin(t*6.5)*2.4,rot:Math.sin(t*6.5)*.035};
+  case'sway':return{dy:-2,rot:Math.sin(t*1.6)*.08};
+  case'scan':return{rot:Math.sin(t*1.3)*.05};
+  case'bounce':return{dy:-Math.abs(Math.sin(t*5.5))*11,sx:1-.05,sy:1+.06};
+  case'shake':return{dx:Math.sin(t*22)*2.4};
+  case'wobble':return{rot:Math.sin(t*10)*.12,dy:Math.sin(t*8)*2.5};
+  case'pulse':{const p=Math.sin(t*3.4);return{sx:1+p*.025,sy:1+p*.025,dy:-1.4*p};}
+  case'dance':return{dy:-Math.abs(Math.sin(t*3))*9,rot:Math.sin(t*1.5)*.15,sx:1-.05*Math.sin(t*6),sy:1+.06*Math.sin(t*6)};
+  default:return{};
+ }
+}
 
 // ---------- state ----------
-const log=m=>{const li=document.createElement('li');if(/ready|done|available|connected/i.test(m))li.className='good';li.textContent=new Date().toLocaleTimeString([],{hour12:false})+'  '+m;$('log').prepend(li);};
+const log=m=>{const li=document.createElement('li');if(/ready|done|available|connected/i.test(m))li.className='good';
+ li.textContent=new Date().toLocaleTimeString([],{hour12:false})+'  '+m;
+ // newest first, and the rail keeps scrolling on its own — one session's worth of
+ // entries is plenty, so the DOM never grows all day long
+ const ul=$('log');ul.prepend(li);while(ul.children.length>240)ul.lastElementChild.remove();};
 function now(){return performance.now()/1000;}
 function eff(){return override&&override.until>now()?override.s:state;}
 function setState(s,msg){
  runId++;state=s;override=null;
  if(s==='finished'){jump=1;for(let i=0;i<10;i++)spawn('star');}
- if(SND[s])beep(SND[s],.15,s==='error'?'sawtooth':'sine');
+ if(STATE_SND[s])play(STATE_SND[s]);
+ if(s==='finished')setTimeout(()=>play('rate'),170);          // a sparkle on top of the chime
  log(msg||('state → '+s));syncUI();
  if(s==='finished'||s==='error'){const id=++runId;setTimeout(()=>{if(id===runId&&state===s)setState('idle','state → idle');},2400);}
 }
-function temp(s,secs){override={s,until:now()+secs};if(SND[s])beep(SND[s],.15,'triangle');syncUI();}
+function temp(s,secs,silent){override={s,until:now()+secs};if(!silent&&STATE_SND[s])play(STATE_SND[s]);syncUI();}
+function emote(name,secs,silent){
+ const e=EMOTES[name];if(!e)return;
+ emo={name,spec:e,start:now(),until:now()+(secs||e.dur),u:0};
+ if(!silent&&e.snd)play(e.snd);
+ if(e.bits&&!REDUCED)for(let i=0;i<5;i++)spawn(e.bits);
+}
 function syncUI(){const k=eff(),p=$('pill');p.textContent=S[k].l;p.style.background=S[k].c;p.classList.toggle('live',k!=='idle');
- $('miniLabel').textContent=S[k].l.toLowerCase();$('notch').title='Arki is '+S[k].l.toLowerCase();if(REDUCED)paintOnce();}
+ $('av').title='Arki is '+S[k].l.toLowerCase();if(REDUCED)paintOnce();}
 
 // speech bubble
 let quipT;
-function quip(t){const q=$('quip');q.textContent=t;q.classList.add('on');clearTimeout(quipT);quipT=setTimeout(()=>q.classList.remove('on'),1600);}
+function quip(t,ms){const q=$('quip');q.textContent=t;q.classList.add('on');clearTimeout(quipT);
+ quipT=setTimeout(()=>q.classList.remove('on'),ms||1600);if(sound)play('pop');}
 const QUIPS=['hey!','that tickles','ow!','poking won\'t speed me up','I live here','boop','I felt that','yes?'];
+const GREETS=['hi, I’m Arki!','hey — I’m here','hello! what are we making?','hi! I live here now 🟦','morning! …hello, anyway'];
 
 // ---------- interaction ----------
+// the pointer is a direction, not a distance: tanh keeps the eyes on the sphere no
+// matter how far away the cursor goes, and stillness later hands the gaze back to Arki
 addEventListener('pointermove',e=>{const r=$('main').getBoundingClientRect();
- mx=Math.max(-1,Math.min(1,(e.clientX-(r.left+r.width/2))/400));my=Math.max(-1,Math.min(1,(e.clientY-(r.top+r.height/2))/400));});
+ mx=Math.tanh((e.clientX-(r.left+r.width/2))/300);my=Math.tanh((e.clientY-(r.top+r.height/2))/260);lastMove=now();});
+['pointerdown','keydown','wheel','touchstart'].forEach(ev=>addEventListener(ev,()=>{lastMove=now();},{passive:true}));
 $('main').addEventListener('click',()=>{
  const t=now();clicks=clicks.filter(c=>t-c<1.7);clicks.push(t);sq=1;
- if(clicks.length>=3){clicks=[];temp('dizzy',2.6);log('3 rapid clicks → dizzy');}
- else{temp('annoyed',.7);spawn('drop',0);quip(QUIPS[Math.floor(Math.random()*QUIPS.length)]);}
+ if(clicks.length>=3){clicks=[];temp('dizzy',2.6);emote('dizzy',2.6,true);log('3 rapid clicks → dizzy');}
+ else{play('slap');temp('annoyed',.7,true);spawn('drop',0);emote('angry',.9,true);quip(QUIPS[Math.floor(Math.random()*QUIPS.length)]);}
 });
+$('main').addEventListener('pointerenter',()=>{if(sound)play('hover');lastMove=now();});
 
 // ---------- image attachments (drag & drop or paste) ----------
 const av=$('av');
@@ -468,13 +675,13 @@ async function addFiles(files){
   const dataUrl=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(f);});
   attachImages.push({name:f.name,dataUrl,b64:dataUrl.split(',')[1]});
  }
- if(imgs.length){jump=.6;for(let i=0;i<5;i++)spawn('heart');beep(200,.2,'square');log('attached '+imgs.length+' image(s)');
+ if(imgs.length){jump=.6;for(let i=0;i<5;i++)spawn('heart');play('attach');emote('happy',1.2,true);log('attached '+imgs.length+' image(s)');
   if(!modelHasVision())log('⚠ '+model+' has no vision — switch model (📷) before sending');}
  renderAttach();syncUI();
 }
 av.addEventListener('dragover',e=>{e.preventDefault();av.classList.add('drop');if(!override||override.s!=='upload')temp('upload',60);});
 av.addEventListener('dragleave',()=>{av.classList.remove('drop');override=null;syncUI();});
-av.addEventListener('drop',e=>{e.preventDefault();av.classList.remove('drop');override=null;addFiles(e.dataTransfer.files||[]);syncUI();});
+av.addEventListener('drop',e=>{e.preventDefault();av.classList.remove('drop');override=null;addFiles(e.dataTransfer.files||[]);play('gulp');syncUI();});
 document.addEventListener('paste',e=>{const fs=[...(e.clipboardData?.files||[])];if(fs.length){e.preventDefault();addFiles(fs);}});
 function renderAttach(){
  const box=$('attach');box.innerHTML='';
@@ -498,7 +705,7 @@ function star(c,x,y,r,rot){c.beginPath();for(let i=0;i<10;i++){const a=rot+i*Mat
 // each strand is [x, tipY, angle°, length, width] and hangs down into the head.
 const HAIR=[[-64,-134,-20,74,19],[-32,-150,-11,90,22],[-2,-158,-3,100,23],[30,-150,9,88,22],[62,-132,20,70,19]];
 function drawHair(c,t,k,morph,hop){
- const sway=Math.sin(t*1.7)*1.7+lx*2.2+(k==='dizzy'?Math.sin(t*9)*9:0);
+ const sway=Math.sin(t*1.7)*1.7+lx*2.2+(k==='dizzy'?Math.sin(t*9)*9:0)+(emo?Math.sin(t*15)*2.6:0);
  c.save();
  c.scale(1-morph*.55,1-morph*.30);            // flattens with the body into the mailbox
  c.translate(0,-hop*9);                        // lifts a little on the celebration jump
@@ -509,9 +716,9 @@ function drawHair(c,t,k,morph,hop){
  });
  c.restore();
 }
-function eye(c,shape,x,y,w,h,side,t){
- c.fillStyle=c.strokeStyle='#17181d';c.lineWidth=9;c.lineCap='round';
- const pill=(ww,hh)=>{c.beginPath();c.roundRect(x-ww/2,y-hh/2,ww,hh,ww/2);c.fill();};
+function eye(c,shape,x,y,w,h,side,t,lid){
+ c.fillStyle=c.strokeStyle='#17181d';c.lineWidth=Math.max(6,9*Math.min(1,w/26));c.lineCap='round';
+ const pill=(ww,hh)=>{c.beginPath();c.roundRect(x-ww/2,y-hh/2,ww,hh,Math.max(1,Math.min(ww,hh)/2));c.fill();};
  if(shape==='wink')shape=side>0?'happy':'pill';
  switch(shape){
   case'pill':pill(w,h);break;
@@ -527,13 +734,54 @@ function eye(c,shape,x,y,w,h,side,t){
   case'star':c.fillStyle='#ffc933';star(c,x,y,w*.7,-Math.PI/2);break;
   case'spiral':c.lineWidth=5;c.beginPath();for(let a=0;a<12;a+=.3){const rr=2+a*2.4,aa=a+t*9*(side||1);c.lineTo(x+Math.cos(aa)*rr,y+Math.sin(aa)*rr);}c.stroke();break;
  }
+ // the specular dot is what makes the eye read as a glossy ball rather than a
+ // sticker — it disappears once the lid has come down over it
+ if(!lid&&(shape==='pill'||shape==='wide'||shape==='dot')&&h>8){
+  c.save();c.globalAlpha=.5;c.fillStyle='#fff';
+  c.beginPath();c.arc(x-w*.17,y-h*.26,Math.max(1.4,Math.min(w,h)*.16),0,7);c.fill();c.restore();
+ }
 }
+// brows carry most of the emotion, so they get their own little vocabulary
+function drawBrow(c,kind,eyes,lx){
+ c.save();c.fillStyle='#33343C';
+ eyes.forEach(e=>{
+  const inner=e.side<0?1:-1;                       // the end that points at the nose
+  const tilt=kind==='angry'?inner*.36:kind==='sad'?-inner*.36:0;
+  c.save();c.translate(e.x,e.y-e.h0*.66-9+(kind==='up'?-13:0));c.rotate(tilt+lx*.07);
+  c.beginPath();c.roundRect(-e.w*.6,-5,e.w*1.2,9,4.5);c.fill();c.restore();
+ });
+ c.restore();
+}
+// the mouth: the other half of a face. shapes morph in place, so an emote only has
+// to name one.
+function mouth(c,shape,x,y,w,t,u){
+ c.strokeStyle='#17181d';c.fillStyle='#17181d';c.lineWidth=8;c.lineCap='round';
+ switch(shape){
+  case'smile':c.beginPath();c.arc(x,y-w*.06,w*.36,Math.PI*.18,Math.PI*.82);c.stroke();break;
+  case'grin':c.beginPath();c.arc(x,y-w*.02,w*.42,Math.PI*.04,Math.PI*.96);c.closePath();c.fill();break;
+  case'smirk':c.beginPath();c.moveTo(x-w*.28,y);c.quadraticCurveTo(x+w*.04,y+w*.24,x+w*.34,y-w*.08);c.stroke();break;
+  case'frown':c.beginPath();c.arc(x,y+w*.44,w*.34,Math.PI*1.14,Math.PI*1.86);c.stroke();break;
+  case'flat':c.beginPath();c.moveTo(x-w*.24,y);c.lineTo(x+w*.24,y);c.stroke();break;
+  case'o':{const p=1+.13*Math.sin(t*8);c.beginPath();c.ellipse(x,y+w*.06,w*.17*p,w*.23*p,0,0,7);c.fill();break;}
+  case'yawn':{const p=1+.12*Math.sin((u||0)*Math.PI);c.beginPath();c.ellipse(x,y+w*.16,w*.26*p,w*.36*p,0,0,7);c.fill();
+   c.fillStyle='rgba(255,255,255,.3)';c.beginPath();c.ellipse(x,y+w*.3,w*.13,w*.08,0,0,7);c.fill();break;}
+  case'wave':c.beginPath();c.moveTo(x-w*.3,y);c.quadraticCurveTo(x-w*.1,y-w*.18,x,y);c.quadraticCurveTo(x+w*.1,y+w*.18,x+w*.3,y);c.stroke();break;
+ }
+}
+function lidNow(t){const p=(t-blinkStart)/blinkDur;return p>0&&p<1?Math.sin(p*Math.PI):0;}
 function render(c,size,dpr,full,t,k){
- const cfg=S[k];
+ const cfg=S[k],e=emo?emo.spec:null,u=emo?emo.u:0;
+ const eyeShape=e?e.eye:cfg.eye,mouthShape=e?e.mouth:cfg.mouth,brow=e?e.brow:cfg.brow;
+ const mv=emo?emoteMotion(emo.name,u,t):stateMotion(k,t);
  c.setTransform(dpr*size/400,0,0,dpr*size/400,0,0);c.clearRect(0,0,400,400);
- const by=Math.sin(t*1.8)*3,jy=-Math.sin(Math.min(1,(1-jump))*Math.PI)*70*(jump>0?1:0);
- c.save();c.translate(200,215+by+(jump>0?jy:0));c.rotate(tilt+(k==='dizzy'?Math.sin(t*10)*.12:0));
- c.scale(1+sq*.1,1-sq*.1);
+ // ---- breathing: one slow cycle even when idle, faster and fuller when there is
+ // work on, so a still Arki is never quite still
+ const busy=k!=='idle'&&k!=='finished'&&!emo,br=Math.sin(t*(busy?1.45:1.02)),bamp=busy?.022:.016;
+ const jy=-Math.sin(Math.min(1,(1-jump))*Math.PI)*70*(jump>0?1:0);
+ const dx=mv.dx||0,dy=(mv.dy||0)+br*2.8;
+ const sx=(mv.sx||1)*(1-bamp*.65*br),sy=(mv.sy||1)*(1+bamp*br);
+ c.save();c.translate(200+dx,215+dy+(jump>0?jy:0));c.rotate(tilt+(mv.rot||0));
+ c.scale(sx*(1+sq*.1),sy*(1-sq*.1));
  drawHair(c,t,k,morph,jump>0?jump:0);
  // body: superellipse, lerped toward a mailbox shape when morphing (upload)
  const n=4+morph*5,Rw=118*(1+morph*.18),Rh=112*(1-morph*.3);
@@ -548,11 +796,19 @@ function render(c,size,dpr,full,t,k){
  g=c.createRadialGradient(-45,-65,0,-45,-65,85);g.addColorStop(0,'rgba(255,255,255,.65)');g.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=g;c.fillRect(-150,-150,300,300);
  if(k==='finished'||k==='upload'||jump>0){c.fillStyle='rgba(255,120,150,.28)';[-1,1].forEach(s=>{c.beginPath();c.ellipse(s*62,28,17,10,0,0,7);c.fill();});}
  c.restore();
- // eyes: projected on a sphere, yaw/pitch follow look target
- const R=95,yaw=lx*.5,pitch=ly*.4;let bk=0;if(t-blinkStart<.16)bk=Math.sin((t-blinkStart)/.16*Math.PI);
- [-1,1].forEach(s=>{const a=s*.46,A=a+yaw,sx=Math.cos(A)/Math.cos(a);
-  const ex=Math.sin(A)*R,ey=-6+Math.sin(pitch)*R*.55-(k==='upload'?10:0);
-  eye(c,cfg.eye,ex,ey,34*sx,60*(1-.92*bk)*(1-Math.abs(pitch)*.15),s,t);});
+ // ---- eyes and mouth. both eyes sit on the front of a 95-unit sphere and slide
+ // around it: the far one narrows and shrinks, the lids follow the vertical look,
+ // and a blink is the lid coming all the way down
+ const lid=Math.min(1,lidNow(t)+drop*.42);
+ const eyes=[-1,1].map(side=>{
+  const rest=side*.44,A=rest+lx*.34,E=ly*.26;      // pointer up → eyes up
+  const depth=Math.cos(A)*Math.cos(E);
+  const persp=Math.max(.34,depth/Math.cos(rest)),sc=.9+.1*Math.max(0,depth),h0=62*sc;
+  return {side,x:Math.sin(A)*97,y:-4+Math.sin(E)*88-(morph>.35?10:0),w:36*persp*sc,h0,h:h0*(1-.95*lid)};
+ });
+ eyes.forEach(e=>eye(c,eyeShape,e.x,e.y,e.w,e.h,e.side,t,lid));
+ if(brow)drawBrow(c,brow,eyes,lx);
+ if(morph<.2)mouth(c,mouthShape,0,46,92,t,u);
  if(morph>.05){const sh=34*morph;c.fillStyle='#17181d';c.beginPath();c.roundRect(-52,34,104,Math.max(2,sh),12);c.fill();}
  c.restore();
  if(full){
@@ -580,8 +836,23 @@ function frame(){
  const t=now(),dt=Math.min(.05,t-last);last=t;const k=eff();
  if(k==='finished')glow=1;else glow*=.992;if(glow<.02)glow=0;
  if(k!==shown){shown=k;syncUI();}
- if(t>nextBlink){blinkStart=t;nextBlink=t+2+Math.random()*3;}
- let tx=mx,ty=my;
+ // an emote runs to its own clock, and hands the face back when it is done
+ if(emo){if(t>emo.until)emo=null;else emo.u=Math.min(1,(t-emo.start)/(emo.until-emo.start));}
+ const still=t-lastMove;
+ // ---- blinks: quick, now and then a double, and slower once nothing is happening
+ if(t>nextBlink){blinkStart=t;blinkDur=.13+Math.random()*.07;
+  if(Math.random()<.22)doubleBlink=blinkStart+blinkDur+.2;
+  nextBlink=t+(still>40?4.6:2.1)+Math.random()*3.3;}
+ if(doubleBlink&&t>doubleBlink){doubleBlink=0;blinkStart=t;blinkDur=.11;}
+ // ---- nobody has touched anything for a while: heavy lids, then a yawn
+ const drowsy=Math.max(0,Math.min(1,(still-42)/38));
+ drop+=(drowsy-drop)*.02;
+ if(drowsy>.5&&t>nextYawn&&k==='idle'){nextYawn=t+75;emote('sleepy');log('🥱 nothing for a while — Arki yawns');}
+ // ---- the gaze: the pointer while it moves, Arki's own little glances once it rests
+ if(t>gazeUntil){gazeUntil=t+2.4+Math.random()*4;
+  gazeX=(Math.random()-.5)*(still>12?1.05:.45);gazeY=(Math.random()-.5)*(still>12?.6:.3);}
+ const own=Math.min(1,Math.max(0,(still-2)/8))*.85;
+ let tx=mx*(1-own)+gazeX*own,ty=my*(1-own)+gazeY*own;
  if(k==='thinking'){tx=.35;ty=-1;}else if(k==='searching'){tx=Math.sin(t*2.4);ty=.1;}else if(k==='dizzy'){tx=Math.sin(t*7)*.6;ty=0;}
  lx+=(tx-lx)*.12;ly+=(ty-ly)*.12;tilt+=((lx*.06)-tilt)*.1;
  const tc=hex(k==='idle'&&glow>0?'#34D399':S[k].c);cur=cur.map((v,i)=>v+(tc[i]-v)*.12);
@@ -589,6 +860,14 @@ function frame(){
  sq*=.88;if(jump>0)jump=Math.max(0,jump-dt*1.6);
  render(mc,mainC.width/dprM,dprM,true,t,k);
  render(nc,26,2,false,t,k);
+}
+// ---------- the greeting ----------
+// The first thing the page does is say hello: Arki waves, the bubble greets you in
+// words, and one of the handcrafted hello sounds plays (or waits for the first click,
+// since browsers keep audio asleep until then).
+function greet(){
+ emote('wave');quip(GREETS[Math.floor(Math.random()*GREETS.length)],3600);
+ log('👋 greeting');
 }
 
 /* ================= Ollama chat ================= */
@@ -612,6 +891,7 @@ function buildMessages(){
 }
 
 function setOnline(v,msg){online=v;$('dot').className=v?'':'off';$('dot').title=v?'Ollama connected':'Ollama offline';
+ $('miniLabel').textContent=v?'Ollama online':'Ollama offline';
  $('banner').classList.toggle('on',!v);if(msg)log(msg);}
 async function loadModels(){
  try{
@@ -712,10 +992,16 @@ const STARTERS=[['What can you do?','What can you do? What are you good at?'],
  ['Explain simply','Explain retrieval-augmented generation in simple words.'],
  ['Write code','Write a JavaScript function that debounces another function, with brief comments.'],
  ['Be playful','Say something delightful about being a squircle.']];
+const STARTER_CMDS=[['/play','lofi hip hop'],['/pause',''],['/vol','40'],['/open','gmail']];
 function showStarters(){
  removeStarters();const box=document.createElement('div');box.className='starters';box.id='starters';
+ const row=document.createElement('div');row.className='row';
  STARTERS.forEach(([label,prompt])=>{const bt=document.createElement('button');bt.textContent=label;
-  bt.onclick=()=>{input.value=prompt;autoGrow();refreshComposer();send();};box.appendChild(bt);});
+  bt.onclick=()=>{input.value=prompt;autoGrow();refreshComposer();send();};row.appendChild(bt);});
+ const crow=document.createElement('div');crow.className='row cmd';
+ STARTER_CMDS.forEach(([cmd,arg])=>{const bt=document.createElement('button');bt.textContent=cmd+(arg?' '+arg:'');bt.title='Insert '+cmd;
+  bt.onclick=()=>{input.value=cmd+(arg?' '+arg:'')+' ';autoGrow();input.focus();refreshComposer();};crow.appendChild(bt);});
+ box.append(row,crow);
  msgs.appendChild(box);scrollBottom(true);
 }
 function retryLast(){
@@ -776,7 +1062,7 @@ async function send(){
  if(!text&&!attachImages.length)return;
  // a slash command runs the tool directly — but still clear the composer, like a real send
  if(text.trim().startsWith('/')&&runCommand(text.trim())){input.value='';autoGrow();refreshComposer();return;}
- runId++;
+ play('send');runId++;
  const imgs=attachImages;attachImages=[];renderAttach();
  input.value='';autoGrow();
  addMsg('user',text,imgs);
@@ -862,7 +1148,12 @@ input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventD
 sendBtn.addEventListener('click',()=>{generating?stop():send();});
 $('new').addEventListener('click',()=>{runId++;if(generating&&ctrl)ctrl.abort();history=[];lastUserImgs=[];attachImages=[];renderAttach();
  msgs.innerHTML='';setState('idle','new chat');addMsg('assistant','Fresh canvas! What should we make? 🟦');showStarters();refreshComposer();input.focus();});
-$('snd').addEventListener('click',e=>{sound=!sound;e.target.textContent=sound?'Sound on':'Sound off';e.target.setAttribute('aria-pressed',String(sound));beep(660);});
+// the sound choice is remembered, so the launch hello is not lost for someone who
+// already turned sound on — the first gesture releases it (see play())
+const applySound=()=>{const b=$('snd');b.textContent=sound?'Sound on':'Sound off';b.setAttribute('aria-pressed',String(sound));};
+sound=localStorage.getItem('arki.snd')==='1';
+$('snd').addEventListener('click',()=>{sound=!sound;localStorage.setItem('arki.snd',sound?'1':'0');applySound();play('pop');});
+applySound();
 $('attachBtn').addEventListener('click',()=>$('fileInput').click());
 $('fileInput').addEventListener('change',e=>{addFiles(e.target.files||[]);e.target.value='';});
 $('jump').addEventListener('click',()=>msgs.scrollTo({top:msgs.scrollHeight,behavior:'smooth'}));
@@ -878,9 +1169,10 @@ const TOOLS=[
  {type:'function',function:{name:'play_music',description:'Play music, a song, an album, a playlist, a lofi/ambient mix or a podcast in the page\'s built-in player so the user can keep chatting while it plays. Use this whenever the user asks to play/put on/hear music.',parameters:{type:'object',properties:{query:{type:'string',description:'song, artist, album, playlist or mix name — or a youtube/spotify/audio URL'},service:{type:'string',enum:['youtube','spotify'],description:'defaults to youtube'}},required:['query']}}},
  {type:'function',function:{name:'control_music',description:'Pause, resume, stop or skip what is currently playing in the page. ONLY call this when the user explicitly asks to pause, resume, stop or skip — never on your own.',parameters:{type:'object',properties:{action:{type:'string',enum:['pause','resume','stop','next']}},required:['action']}}},
  {type:'function',function:{name:'set_volume',description:'Set the volume of the in-page music player, 0 to 100. ONLY call this when the user explicitly mentions loudness or volume.',parameters:{type:'object',properties:{level:{type:'integer',minimum:0,maximum:100}},required:['level']}}},
- {type:'function',function:{name:'open_app',description:openAppDesc(),parameters:{type:'object',properties:{name:{type:'string',description:'app name such as gmail, a desktop program such as vlc, or a full url'}},required:['name']}}}
+ {type:'function',function:{name:'open_app',description:openAppDesc(),parameters:{type:'object',properties:{name:{type:'string',description:'app name such as gmail, a desktop program such as vlc, or a full url'}},required:['name']}}},
+ {type:'function',function:{name:'prayer_times',description:'Give today\'s five Islamic prayer times (Fajr, Dhuhr, Asr, Maghrib, Isha) and sunrise for the place the user saved in the prayer-times panel, plus how long until the next one. Use this whenever the user asks about prayer times, salah, namaz, or when the next prayer is.',parameters:{type:'object',properties:{}}}}
 ];
-const T_ICONS={play_music:'🎵',control_music:'⏯',set_volume:'🔊',open_app:'🚀'};
+const T_ICONS={play_music:'🎵',control_music:'⏯',set_volume:'🔊',open_app:'🚀',prayer_times:'🕌'};
 const APPS={
  gmail:'https://mail.google.com/',mail:'https://mail.google.com/',email:'https://mail.google.com/',
  youtube:'https://www.youtube.com/',yt:'https://www.youtube.com/',spotify:'https://open.spotify.com/',
@@ -914,11 +1206,12 @@ function ytCmd(func,args){
  try{f.contentWindow.postMessage(JSON.stringify({event:'command',func,args:args===undefined?'':args}),'*');}catch(e){}
 }
 function dockShow(title,sub,url){
- media.active=true;media.url=url;
- $('dock').hidden=false;$('dockTitle').textContent=title;$('dockSub').textContent=sub;
+ media.active=true;media.url=url;media.sub=sub;
+ $('dock').hidden=false;$('dockTitle').textContent=title;
  media.playing=true;dockSync();
 }
 function dockSync(){
+ $('dockSub').textContent=(media.sub||'')+(media.kind==='spotify'?'':' · Vol '+media.vol+'%');
  $('dockIcon').textContent=media.playing?'❚❚':'▶';
  $('dockIcon').classList.toggle('playing',media.playing);
  const p=$('dockPlay');p.textContent=media.playing?'❚❚':'▶';
@@ -987,7 +1280,7 @@ $('dockPlay').addEventListener('click',mediaPlay);
 stopBtn.addEventListener('click',()=>{log('stopped playback');mediaStop();});
 $('dockClose').addEventListener('click',dockClose);
 $('dockVol').addEventListener('input',e=>{media.vol=+e.target.value;localStorage.setItem('arki.vol',media.vol);
- if(media.audio)media.audio.volume=media.vol/100;if(media.kind==='yt')ytCmd('setVolume',{value:media.vol});});
+ if(media.audio)media.audio.volume=media.vol/100;if(media.kind==='yt')ytCmd('setVolume',{value:media.vol});dockSync();});
 // ---------- tool implementations ----------
 async function toolPlayMusic(args){
  const q=String(args.query||'').trim();
@@ -1089,12 +1382,309 @@ function addToolCard(name,args,ok,summary){
  const res=document.createElement('div');res.className='toolres';res.textContent=summary||'…';res.title=res.textContent;
  head.append(tag,tn,ar);c.append(head,res);box.appendChild(c);
  while(box.children.length>TOOL_MAX)box.firstElementChild.remove();
+ play('tick');
  $('toolpanel').hidden=false;
  box.scrollTop=box.scrollHeight; // newest card first, without hijacking the sidebar scroll
  return c;
 }
 function updateToolPanel(){const b=$('toolbox');$('toolpanel').hidden=!b.children.length;}
 $('toolClear').addEventListener('click',()=>{$('toolbox').innerHTML='';updateToolPanel();log('tool activity cleared');});
+$('logClear').addEventListener('click',()=>{$('log').innerHTML='';});
+/* ================= Muslim prayer times =================
+   Times come from the standard PrayTimes.org algorithm (Hamid Zarrabi-Zadeh,
+   MIT) ported to plain JS — no library, no network, nothing to install. They read
+   as one running line under the avatar; the sidebar panel holds the settings. The
+   feature ships ON — the 🕌 button in Controls or the panel's own "off" turns it
+   off, and that choice is remembered. Times are always shown in local clock time. */
+{
+ const METHODS={
+  MWL:{label:'Muslim World League',fajr:18,isha:17},
+  ISNA:{label:'Islamic Society of North America',fajr:15,isha:15},
+  Egypt:{label:'Egyptian General Authority of Survey',fajr:19.5,isha:17.5},
+  Makkah:{label:'Umm al-Qura University, Makkah',fajr:18.5,isha:'90 min'},
+  Karachi:{label:'University of Islamic Sciences, Karachi',fajr:18,isha:18},
+  Tehran:{label:'Institute of Geophysics, University of Tehran',fajr:17.7,isha:14,maghrib:4.5},
+  Jafari:{label:'Shia Ithna-Ashari, Leiva Institute, Qum',fajr:16,isha:14,maghrib:4}
+ };
+ const NAMES={fajr:'Fajr',sunrise:'Sunrise',dhuhr:'Dhuhr',asr:'Asr',maghrib:'Maghrib',isha:'Isha'};
+ const ROWS=['fajr','sunrise','dhuhr','asr','maghrib','isha'];
+ const ORDER=['fajr','dhuhr','asr','maghrib','isha'];
+ // ---------- astronomy ----------
+ const dtr=d=>d*Math.PI/180, rtd=r=>r*180/Math.PI;
+ const dsin=d=>Math.sin(dtr(d)), dcos=d=>Math.cos(dtr(d)), dtan=d=>Math.tan(dtr(d));
+ const darcsin=x=>rtd(Math.asin(x)), darccos=x=>rtd(Math.acos(x));
+ const darctan2=(y,x)=>rtd(Math.atan2(y,x)), darccot=x=>rtd(Math.atan(1/x));
+ const fix=(a,b)=>{const r=a-b*Math.floor(a/b);return r<0?r+b:r;};
+ const fixAngle=a=>fix(a,360), fixHour=a=>fix(a,24);
+ const isMin=v=>typeof v==='string'&&/min$/.test(v);
+ function julian(y,m,d){
+  if(m<=2){y-=1;m+=12;}
+  const A=Math.floor(y/100), B=2-A+Math.floor(A/4);
+  return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+B-1524.5;
+ }
+ function sunPos(jd){
+  const D=jd-2451545, g=fixAngle(357.529+0.98560028*D), q=fixAngle(280.459+0.98564736*D);
+  const L=fixAngle(q+1.915*dsin(g)+0.02*dsin(2*g)), e=23.439-0.00000036*D;
+  const declination=darcsin(dsin(L)*dsin(e));
+  return {declination,equation:q/15-fixHour(darctan2(dcos(e)*dsin(L),dcos(L))/15)};
+ }
+ // decimal hours on the local clock for one civil day
+ function hoursFor(y,mo,d,lat,lng,tz,method){
+  const M=METHODS[method]||METHODS.MWL;
+  // an absent maghrib means the usual "maghrib = sunset" rule
+  const set={fajr:M.fajr,maghrib:M.maghrib!=null?M.maghrib:'0 min',isha:M.isha};
+  const angleOf=v=>isMin(v)?0:v;
+  const jDate=julian(y,mo,d)-lng/(15*24);
+  const midDay=t=>fixHour(12-sunPos(jDate+t).equation);
+  const angleTime=(angle,t,ccw)=>{const decl=sunPos(jDate+t).declination;
+   return midDay(t)+(ccw?-1:1)*darccos((-dsin(angle)-dsin(decl)*dsin(lat))/(dcos(decl)*dcos(lat)))/15;};
+  const asrTime=t=>{const decl=sunPos(jDate+t).declination;
+   return angleTime(-darccot(1+dtan(Math.abs(lat-decl))),t);};
+  const t={
+   fajr:angleTime(set.fajr,5/24,true),
+   sunrise:angleTime(0.833,6/24,true),   // 0.833° = refraction + solar radius
+   dhuhr:midDay(12/24),
+   asr:asrTime(13/24),
+   sunset:angleTime(0.833,18/24,false),
+   maghrib:angleTime(angleOf(set.maghrib),18/24,false),
+   isha:angleTime(angleOf(set.isha),18/24,false)
+  };
+  for(const k in t)t[k]+=tz-lng/15;
+  // high latitudes: clamp a twilight that never happens to half the night. A
+  // min-based maghrib/isha is defined off sunset, so it must skip this — its raw
+  // angle-0 value sits a few minutes *before* sunset, which the wrap-around in
+  // fixHour would misread as a whole day away and wrongly clamp.
+  const night=fixHour(t.sunrise-t.sunset);
+  const hl=(v,base,ccw)=>{const p=night/2, diff=ccw?fixHour(base-v):fixHour(v-base);
+   return isNaN(v)||diff>p?base+(ccw?-p:p):v;};
+  t.fajr=hl(t.fajr,t.sunrise,true);
+  if(!isMin(set.maghrib))t.maghrib=hl(t.maghrib,t.sunset,false);
+  if(!isMin(set.isha))t.isha=hl(t.isha,t.sunset,false);
+  if(isMin(set.maghrib))t.maghrib=t.sunset+parseFloat(set.maghrib)/60;
+  if(isMin(set.isha))t.isha=t.maghrib+parseFloat(set.isha)/60;
+  return t;
+ }
+ function timesFor(date,lat,lng,method){
+  const y=date.getFullYear(), mo=date.getMonth()+1, d=date.getDate();
+  const tz=-new Date(y,mo-1,d,12).getTimezoneOffset()/60;
+  const base=new Date(y,mo-1,d,0,0,0,0).getTime();
+  const build=h=>{const out={};for(const k of ROWS)out[k]=isNaN(h[k])?null:new Date(base+h[k]*3600000);return out;};
+  let h=hoursFor(y,mo,d,lat,lng,tz,method), approx=false;
+  // inside the polar circles the sun can stay up (or down) all day and no
+  // twilight exists — fall back to the nearest latitude where it does
+  if(isNaN(h.sunrise)||isNaN(h.sunset)){
+   approx=true;
+   h=hoursFor(y,mo,d,Math.sign(lat||1)*Math.min(Math.abs(lat),48),lng,tz,method);
+  }
+  return {times:build(h),approx};
+ }
+ // ---------- state ----------
+ const store={
+  on:localStorage.getItem('arki.prayer')!=='0',
+  lat:parseFloat(localStorage.getItem('arki.pLat')),
+  lng:parseFloat(localStorage.getItem('arki.pLng')),
+  city:localStorage.getItem('arki.pCity')||'',
+  method:METHODS[localStorage.getItem('arki.pMethod')]?localStorage.getItem('arki.pMethod'):'MWL',
+  adhan:localStorage.getItem('arki.pAdhan')!=='0'
+ };
+ if(!isFinite(store.lat)||!isFinite(store.lng)){store.lat=null;store.lng=null;}
+ const hasLoc=()=>store.lat!=null&&store.lng!=null;
+ const bootAt=Date.now();
+ let today=null, dayKey='', lastFired='', shownNext='';
+ const dayOf=d=>d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate();
+ function computeToday(){
+  const d=new Date(), k=dayOf(d);
+  if(!hasLoc()){today=null;dayKey=k;return;}
+  if(k===dayKey&&today)return;
+  const r=timesFor(d,store.lat,store.lng,store.method);
+  today={times:r.times,approx:r.approx};
+  dayKey=k;
+ }
+ function nextPrayer(){
+  if(!today)return null;
+  const now=Date.now();
+  for(const k of ORDER)if(today.times[k]&&today.times[k].getTime()>now)return {key:k,at:today.times[k]};
+  const tom=new Date();tom.setDate(tom.getDate()+1);
+  const f=timesFor(tom,store.lat,store.lng,store.method).times.fajr;
+  return f?{key:'fajr',at:f}:null;
+ }
+ // ---------- formatting ----------
+ const timeStr=d=>d?d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}):'—';
+ function countdown(ms){
+  const s=Math.max(0,Math.round(ms/1000)), h=Math.floor(s/3600), m=Math.floor(s%3600/60);
+  return h?h+'h '+String(m).padStart(2,'0')+'m':m?m+'m '+String(s%60).padStart(2,'0')+'s':s+'s';
+ }
+ let hijriFmt=null, hijriDone=false;
+ function hijri(){
+  const d=new Date();
+  if(!hijriDone){hijriDone=true;
+   for(const cal of ['islamic-umalqura','islamic','islamic-civil']){
+    try{const f=new Intl.DateTimeFormat('en-u-ca-'+cal,{day:'numeric',month:'long',year:'numeric'});
+     f.format(d);hijriFmt=f;break;}catch(e){}
+   }}
+  if(!hijriFmt)return '';
+  try{return '☪ '+hijriFmt.format(d);}catch(e){return '';}
+ }
+ const placeLabel=()=>store.city||(hasLoc()?store.lat.toFixed(2)+'°, '+store.lng.toFixed(2)+'°':'set location');
+ // ---------- adhan chime ----------
+ let actx=null;
+ function chime(){
+  try{
+   actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+   if(actx.state==='suspended')actx.resume();
+   const t0=actx.currentTime;
+   [[523.25,0],[659.25,.3],[783.99,.6],[659.25,.9]].forEach(([f,at])=>{
+    const o=actx.createOscillator(), g=actx.createGain();
+    o.type='sine';o.frequency.value=f;
+    g.gain.setValueAtTime(0,t0+at);
+    g.gain.linearRampToValueAtTime(.14,t0+at+.05);
+    g.gain.exponentialRampToValueAtTime(.0001,t0+at+1.9);
+    o.connect(g);g.connect(actx.destination);o.start(t0+at);o.stop(t0+at+2);
+   });
+  }catch(e){}
+ }
+ // browsers only let audio start after a gesture — arm it on the first one
+ addEventListener('pointerdown',()=>{try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume();}catch(e){}},{once:true});
+ function adhan(key){
+  log('🕌 '+NAMES[key]+' at '+timeStr(today.times[key]));
+  quip('🕌 '+NAMES[key]);
+  if(store.adhan)chime();
+ }
+ // ---------- rendering ----------
+ // the times read as one running line of text under the avatar; the sidebar panel
+ // is settings only (method, location, adhan) plus the first-run prompt
+ const toggleBtn=$('prayer'), panel=$('prayerpanel'), words=$('prayerText');
+ const TEXT_IDS=['pTimes','pNextText','pNextCount','pHijri'];
+ function setNeed(msg){$('pNeedMsg').textContent=msg||'';}
+ function renderPrayer(){
+  panel.hidden=!store.on;
+  toggleBtn.setAttribute('aria-pressed',String(store.on));
+  toggleBtn.title=store.on?'Muslim prayer times for your local area — click to turn off':'Muslim prayer times are off — click to turn on';
+  if(!store.on||!hasLoc()){
+   words.hidden=true;
+   for(const id of TEXT_IDS)$(id).textContent='';
+   if(!store.on)return;
+   $('pNeed').hidden=false;
+   if(!$('pNeedMsg').textContent)setNeed('Tell me where you are and I will show today\'s prayer times.');
+   $('pPlaceLabel').textContent=placeLabel();$('pNote').hidden=true;return;
+  }
+  computeToday();
+  const np=nextPrayer();
+  shownNext=np?np.key:'';
+  $('pNeed').hidden=true;
+  words.hidden=false;
+  $('pTimes').textContent=ROWS.map(k=>NAMES[k]+' '+timeStr(today.times[k])).join(' · ');
+  const nt=$('pNextText');
+  nt.textContent='';
+  if(np){
+   const who=document.createElement('b'),when=document.createElement('b');
+   who.textContent=NAMES[np.key];when.textContent=timeStr(np.at);
+   nt.append('Next ',who,' at ',when);
+   $('pNextCount').textContent=' · in '+countdown(np.at-Date.now());
+  }
+  $('pPlaceLabel').textContent=placeLabel();
+  $('pHijri').textContent=hijri();
+  const note=$('pNote');
+  note.hidden=!today.approx;
+  if(today.approx)note.textContent='Polar day or night — estimated from the nearest latitude where twilight occurs.';
+ }
+ // ---------- live tick: countdown + adhan ----------
+ function tick(){
+  if(!store.on||!hasLoc())return;
+  const d=new Date();
+  if(dayOf(d)!==dayKey){renderPrayer();return;}
+  computeToday();
+  const np=nextPrayer();
+  if(!np)return;
+  // when a prayer comes due, the whole card has to move together — the highlight,
+  // the name and the time as well as the countdown — or it keeps showing the
+  // prayer that just passed next to the countdown for the one that follows
+  if(np.key!==shownNext){renderPrayer();return;}
+  $('pNextCount').textContent=' · in '+countdown(np.at-Date.now());
+  if(!store.adhan||!today)return;
+  for(const k of ORDER){
+   const t=today.times[k];
+   if(!t)continue;
+   const id=k+'@'+t.getTime();
+   if(id!==lastFired&&t.getTime()>=bootAt&&d.getTime()-t.getTime()>=0&&d.getTime()-t.getTime()<60000){
+    lastFired=id;adhan(k);
+   }
+  }
+ }
+ // ---------- location ----------
+ function locate(){
+  if(!navigator.geolocation){setNeed('This browser cannot read a location — enter a city instead.');return;}
+  setNeed('Getting your location…');
+  navigator.geolocation.getCurrentPosition(
+   p=>{store.lat=p.coords.latitude;store.lng=p.coords.longitude;store.city='';
+    localStorage.setItem('arki.pLat',store.lat);localStorage.setItem('arki.pLng',store.lng);
+    localStorage.removeItem('arki.pCity');dayKey='';
+    log('🕌 prayer location → '+store.lat.toFixed(3)+', '+store.lng.toFixed(3));renderPrayer();
+    const np=nextPrayer();if(np)log('🕌 next: '+NAMES[np.key]+' at '+timeStr(np.at));},
+   err=>{setNeed(err&&err.code===1?'Location permission denied — enter a city by hand instead.':'Could not read your location — enter a city by hand instead.');},
+   {enableHighAccuracy:false,timeout:12000,maximumAge:600000});
+ }
+ async function setPlace(raw){
+  const q=String(raw||'').trim();
+  if(!q)return;
+  const coords=q.match(/^(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)$/);
+  if(coords){
+   store.lat=parseFloat(coords[1]);store.lng=parseFloat(coords[2]);store.city='';
+  }else{
+   setNeed('Looking up “'+q+'”…');
+   try{
+    const r=await fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&name='+encodeURIComponent(q));
+    const hit=((await r.json()).results||[])[0];
+    if(!hit)throw new Error('no match');
+    store.lat=hit.latitude;store.lng=hit.longitude;
+    store.city=hit.name+(hit.country_code?' · '+hit.country_code:'');
+   }catch(e){setNeed('I could not find “'+q+'” — try a nearby bigger city, or paste "lat,lng".');return;}
+  }
+  localStorage.setItem('arki.pLat',store.lat);localStorage.setItem('arki.pLng',store.lng);
+  store.city?localStorage.setItem('arki.pCity',store.city):localStorage.removeItem('arki.pCity');
+  dayKey='';today=null;
+  log('🕌 prayer location → '+placeLabel());
+  renderPrayer();
+ }
+ // ---------- the toggle ----------
+ function setPrayer(on){
+  store.on=on;localStorage.setItem('arki.prayer',on?'1':'0');
+  renderPrayer();
+  log('🕌 prayer times '+(on?'on':'off'));
+  if(on&&!hasLoc()&&!localStorage.getItem('arki.pAsked')){localStorage.setItem('arki.pAsked','1');locate();}
+ }
+ toggleBtn.addEventListener('click',()=>setPrayer(!store.on));
+ $('prayerOff').addEventListener('click',()=>setPrayer(false));
+ $('pGeo').addEventListener('click',locate);
+ $('pManual').addEventListener('click',()=>{const v=prompt('City for prayer times (or "lat,lng"):',store.city||'');if(v)setPlace(v);});
+ $('pPlace').addEventListener('click',()=>{const v=prompt('City for prayer times (or "lat,lng"):',store.city||'');if(v)setPlace(v);});
+ // ---------- method + adhan controls ----------
+ const sel=$('pMethod');
+ for(const k in METHODS){const o=document.createElement('option');o.value=k;o.textContent=METHODS[k].label;sel.appendChild(o);}
+ sel.value=store.method;
+ sel.addEventListener('change',()=>{store.method=sel.value;localStorage.setItem('arki.pMethod',store.method);
+  dayKey='';today=null;renderPrayer();log('🕌 method → '+METHODS[store.method].label);});
+ const adhanBtn=$('pAdhan');
+ const applyAdhan=()=>{adhanBtn.setAttribute('aria-pressed',String(store.adhan));adhanBtn.textContent=store.adhan?'🔔 Adhan on':'🔕 Adhan off';};
+ adhanBtn.addEventListener('click',()=>{store.adhan=!store.adhan;localStorage.setItem('arki.pAdhan',store.adhan?'1':'0');
+  applyAdhan();log('🕌 adhan chime '+(store.adhan?'on':'off'));});
+ // ---------- the tool Arki can call ----------
+ async function toolPrayerTimes(){
+  if(!store.on)return 'Prayer times are switched off right now — the user can turn them back on with the 🕌 Prayer times button.';
+  if(!hasLoc())return 'I need a location first — the user can set one in the 🕌 Prayer settings panel ("Use my location" or a city).';
+  computeToday();
+  const np=nextPrayer();
+  const list2=ROWS.filter(k=>k!=='sunrise').map(k=>NAMES[k]+' '+timeStr(today.times[k])).join(', ');
+  return 'Prayer times for today ('+METHODS[store.method].label+(store.city?', '+store.city:'')+', local time): '+list2+'.'
+   +(np?' Next is '+NAMES[np.key]+' at '+timeStr(np.at)+', in '+countdown(np.at-Date.now())+'.':'');
+ }
+ TOOL_IMPL.prayer_times=toolPrayerTimes;
+ // ---------- boot ----------
+ applyAdhan();
+ renderPrayer();
+ if(store.on&&!hasLoc()&&!localStorage.getItem('arki.pAsked')){localStorage.setItem('arki.pAsked','1');setTimeout(locate,800);}
+ setInterval(tick,1000);
+}
 // ---------- slash commands (work without a mic, and make the tools testable) ----------
 // bare=true lets the wake word run them without a slash, so "Arki, pause that" works
 function runCommand(text,bare){
@@ -1133,7 +1723,9 @@ let rec=null,voiceOn=false,awake=false,finalTxt='',interim='',awakeAt=0,silenceT
 let wakeWord=localStorage.getItem('arki.wake')||'Arki';
 function wakeRe(){try{return new RegExp('\\b'+wakeWord.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','i');}catch(e){return /arki/i;}}
 function setMicUI(on){const b=$('mic');b.setAttribute('aria-pressed',String(on));
- b.textContent=on?'🎤 Listening…':'🎤 Wake “'+wakeWord+'”';$('waverow').hidden=!on;}
+ b.classList.toggle('listening',on);
+ b.title=on?'Listening — say “'+wakeWord+'”':'Wake word — say “'+wakeWord+'” to pause or resume music, or speak a command';
+ $('waverow').hidden=!on;}
 function sayHeard(t){$('heard').textContent=t||'listening…';}
 function startVoice(){
  if(!SR){log('⚠ this browser has no SpeechRecognition (Chrome or Safari needed)');quip('no ears 😢');temp('annoyed',1.4);setMicUI(false);return;}
@@ -1148,7 +1740,7 @@ function startVoice(){
   if(now()<ignoreUntil){finalTxt='';interim='';return;}
   if(!awake){
    if(live.match(wakeRe())){awake=true;awakeAt=now();finalTxt=live.replace(wakeRe(),' ').trim();interim='';
-    log('🎤 wake word heard');beep(1180,.1,'triangle');quip('yes?');temp('listening',12);clearTimeout(silenceT);
+    log('🎤 wake word heard');play('blip');emote('curious',1.4);quip('yes?');temp('listening',12,true);clearTimeout(silenceT);
     silenceT=setTimeout(wakeToggle,1700);}
    else if(live.length<16)finalTxt='';
    return;
@@ -1190,6 +1782,7 @@ $('dockVol').value=media.vol;
 // ---------- boot ----------
 syncUI();
 log('Arki ready');
+setTimeout(greet,900);   // the character says hello before anything else happens
 addMsg('assistant','Hi! I\'m **Arki** 🟦 — your local squircle companion.\nEverything runs on *your* machine via Ollama. Ask me anything, drop an image on me to talk about it, or just poke me 👋\n\nI can also **play music right here** while we chat, and open sites like Gmail or YouTube for you. Hit 🎤 and say **“Arki”** to pause or resume the music hands-free. You can also type `/play lofi`, `/pause`, `/vol 40`, `/open gmail`.');
 showStarters();
 refreshComposer();
