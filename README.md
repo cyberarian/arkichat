@@ -16,11 +16,13 @@ node server.js      # 2. Arki (tidak perlu instalasi)
 open http://localhost:5177
 ```
 
-![Arki Chat di desktop, memutar lofi di sidebar sambil mengobrol](screenshots/desktop.png)
+![Tampilan Arki Chat di desktop dengan rail navigasi dan sidebar pendamping](screenshots/desktop.png)
 
 <p align="center">
   <img src="screenshots/mobile.png" width="300" alt="Arki Chat di ponsel">
 </p>
+
+![Halaman DigUp menampilkan 17 hasil pencarian nama file untuk “Whatsapp”](screenshots/digup.png)
 
 <p align="center">
   <img src="screenshots/about.png" width="620" alt="Halaman tentang Arki Chat">

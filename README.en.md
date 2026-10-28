@@ -22,11 +22,13 @@ node server.js      # 2. Arki (nothing to install)
 open http://localhost:5177
 ```
 
-![Arki Chat on desktop, playing lofi in the sidebar while it chats](screenshots/desktop.png)
+![Arki Chat desktop interface with its navigation rail and companion sidebar](screenshots/desktop.png)
 
 <p align="center">
   <img src="screenshots/mobile.png" width="300" alt="Arki Chat on a phone">
 </p>
+
+![DigUp showing filename search results and the local library](screenshots/digup.png)
 
 <p align="center">
   <img src="screenshots/about.png" width="620" alt="The Arki Chat about page">
@@ -176,12 +178,13 @@ npm install --prefix digup-js     # one dependency (fflate); Node 22.13+ for nod
 node server.js
 ```
 
-Open the **🔎 DigUp files** card in the sidebar, press **+ folder**, enter a folder path and let it
-index. Then ask Arki in chat, use the card's search field, or type `/find <what you remember>`.
+Open the standalone **DigUp** page from the magnifying-glass icon in the navigation rail, press
+**+ folder**, enter a folder path and let it index. Then ask Arki in chat, use the page's search
+field, or type `/find <what you remember>`.
 The `search_files` tool returns file names, paths, the matching page/moment/line and a snippet;
 clicking a result opens it with your default app. Choose **Search filenames only** to match any name, prefix, or extension across your indexed folders; this returns every filename match without ranking file contents. The same mode is available to Arki when it calls DigUp. Source code is opt-in per folder: select **Include source code in this folder** when adding a project, then use **Search source code**, `code:`, or the tool's `code` flag.
 
-The **folders** panel lists your search folders and lets you remove them from the index without deleting files. Use **update index** for changed files, or **rebuild entire index** in the folders panel after changing embedding models. Indexing progress and recoverable errors appear in the card; **Search details** explains the active search capabilities. Results include a snippet and full path. Press ↓ from the search field, use ↑/↓ to move between results, Enter to open, and Escape to return to the query.
+The **Your library** panel lists your search folders and lets you remove them from the index without deleting files. Use **update index** for changed files, or **rebuild entire index** in the folders panel after changing embedding models. Indexing progress and recoverable errors appear on the DigUp page; **Search details** explains the active search capabilities. Results include a snippet and full path. Press ↓ from the search field, use ↑/↓ to move between results, Enter to open, and Escape to return to the query.
 
 **Embeddings come from Ollama.** Pull the model once and Arki uses it on the next start:
 
