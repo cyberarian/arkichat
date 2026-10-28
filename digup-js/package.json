@@ -1,0 +1,11 @@
+{
+  "name": "digup-js",
+  "version": "0.1.0",
+  "description": "Search your files by what's in them: text, PDFs, images, audio, video and code. On-device, in Node.js.",
+  "type": "module",
+  "bin": { "digup": "src/cli.js" },
+  "engines": { "node": ">=22.13" },
+  "scripts": { "test": "node --test test/*.test.js" },
+  "dependencies": { "fflate": "^0.8.2" },
+  "license": "MIT"
+}

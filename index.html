@@ -58,6 +58,35 @@ main{display:flex;height:100vh;height:100dvh;overflow:hidden;background:var(--bg
 .railbtn[aria-current="page"],.railbtn[aria-expanded="true"]{color:var(--acc);background:var(--accsoft)}
 
 .workspace{flex:1;display:flex;min-width:0}
+.workspace.digup-active>.sidebar,.workspace.digup-active>.chat{display:none}
+.workspace:not(.digup-active)>.diguppage{display:none}
+.diguppage{flex:1;min-width:0;overflow:auto;padding:clamp(22px,4vw,56px);background:var(--bg)}
+.digup-page-inner{max-width:1180px;margin:0 auto}
+.digup-page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:26px}
+.digup-page-head h1{font-size:32px}
+.digup-page-head p{margin:8px 0 0;color:var(--mute)}
+.digup-page-grid{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:20px;align-items:start}
+.digup-search-pane,.digup-library-pane{min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:24px}
+.digup-search-pane h2,.digup-library-pane h2{font-size:16px;margin:0;font-weight:800}
+.digup-search-pane .dintro{margin:6px 0 20px;color:var(--mute)}
+.digup-search-pane .dsearch{display:flex;gap:10px}
+.digup-search-pane .dsearch input{flex:1;min-width:0;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font:inherit}
+.digup-search-pane .dsearch button{min-width:82px;background:var(--acc);color:#fff;border-color:var(--acc);font-weight:800}
+.digup-search-pane .dsearchopts{display:flex;gap:20px;flex-wrap:wrap;margin:12px 0 0}
+.digup-search-pane .dmeta{margin-top:9px}
+.digup-search-pane #digupResultMeta{margin-top:22px;color:var(--ink);font-weight:800}
+.digup-search-pane .dresults{display:grid;gap:8px;margin-top:12px;max-height:none;overflow:visible}
+.digup-library-pane .cardlab{justify-content:space-between;font-size:12px}
+.digup-library-pane .cardlab h2{color:var(--ink);letter-spacing:0;text-transform:none}
+.digup-library-pane .dmeta{margin:12px 0;color:var(--mute)}
+.digup-library-pane #digupProgress{width:100%;accent-color:var(--acc)}
+.digup-library-pane .dacts{gap:12px}
+.digup-library-pane .dfolders{border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
+.digup-library-pane #digupFolders[hidden]{display:none}
+.digup-library-pane #digupFolderForm{display:grid;gap:8px}
+.digup-library-pane #digupPath{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
+.digup-library-pane #digupSave,.digup-library-pane #digupRebuild{margin-top:10px}
+.tool-digup-open{margin-top:8px;color:var(--acc);font-weight:800}
 
 /* ---- sidebar ---- */
 .sidebar{flex:none;width:326px;border-right:1px solid var(--line);background:var(--bg);
@@ -149,6 +178,50 @@ button.mini.wake{padding:2px 8px;font-size:11.5px}
 .pneed .row{display:flex;gap:8px;flex-wrap:wrap}
 .pnote{margin-top:8px;font-size:11.5px;color:var(--mute);line-height:1.45}
 
+/* DigUp file search */
+.dsearch{display:flex;gap:6px;align-items:center}
+.dsearch input{flex:1;min-width:0;font:inherit;font-size:12.5px;padding:7px 10px;border-radius:10px;
+ border:1px solid var(--line);background:var(--panel2);color:var(--ink);outline:none}
+.dsearch input:focus{border-color:var(--acc)}
+.dsearch button{font-size:12px;padding:5px 10px}
+.dmeta{margin-top:8px;font-size:11.5px;color:var(--mute);line-height:1.45;overflow-wrap:anywhere}
+.dresults{margin-top:8px;display:flex;flex-direction:column;gap:4px;max-height:250px;overflow-y:auto}
+.drow{text-align:left;display:flex;flex-direction:column;gap:2px;padding:7px 9px;border-radius:10px;
+ border:1px solid transparent;background:transparent;width:100%}
+.drow:hover{background:var(--panel2);border-color:var(--line)}
+.dname{font-size:12.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.dsnip{font-size:11.5px;color:var(--mute);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;
+ -webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.dempty{font-size:11.5px;color:var(--mute);line-height:1.45}
+.dempty.bad{color:var(--bad)}
+.cardlab .dacts{margin-left:auto;display:flex;gap:10px}
+.cardlab .dacts .spclear{margin-left:0}
+
+.diguppanel .dintro{font-size:14px;line-height:1.5;margin:0 0 12px;color:var(--ink)}
+.diguppanel .dmeta,.diguppanel .dsnip,.diguppanel .dempty{font-size:13px}
+.diguppanel .dsearch input,.dfolders input[type=text]{font:inherit;font-size:16px;min-width:0;width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--ink)}
+.diguppanel .dacts{flex-wrap:wrap;justify-content:flex-end;gap:4px 10px}
+.diguppanel button{min-height:32px}
+.diguppanel :is(button,input,summary):focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+.diguppanel button:disabled{opacity:.5;cursor:wait}
+.dsearchopts{display:flex;flex-wrap:wrap;gap:0 14px}
+.dcheck{display:flex;align-items:center;gap:8px;font-size:13px;line-height:1.5;margin-top:10px}
+.dcheck input{accent-color:var(--acc);width:16px;height:16px;flex-shrink:0}
+.dnotice{margin-top:10px;font-size:13px;line-height:1.5;overflow-wrap:anywhere;color:var(--bad)}
+.ddetails{margin-top:10px;font-size:13px;color:var(--mute)}
+.ddetails summary{cursor:pointer;padding:4px 0}
+.dfolders{margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+.droots{list-style:none;padding:0;margin:10px 0}
+.droots li{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
+.droots span{flex:1;min-width:0;overflow-wrap:anywhere;font-size:13px}
+.dfolders form>label{display:block;font-size:14px;margin:10px 0 6px}
+.dfolders form>.dcheck{display:flex;font-size:13px}
+.dfolders button{margin-top:6px}
+.dpath{font-size:12px;color:var(--mute);overflow-wrap:anywhere}
+.diguppanel .drow{padding:10px 6px;gap:5px;color:var(--ink)}
+.diguppanel .dname{font-size:14px}
+#digupProgress{width:100%;height:6px;margin-top:10px;accent-color:var(--acc)}
+
 /* ---- chat column ---- */
 .chat{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0;background:var(--bg)}
 .topbar{flex:none;display:flex;align-items:center;gap:16px;padding:16px 24px;border-bottom:1px solid var(--line);flex-wrap:wrap}
@@ -161,6 +234,16 @@ button.mini.wake{padding:2px 8px;font-size:11.5px}
 .sub{color:var(--mute);margin:2px 0 0;font-size:13px}
 .actions{display:flex;align-items:center;gap:10px;margin-left:auto}
 .actions #new{background:var(--panel2)}
+/* backend switch — Ollama | llama.cpp, so the user picks where inference runs */
+.bkswitch{display:inline-flex;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:3px;gap:2px}
+.bkswitch .bk{border:0;background:transparent;padding:5px 11px;border-radius:9px;font-size:12.5px;
+ font-weight:600;color:var(--mute);line-height:1.2;white-space:nowrap;transition:background .15s,color .15s}
+.bkswitch .bk:hover:not([aria-pressed="true"]){color:var(--ink)}
+.bkswitch .bk[aria-pressed="true"]{background:var(--acc);color:#fff;font-weight:700}
+.bkswitch .bk.off{opacity:.42}
+.bkswitch .bk .dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-left:6px;
+ vertical-align:middle;background:var(--mute)}
+.bkswitch .bk.up .dot{background:var(--ok)}
 .controlpanel{flex:none;display:flex;gap:8px;align-items:center;flex-wrap:wrap;
  padding:12px 24px;border-bottom:1px solid var(--line);background:var(--panel)}
 .controlpanel button{font-size:13px;padding:6px 13px}
@@ -257,6 +340,10 @@ button.mini.wake{padding:2px 8px;font-size:11.5px}
  .composerwrap{padding:10px 16px 16px;position:sticky;bottom:0;background:var(--bg);z-index:4}
  .topbar,.controlpanel,.attach{padding-left:16px;padding-right:16px}
  .banner{margin:0 16px}
+ .workspace.digup-active{min-height:calc(100vh - 56px);min-height:calc(100dvh - 56px)}
+ .diguppage{padding:22px 16px}
+ .digup-page-grid{grid-template-columns:1fr}
+ .digup-library-pane{order:2}
 }
 @media(max-width:560px){
  .topbar{padding:12px 14px}.topbar h1{font-size:21px}.sub{display:none}
@@ -268,6 +355,12 @@ button.mini.wake{padding:2px 8px;font-size:11.5px}
  #model{max-width:150px}
  #main{width:120px;height:120px}
  .actions #new{padding:8px 12px}
+ .digup-page-head{margin-bottom:18px}
+ .digup-page-head h1{font-size:28px}
+ .digup-search-pane,.digup-library-pane{padding:17px;border-radius:16px}
+ .digup-search-pane .dsearch{align-items:stretch}
+ .digup-search-pane .dsearch input{padding:11px 12px}
+ .digup-search-pane .dsearch button{min-width:62px}
 }
 @media(max-height:720px) and (min-width:861px){#main{width:140px;height:140px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -298,6 +391,7 @@ button.mini.wake{padding:2px 8px;font-size:11.5px}
   <g fill="#17181D"><rect x="18.5" y="23" width="9" height="19" rx="4.5"/><rect x="36.5" y="23" width="9" height="19" rx="4.5"/></g>
  </svg></a>
  <button class="railbtn" id="navChat" aria-current="page" title="Chat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8z"/></svg></button>
+ <button class="railbtn" id="navDigup" title="DigUp" aria-label="DigUp"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg></button>
  <button class="railbtn" id="navControls" aria-expanded="false" aria-controls="chatControls" title="Chat controls"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9m4 0h3M4 17h3m4 0h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button>
  <button class="railbtn" id="theme" title="Toggle theme" aria-label="Toggle theme">🌙</button>
  <a class="railbtn" id="about" href="about.html" target="_blank" rel="noopener" title="About Arki Chat (opens in a new tab)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.01"/></svg></a>
@@ -386,12 +480,17 @@ button.mini.wake{padding:2px 8px;font-size:11.5px}
     </svg>
     <div class="brandtext">
      <h1>Arki Chat</h1>
-     <p class="sub">Your squircle companion, powered by local Ollama models.</p>
+     <p class="sub" id="sub">Your squircle companion, powered by local Ollama models.</p>
     </div>
    </div>
    <div class="actions">
     <button id="new">New chat</button>
-    <select id="model" aria-label="Ollama model"></select>
+    <div class="bkswitch" role="group" aria-label="Inference backend">
+     <button type="button" class="bk" data-bk="ollama" aria-pressed="true">Ollama</button>
+     <button type="button" class="bk" data-bk="llama.cpp" aria-pressed="false">llama.cpp</button>
+    </div>
+    <select id="model" aria-label="Chat model"></select>
+    <button id="llamaCtl" class="mini" hidden title="Start or stop the llama.cpp server for the chosen model"></button>
    </div>
   </header>
   <div class="tools controlpanel" id="chatControls" role="region" aria-label="Chat controls" hidden>
@@ -416,6 +515,33 @@ button.mini.wake{padding:2px 8px;font-size:11.5px}
   </div>
   <input type="file" id="fileInput" accept="image/*" multiple hidden>
  </div>
+ <section class="diguppage" id="diguppanel" aria-label="DigUp file search">
+  <div class="digup-page-inner">
+   <header class="digup-page-head"><div><h1>DigUp</h1><p>Search the folders you chose, by what a file says or by its name.</p></div></header>
+   <div class="digup-page-grid">
+    <section class="digup-search-pane" aria-labelledby="digupSearchTitle">
+     <h2 id="digupSearchTitle">Search your files</h2>
+     <p class="dintro" id="digupIntro">Find a passage, a document, or a piece of code in folders you choose.</p>
+     <div class="dsearch"><input id="digupQ" type="search" placeholder="Describe the file…" autocomplete="off" aria-label="Search your files" aria-describedby="digupSearchHelp"><button id="digupFind" title="Search your files">Search</button></div>
+     <div class="dsearchopts"><label class="dcheck"><input type="checkbox" id="digupCode"> Search source code</label><label class="dcheck"><input type="checkbox" id="digupFilenames"> Search filenames only</label></div>
+     <div class="dmeta" id="digupSearchHelp">Try a topic or phrase. Turn on “Search filenames only” to match a name, prefix, or extension.</div>
+     <div class="dmeta" id="digupResultMeta" role="status" hidden></div>
+     <div class="dresults" id="digupResults" aria-label="Search results" hidden></div>
+    </section>
+    <aside class="digup-library-pane" aria-label="DigUp library and indexing">
+     <div class="cardlab"><h2>Your library</h2><span class="dacts"><button class="spclear" id="digupIndex" title="Read new and changed files">update index</button><button class="spclear" id="digupAdd" aria-expanded="false" aria-controls="digupFolders">+ folder</button></span></div>
+     <div class="dmeta" id="digupMeta" role="status">connecting…</div>
+     <progress id="digupProgress" aria-label="Indexing files" hidden></progress>
+     <div class="dnotice" id="digupNotice" role="status" hidden></div><button class="mini" id="digupRetry" hidden>retry connection</button>
+     <details id="digupDetails" class="ddetails"><summary>Search details</summary><div id="digupHint" class="dmeta"></div></details>
+     <div id="digupFolders" class="dfolders" hidden><p class="dmeta">Only folders you add are searched. Removing one from the index leaves your files untouched.</p><ul id="digupRoots" class="droots" aria-label="Search folders"></ul>
+      <form id="digupFolderForm"><label for="digupPath">Folder path</label><input id="digupPath" type="text" placeholder="~/Documents" required autocomplete="off" aria-describedby="digupPathHelp"><div id="digupPathHelp" class="dmeta">A folder on the computer running Arki.</div><label class="dcheck"><input id="digupIncludeCode" type="checkbox"> Include source code in this folder</label><button class="mini" id="digupSave" type="submit">add folder &amp; index</button></form>
+      <button class="mini" id="digupRebuild" type="button">rebuild entire index</button>
+     </div>
+    </aside>
+   </div>
+  </div>
+ </section>
 </div>
 </main>
 
@@ -424,9 +550,11 @@ button.mini.wake{padding:2px 8px;font-size:11.5px}
 (()=>{
 // Keep navigation independent of chat state: opening controls never resets a conversation.
 const navChat=document.getElementById('navChat');
+const navDigup=document.getElementById('navDigup');
 const navControls=document.getElementById('navControls');
 const chatControls=document.getElementById('chatControls');
 const navRail=navChat.closest('nav');
+const workspace=document.querySelector('.workspace');
 function showControls(open,keyboard=false){
  if(open!==!chatControls.hidden){if(open)play('open');else play('close');}
  navRail.classList.toggle('keyboard-nav',keyboard);
@@ -436,11 +564,34 @@ function showControls(open,keyboard=false){
  else navChat.setAttribute('aria-current','page');
  chatControls.hidden=!open;
 }
-navControls.addEventListener('click',event=>showControls(chatControls.hidden,event.detail===0));
+navControls.addEventListener('click',event=>{
+ if(workspace.classList.contains('digup-active')){
+  workspace.classList.remove('digup-active');navDigup.removeAttribute('aria-current');
+ }
+ showControls(chatControls.hidden,event.detail===0);
+});
 navChat.addEventListener('click',event=>{
+ workspace.classList.remove('digup-active');
+ navDigup.removeAttribute('aria-current');
  showControls(false,event.detail===0);
  document.querySelector('textarea').focus({preventScroll:true});
 });
+function showDigup(open,query){
+ workspace.classList.toggle('digup-active',open);
+ if(open){
+  showControls(false);
+  navChat.removeAttribute('aria-current');navDigup.setAttribute('aria-current','page');
+  digupLoad();
+  if(query){
+   $('digupQ').value=query.query;
+   $('digupCode').checked=!!query.code;$('digupFilenames').checked=!!query.filenames;
+   $('digupQ').placeholder=query.filenames?'Enter a name, prefix, or extension…':'Describe the file…';
+   digupSearch(query.query,query.code,query.filenames);
+  }
+  if(!query)setTimeout(()=>$('digupQ').focus({preventScroll:true}),0);
+ }else navDigup.removeAttribute('aria-current');
+}
+navDigup.addEventListener('click',event=>showDigup(true,null));
 chatControls.addEventListener('keydown',event=>{
  if(event.key==='Escape'){showControls(false,true);navControls.focus();}
 });
@@ -875,12 +1026,26 @@ function greet(){
 
 /* ================= Ollama chat ================= */
 const SYSTEM='You are Arki, a cute and friendly squircle companion who lives on the user\'s screen. Be helpful, concise and warm. Use markdown when it helps (code blocks for code, bold for emphasis).\n'+
-'You can ACT on the user\'s computer by calling tools. Always call a tool instead of only describing it when the user asks to play music, pause or skip it, change the volume, open a website/app (gmail, youtube, spotify, github, drive, maps…), or launch any installed program by name (LibreOffice, VLC, VS Code…). '+
+'You can ACT on the user\'s computer by calling tools. Always call a tool instead of only describing it when the user asks to play music, pause or skip it, change the volume, open a website/app (gmail, youtube, spotify, github, drive, maps…), launch any installed program by name (LibreOffice, VLC, VS Code…), or find something in their own files. When a question may be answered by their documents, notes, recordings or code, call search_files before answering. '+
 'After a tool runs, confirm briefly in one sentence what you did — never paste raw URLs the user did not ask for.\n'+
-'Never pause, resume, skip or change the volume unless the user explicitly asked for it. If they just asked for music, leave it playing.\n'+
+'Never pause, resume, skip or change the volume unless the user explicitly asked for it. When they just asked for music, leave it playing.\n'+
 'Wake word: the user may talk to you hands-free. When they say “Arki” on its own, that pauses or resumes their music; when they say “Arki” plus a request, treat the rest as the request.';
 const DEF_MODEL='qwen3.5:2b';
 let models=[],model=localStorage.getItem('arki.model')||'';
+// Which inference backend the user prefers: 'ollama' | 'llama.cpp'. This is the
+// single source of truth for the preference — the toggle in the top bar sets
+// it, the model picker lists only that backend's models, and every chat
+// request carries it so the server routes accordingly.
+let backend=localStorage.getItem('arki.backend')||'ollama';
+// reachability per backend, and the GGUF catalog llama.cpp can serve
+let backendUp={ollama:false,'llama.cpp':false};
+let llamaModels=[],llamaRunning=false,llamaCurrent='',llamaBusy=false;
+const BK_LABEL={'ollama':'Ollama','llama.cpp':'llama.cpp'};
+const BK_HINT={
+ 'ollama':'Ollama serves your local models — pick one and it just works.',
+ 'llama.cpp':'llama.cpp runs a GGUF directly. Pick a model and Arki starts the server for it.',
+};
+function modelsFor(bk){return models.filter(m=>(m.backend||(m.details&&m.details.backend)||'ollama')===bk);}
 let history=[],generating=false,ctrl=null,lastUserImgs=[],toolNotes=[];
 const msgs=$('msgs'),input=$('input'),sendBtn=$('send');
 // never split a user/assistant pair, and never ship client-only fields to Ollama
@@ -893,25 +1058,192 @@ function buildMessages(){
  return [...sys,...h.map(m=>({role:m.role,content:m.content,...(m.images&&m.images.length?{images:m.images}:{})}))];
 }
 
-function setOnline(v,msg){online=v;$('dot').className=v?'':'off';$('dot').title=v?'Ollama connected':'Ollama offline';
- $('miniLabel').textContent=v?'Ollama online':'Ollama offline';
- $('banner').classList.toggle('on',!v);if(msg)log(msg);}
+// ---- status: the notch, the banner and the subtitle all follow the backend ----
+// The user's choice drives the wording, so "Ollama online" never shows while
+// llama.cpp is the one actually serving the conversation.
+function backendOnline(){return !!backendUp[backend];}
+function setOnline(v,msg){
+ online=v;
+ const dot=$('dot'),mini=$('miniLabel'),notch=$('notch');
+ const label=BK_LABEL[backend];
+ dot.className=v?'':'off';
+ dot.title=v?(label+' is running'):(label+' is not reachable');
+ mini.textContent=v?(label+' online'):(label+' offline');
+ notch.title=label;
+ $('sub').textContent='Your squircle companion, powered by local '+label+' models.';
+ $('banner').classList.toggle('on',!v);
+ if(!v)$('banner').innerHTML=BK_BANNER[backend];
+ if(msg)log(msg);
+}
+const BK_BANNER={
+ 'ollama':'Can\'t reach Ollama — start it with <code>ollama serve</code> (retrying every 5s…)',
+ 'llama.cpp':'llama.cpp isn\'t serving yet — pick a GGUF above and press <code>start</code> (or run <code>llama-server -m model.gguf</code>).',
+};
+
 async function loadModels(){
  try{
-  const r=await fetch('/api/tags');if(!r.ok)throw new Error('HTTP '+r.status);
-  const j=await r.json();
-  models=(j.models||[]).filter(m=>!m.details||!m.details.capabilities||m.details.capabilities.includes('completion'));
-  if(!models.length){setOnline(false,'no chat models found — try `ollama pull '+DEF_MODEL+'`');return;}
-  models.sort((a,b)=>(a.model===DEF_MODEL?-1:b.model===DEF_MODEL?1:a.model.localeCompare(b.model)));
-  const sel=$('model');sel.innerHTML='';
-  models.forEach(m=>{const caps=(m.details&&m.details.capabilities)||[];
-   const o=document.createElement('option');o.value=m.model;o.textContent=m.model+(caps.includes('vision')?'  📷':'');sel.appendChild(o);});
-  if(!models.find(m=>m.model===model))model=models[0].model;
-  sel.value=model;localStorage.setItem('arki.model',model);
-  setOnline(true,'ollama connected — '+models.length+' chat model(s)');
- }catch(e){setOnline(false,'ollama unreachable — run `ollama serve`');}
+  let j=null;
+  try{
+   const r=await fetch('/api/models');
+   if(r.ok){const t=await r.json();if(t&&Array.isArray(t.models))j=t;}
+  }catch(e){/* ignore */}
+  if(!j){
+   const r=await fetch('/api/tags');if(!r.ok)throw new Error('HTTP '+r.status);
+   j=await r.json();
+  }
+  models=(j.models||[]).filter(m=>{
+   const caps=(m.details&&m.details.capabilities)||[];
+   if(caps.length && !caps.includes('completion'))return false;
+   return true;
+  });
+  // reachability comes from the server's own probe of each backend, so a
+  // backend that is up but has no models yet still counts as up
+  try{
+   const r=await fetch('/api/inference/status');
+   if(r.ok){const s=await r.json();
+    backendUp.ollama=!!(s.ollama&&s.ollama.ok);
+    backendUp['llama.cpp']=!!(s.llama_cpp&&s.llama_cpp.ok);
+   }
+  }catch(e){/* keep whatever we had */}
+  // the GGUF catalog: what llama.cpp could serve, and what it serves now
+  try{
+   const r=await fetch('/api/llama/models');
+   if(r.ok){const s=await r.json();
+    llamaModels=s.models||[];llamaRunning=!!s.running;llamaCurrent=s.current||'';
+    if(s.served&&s.served.length)backendUp['llama.cpp']=true;
+   }
+  }catch(e){/* ignore */}
+  renderModels();
+  // the banner reflects the backend the user actually chose
+  if(backendOnline()){setOnline(true);log('connected — '+BK_LABEL[backend]+' · '+(modelsFor(backend).length||llamaModels.length)+' model(s)');clearInterval(selfHeal);}
+   else{
+    const have=backend==='ollama'?modelsFor('ollama').length:llamaModels.length;
+    setOnline(false,'inference backends unreachable — check '+BK_LABEL[backend]);
+    if(have)log(BK_LABEL[backend]+' has '+have+' model(s) available');
+    scheduleRetries();
+   }  }catch(e){setOnline(false,'inference backends unreachable — check '+BK_LABEL[backend]);renderModels();}
 }
-$('model').addEventListener('change',e=>{model=e.target.value;localStorage.setItem('arki.model',model);log('model → '+model);});
+// While a backend is down, re-probe it every few seconds: llama.cpp warms up
+// in the background after a restart, and the banner should disappear on its
+// own the moment the model is serving, without a page reload.
+let selfHeal=0;
+function scheduleRetries(){
+ clearInterval(selfHeal);
+ selfHeal=setInterval(async ()=>{
+  if(backendOnline())return clearInterval(selfHeal);
+  try{
+   const r=await fetch('/api/inference/status');
+   if(!r.ok)return;
+   const s=await r.json();
+   backendUp.ollama=!!(s.ollama&&s.ollama.ok);
+   backendUp['llama.cpp']=!!(s.llama_cpp&&s.llama_cpp.ok);
+   if(backendOnline()){try{await loadModels();}catch(e){/* already handled */}return;}
+   renderModels();
+  }catch(e){/* server itself may still be coming up */}
+ },5000);
+}
+$('model').addEventListener('change',e=>{
+ model=e.target.value;localStorage.setItem('arki.model',model);
+ log('model → '+model);
+ renderLlamaCtl();
+});
+
+// ---- backend switch (Ollama | llama.cpp) ----
+// The picker only lists models of the chosen backend, so the choice is obvious:
+// you pick the engine first, then the model inside it. A backend with no models
+// shows a disabled button rather than vanishing, so you can always see both exist.
+function renderModels(){
+ const sel=$('model');sel.innerHTML='';
+ const isLlama=backend==='llama.cpp';
+ const list=isLlama
+  ? llamaModels.map(m=>({model:m.name,name:m.name,details:{size:m.size},active:m.active}))
+  : modelsFor('ollama');
+ list.sort((a,b)=>(a.model===DEF_MODEL?-1:b.model===DEF_MODEL?1:a.model.localeCompare(b.model)));
+ if(!list.length){
+  const o=document.createElement('option');
+  o.textContent=backendUp[backend]?'no chat models — pull one for '+BK_LABEL[backend]:BK_LABEL[backend]+' not running';
+  o.value='';sel.appendChild(o);sel.disabled=true;
+ }else{
+  sel.disabled=false;
+  list.forEach(m=>{
+   const caps=(m.details&&m.details.capabilities)||[];
+   const o=document.createElement('option');
+   o.value=m.model;
+   o.textContent=m.model+(caps.includes('vision')?'  📷':'')+(m.active?'  ✓':'');
+   sel.appendChild(o);
+  });
+  if(!list.find(m=>m.model===model))model=list[0].model;
+  sel.value=model;localStorage.setItem('arki.model',model);
+ }
+ // the two backend buttons: pressed = selected, .up = reachable
+ document.querySelectorAll('.bkswitch .bk').forEach(b=>{
+  const bk=b.dataset.bk;
+  b.setAttribute('aria-pressed',String(bk===backend));
+  b.classList.toggle('off',!backendUp[bk]);
+  b.classList.toggle('up',!!backendUp[bk]);
+  let dot=b.querySelector('.dot');
+  if(!dot){dot=document.createElement('i');dot.className='dot';b.appendChild(dot);}
+  dot.title=backendUp[bk]?(BK_LABEL[bk]+' is running'):(BK_LABEL[bk]+' is not reachable');
+ });
+ renderLlamaCtl();
+}
+// The llama.cpp button starts the server on the chosen GGUF, and stops it
+// again — the two states are the only ones the user cares about.
+function renderLlamaCtl(){
+ const btn=$('llamaCtl');
+ if(backend!=='llama.cpp'){btn.hidden=true;return;}
+ btn.hidden=false;
+ if(llamaBusy){btn.textContent='starting…';btn.disabled=true;return;}
+ btn.disabled=false;
+ const active=llamaModels.find(m=>m.name===model);
+ if(active&&active.active){btn.textContent='stop llama.cpp';btn.title='Stop the llama.cpp server';}
+ else{btn.textContent='start llama.cpp';btn.title='Start llama-server on '+model;}
+}
+async function toggleLlama(){
+ const active=llamaModels.find(m=>m.name===model);
+ if(active&&active.active){
+  try{
+   const r=await fetch('/api/llama/stop',{method:'POST'});
+   if(!r.ok)throw new Error('HTTP '+r.status);
+   log('llama.cpp → stopped');
+  }catch(e){log('⚠ could not stop llama.cpp: '+e.message);}
+  llamaRunning=false;llamaCurrent='';
+ }else{
+  if(!model){log('⚠ pick a llama.cpp model first');return;}
+  llamaBusy=true;renderLlamaCtl();
+  log('llama.cpp → starting '+model+'…');
+  try{
+   const r=await fetch('/api/llama/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model})});
+   const j=await r.json().catch(()=>({}));
+   if(!r.ok||!j.ok)throw new Error(j.error||('HTTP '+r.status));
+   log('llama.cpp → '+model+' ready');
+   llamaRunning=true;llamaCurrent=model;
+   backendUp['llama.cpp']=true;
+  }catch(e){log('⚠ llama.cpp failed to start: '+e.message);}
+  llamaBusy=false;
+ }
+ await loadModels();
+ setOnline(backendOnline());
+}
+$('llamaCtl').addEventListener('click',toggleLlama);
+document.querySelectorAll('.bkswitch .bk').forEach(b=>{
+ b.addEventListener('click',()=>{
+  const bk=b.dataset.bk;
+  if(bk===backend)return;
+  backend=bk;localStorage.setItem('arki.backend',bk);
+  // each backend keeps its own model so switching back and forth is painless
+  const saved=localStorage.getItem('arki.model.'+bk);
+  if(saved)model=saved;
+  renderModels();
+  localStorage.setItem('arki.model.'+bk,model);
+  log('backend → '+BK_LABEL[bk]+' ('+(backend==='llama.cpp'?llamaModels.length:modelsFor('ollama').length)+' model(s))');
+  setOnline(backendOnline());
+ });
+});
+$('model').addEventListener('change',()=>{
+ if(backend)localStorage.setItem('arki.model.'+backend,model);
+});
+
 // thinking-capable models can spend hundreds of tokens reasoning and answer nothing,
 // so reasoning is opt-in: `think:false` makes replies fast and reliable
 let thinkMode=localStorage.getItem('arki.think')==='1';
@@ -943,7 +1275,7 @@ async function loadLocalApps(){
   if(localApps.length)log('local apps → '+localApps.map(a=>a.label).join(', '));
  }catch(e){localApps=[];}
 }
-loadLocalApps();
+loadLocalApps().then(loadCliAnything);
 
 // ---------- markdown-lite ----------
 function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
@@ -995,7 +1327,7 @@ const STARTERS=[['What can you do?','What can you do? What are you good at?'],
  ['Explain simply','Explain retrieval-augmented generation in simple words.'],
  ['Write code','Write a JavaScript function that debounces another function, with brief comments.'],
  ['Be playful','Say something delightful about being a squircle.']];
-const STARTER_CMDS=[['/play','lofi hip hop'],['/pause',''],['/vol','40'],['/open','gmail']];
+const STARTER_CMDS=[['/play','lofi hip hop'],['/pause',''],['/vol','40'],['/open','gmail'],['/find','lease pets']];
 function showStarters(){
  removeStarters();const box=document.createElement('div');box.className='starters';box.id='starters';
  const row=document.createElement('div');row.className='row';
@@ -1020,7 +1352,7 @@ function refreshComposer(){sendBtn.textContent=generating?'■ Stop':'Send';send
 let streamPhase='thinking',bubbleFinal=false;
 // one model turn: streams text into the bubble and reports any tool_calls it wants
 async function streamTurn(messages,useTools){
- const body={model,think:thinkMode,stream:true,options:{temperature:.7},messages};
+ const body={model,think:thinkMode,stream:true,options:{temperature:.7},messages,backend};
  if(useTools)body.tools=TOOLS;
  const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},signal:ctrl.signal,body:JSON.stringify(body)});
  if(!res.ok){
@@ -1109,10 +1441,16 @@ async function send(){
     try{ summary=await execTool(name,args); }
     catch(e){ summary='Tool error: '+e.message;card.classList.add('bad');log('⚠ tool '+name+': '+e.message);}
     card.querySelector('.toolres').textContent=summary;card.classList.remove('run');
+    if(name==='search_files'&&summary.startsWith('Found ')){
+     const open=document.createElement('button');open.type='button';open.className='mini tool-digup-open';open.textContent='Open results in DigUp';
+     open.addEventListener('click',()=>showDigup(true,{query:String(args.query||'').trim(),code:args.code===true||/^code:\s*/i.test(String(args.query||'')),filenames:args.filenames===true}));
+     card.appendChild(open);
+    }
     log('⚙ '+name+' → '+summary);
     toolNotes.push(name+'('+Object.entries(args).map(([k,v])=>k+'="'+v+'"').join(', ')+') → '+summary);
     if(toolNotes.length>6)toolNotes.shift();
-    results.push({role:'tool',content:summary});
+    // tool_call_id keeps the pairing intact on the OpenAI-compatible side
+    results.push({role:'tool',content:summary,...(c.id?{tool_call_id:c.id}:{})});
    }
    convo=[...convo,{role:'assistant',content:r.full||'',tool_calls:r.calls},...results];
    setState('working','arki: acting on it');
@@ -1177,9 +1515,28 @@ const TOOLS=[
  {type:'function',function:{name:'control_music',description:'Pause, resume, stop or skip what is currently playing in the page. ONLY call this when the user explicitly asks to pause, resume, stop or skip — never on your own.',parameters:{type:'object',properties:{action:{type:'string',enum:['pause','resume','stop','next']}},required:['action']}}},
  {type:'function',function:{name:'set_volume',description:'Set the volume of the in-page music player, 0 to 100. ONLY call this when the user explicitly mentions loudness or volume.',parameters:{type:'object',properties:{level:{type:'integer',minimum:0,maximum:100}},required:['level']}}},
  {type:'function',function:{name:'open_app',description:openAppDesc(),parameters:{type:'object',properties:{name:{type:'string',description:'app name such as gmail, a desktop program such as vlc, or a full url'}},required:['name']}}},
- {type:'function',function:{name:'prayer_times',description:'Give today\'s five Islamic prayer times (Fajr, Dhuhr, Asr, Maghrib, Isha) and sunrise for the place the user saved in the prayer-times panel, plus how long until the next one. Use this whenever the user asks about prayer times, salah, namaz, or when the next prayer is.',parameters:{type:'object',properties:{}}}}
+ {type:'function',function:{name:'prayer_times',description:'Give today\'s five Islamic prayer times (Fajr, Dhuhr, Asr, Maghrib, Isha) and sunrise for the place the user saved in the prayer-times panel, plus how long until the next one. Use this whenever the user asks about prayer times, salah, namaz, or when the next prayer is.',parameters:{type:'object',properties:{}}}},
+ {type:'function',function:{name:'search_files',description:'Search the user\'s local DigUp index. Search file contents by natural language, or search filenames by setting filenames=true and using the name, prefix, extension, or other text to match. Preserve requested filename constraints. Set code=true (or start with code:) for source code contents.',parameters:{type:'object',properties:{query:{type:'string',description:'natural-language description of file contents, or the name, prefix, extension, or other text to match when filenames=true'},code:{type:'boolean',description:'search source code contents'},filenames:{type:'boolean',description:'match the query against filenames only; use for filename, prefix, suffix, or extension requests'}},required:['query']}}}
 ];
-const T_ICONS={play_music:'🎵',control_music:'⏯',set_volume:'🔊',open_app:'🚀',prayer_times:'🕌'};
+let cliAnythingApps=[];
+function cliAnythingDesc(){
+ const names=cliAnythingApps.map(a=>a.id).join(', ');
+ return 'Run a locally installed CLI-Anything app harness. Installed harnesses: '+names+'. Start with args ["--help"] if you need its commands, then pass command tokens as separate args. Use only when the user asks to perform an action in one of these apps; do not use a shell.';
+}
+async function loadCliAnything(){
+ try{
+  const r=await fetch('/api/cli-anything');if(!r.ok)throw new Error('HTTP '+r.status);
+  const j=await r.json();cliAnythingApps=j.apps||[];
+  const existing=TOOLS.find(t=>t.function.name==='cli_anything');
+  if(!cliAnythingApps.length){if(existing)TOOLS.splice(TOOLS.indexOf(existing),1);return;}
+  const tool=existing||{type:'function',function:{name:'cli_anything',parameters:{type:'object'}}};
+  tool.function.description=cliAnythingDesc();
+  tool.function.parameters={type:'object',properties:{app:{type:'string',enum:cliAnythingApps.map(a=>a.id),description:'Installed CLI-Anything harness to run'},args:{type:'array',items:{type:'string',maxLength:4096},maxItems:64,description:'Command and arguments, each as a separate string; use ["--help"] to inspect available actions'}},required:['app','args']};
+  if(!existing)TOOLS.push(tool);
+  log('CLI-Anything → '+cliAnythingApps.map(a=>a.id).join(', '));
+ }catch(e){cliAnythingApps=[];}
+}
+const T_ICONS={play_music:'🎵',control_music:'⏯',set_volume:'🔊',open_app:'🚀',prayer_times:'🕌',search_files:'🔎',cli_anything:'🧰'};
 const APPS={
  gmail:'https://mail.google.com/',mail:'https://mail.google.com/',email:'https://mail.google.com/',
  youtube:'https://www.youtube.com/',yt:'https://www.youtube.com/',spotify:'https://open.spotify.com/',
@@ -1350,6 +1707,19 @@ async function launchLocal(name){
  if(j.ok)return {ok:true,msg:j.message||('Launched '+name+'.')};
  return {ok:false,msg:(j.reason==='invalid')?'':(j.message||'')};
 }
+async function toolCliAnything(args){
+ const app=String(args.app||'');
+ if(!cliAnythingApps.some(a=>a.id===app))throw new Error('that CLI-Anything harness is not installed');
+ if(!Array.isArray(args.args))throw new Error('args must be an array of command arguments');
+ let j;
+ try{
+  const r=await fetch('/api/cli-anything/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({app,args:args.args})});
+  j=await r.json();
+ }catch(e){throw new Error('the server did not answer — is `node server.js` still running?');}
+ const out=[j.stdout,j.stderr].filter(Boolean).join('\n').trim();
+ if(j.error)throw new Error(j.error);
+ return (j.ok?'':'Command exited with '+j.code+'. ')+(out||'Command completed without output.')+(j.truncated?'\n[output truncated]':'');
+}
 async function toolOpenApp(args){
  const name=String(args.name||'').trim();
  if(!name)throw new Error('name is required — an app name or a url');
@@ -1373,7 +1743,7 @@ async function toolOpenApp(args){
  window.open('https://duckduckgo.com/?q='+encodeURIComponent(name),'_blank','noopener');
  return (why?why:'I did not recognise “'+name+'”')+', so I searched the web for it instead.';
 }
-const TOOL_IMPL={play_music:toolPlayMusic,control_music:toolControlMusic,set_volume:toolSetVolume,open_app:toolOpenApp};
+const TOOL_IMPL={play_music:toolPlayMusic,control_music:toolControlMusic,set_volume:toolSetVolume,open_app:toolOpenApp,search_files:toolSearchFiles,cli_anything:toolCliAnything};
 async function execTool(name,args){const f=TOOL_IMPL[name];if(!f)throw new Error('unknown tool “'+name+'”');return f(args||{});}
 // ---------- tool-call cards (sidebar, so the transcript stays a conversation) ----------
 const TOOL_MAX=8;
@@ -1397,6 +1767,220 @@ function addToolCard(name,args,ok,summary){
 function updateToolPanel(){const b=$('toolbox');$('toolpanel').hidden=!b.children.length;}
 $('toolClear').addEventListener('click',()=>{$('toolbox').innerHTML='';updateToolPanel();log('tool activity cleared');});
 $('logClear').addEventListener('click',()=>{$('log').innerHTML='';});
+
+/* ================= DigUp — search your own files, on-device =================
+   The server keeps one SQLite index and asks digup-js for hybrid (vector +
+   keyword) hits. This workspace runs the same search as the `search_files` tool, so
+   what Arki sees and what you see are the same list. Nothing leaves the machine. */
+const digup={ok:false,roots:[],files:0,chunks:0,indexing:false,rebuilding:false,lexical:false,embedder:null,media:false,pendingMedia:0};
+let digupTimer=null,digupWasIndexing=false,digupError='',digupSearchVersion=0,digupSaving=false;
+async function digupFetch(url,opts){
+ const r=await fetch(url,{...opts,signal:AbortSignal.timeout(30000)});
+ let j={};try{j=await r.json();}catch(e){}
+ if(!r.ok||j.ok===false)throw new Error(j.error||('HTTP '+r.status));
+ return j;
+}
+function digupNotice(message,retry=false){
+ $('digupNotice').textContent=message;$('digupNotice').hidden=!message;
+ $('digupRetry').hidden=!retry;
+}
+function digupFolderList(){
+ const list=$('digupRoots');list.innerHTML='';
+ digup.roots.forEach(root=>{
+  const li=document.createElement('li'),name=document.createElement('span'),button=document.createElement('button');
+  name.textContent=root.path+(root.code?' · source code included':'');
+  button.type='button';button.className='mini';button.textContent='remove';button.disabled=digup.indexing||digupSaving;
+  button.setAttribute('aria-label','Remove '+root.path+' from index');
+  button.onclick=()=>digupRemoveFolder(root.path);li.append(name,button);list.appendChild(li);
+ });
+}
+function digupMeta(j){
+ const bits=[];
+ if(!digup.roots.length)bits.push('no folders yet — + folder to begin');
+ else bits.push(digup.roots.length+(digup.roots.length===1?' folder':' folders'));
+ if(digup.files)bits.push(digup.files+(digup.files===1?' file':' files'));
+ if(digup.chunks)bits.push(digup.chunks+(digup.chunks===1?' passage':' passages'));
+ if(digup.lexical)bits.push('keyword search');
+ else if(digup.embedder)bits.push(digup.embedder.replace(/^ollama:/,''));
+ if(digup.media&&digup.pendingMedia)bits.push(digup.pendingMedia+' images/audio need semantic indexing');
+ if(j&&j.mediaError)bits.push('media embeddings unavailable');
+ if(j&&j.setup===false)bits.push('setup needed');
+ if(j&&j.modelReady===false)bits.push('model mismatch — reindex');
+ const ix=j&&j.indexing;
+ if(ix&&ix.indexing){
+  const activity=String(ix.last||'').replace(/^\[(\d+)\/(\d+)\]\s*/, '').replace(/^indexing /, '');
+  const phase=ix.phase==='finishing'?'finishing':'indexing';
+  bits.push(phase+(ix.total?' '+ix.done+'/'+ix.total:'')+(activity?' · '+activity:'…'));
+ }
+ else if(ix&&ix.phase==='error')bits.push('index error');
+ const el=$('digupMeta');el.textContent=bits.join(' · ');
+ const folders=digup.roots.length?'Folders:\n'+digup.roots.map(r=>r.path+(r.code?'  (code)':'')).join('\n')+'\n\n':'';
+ el.title=folders+((j&&j.hint)||'On-device index from the bundled digup-js engine.');
+ $('digupIntro').textContent=digup.roots.length?'Search the contents of your chosen folders.':'Add a folder to start. Your files stay on this computer.';
+ $('digupAdd').textContent=digup.roots.length?'folders ('+digup.roots.length+')':'+ folder';
+ $('digupIndex').disabled=digup.indexing||!digup.roots.length||digupSaving;
+ $('digupIndex').textContent=digup.indexing?'indexing…':'update index';
+ $('digupRebuild').disabled=digup.indexing||!digup.roots.length||digupSaving;
+ $('digupSave').disabled=digup.indexing||digupSaving;
+ const progress=$('digupProgress');progress.hidden=!digup.indexing;
+ if(ix&&ix.total){progress.max=ix.total;progress.value=ix.done||0;}else progress.removeAttribute('value');
+ if(j){
+  $('digupHint').textContent=(j.hint||'Search combines meaning and exact words.')+(j.media?' Media embeddings enabled.':' Image and audio understanding is not enabled.')+(j.pendingMedia?' '+j.pendingMedia+' images or audio files need an index update for semantic search.':'')+(j.pending?' '+j.pending+' files waiting for a later pass.':'');
+  if(j.setup===false||j.modelReady===false){$('digupDetails').open=true;digupNotice(j.modelReady===false?'The embedding model changed. Rebuild the index in folders to search again.':j.hint||'DigUp setup is incomplete. Check Search details.');}
+  else if(ix&&ix.error)digupNotice('Indexing failed: '+ix.error+' Try updating the index again.');
+ }
+ digupFolderList();
+}
+async function digupLoad(){
+ try{
+  const j=await digupFetch('/api/digup');
+  digup.ok=true;digupNotice('');
+  digup.roots=j.roots||[];digup.files=j.files||0;digup.chunks=j.chunks||0;
+  digup.embedder=j.embedder||null;
+  digup.media=!!j.media;digup.pendingMedia=j.pendingMedia||0;
+  digup.lexical=!!j.lexical;digup.indexing=!!(j.indexing&&j.indexing.indexing);if(!digup.indexing)digup.rebuilding=false;
+  $('diguppanel').hidden=false;
+  digupMeta(j);
+  if(digup.indexing)digupWatch();
+  return j;
+ }catch(e){
+  digup.ok=false;$('diguppanel').hidden=false;digupNotice('DigUp could not connect: '+e.message,true);$('digupMeta').textContent='Connection unavailable';
+  digupError=e.message;log('🔎 DigUp unavailable — '+e.message);
+  return null;
+ }
+}
+async function digupPoll(){
+ let j=null;
+ try{j=await digupFetch('/api/digup');}catch(e){digupNotice('Could not refresh indexing progress: '+e.message+' Retrying…',true);digupTimer=setTimeout(digupPoll,4000);return;}
+ digupNotice('');
+ digup.roots=j.roots||[];digup.files=j.files||0;digup.chunks=j.chunks||0;
+ digup.embedder=j.embedder||null;digup.lexical=!!j.lexical;
+ digup.media=!!j.media;digup.pendingMedia=j.pendingMedia||0;
+ digup.indexing=!!(j.indexing&&j.indexing.indexing);if(!digup.indexing)digup.rebuilding=false;
+ digupMeta(j);
+ if(digup.indexing){digupTimer=setTimeout(digupPoll,1500);return;}
+ if(digupWasIndexing){
+  const ix=j.indexing||{};
+  if(ix.phase==='error')log('🔎 index failed — '+(ix.error||'unknown error'));
+  else if(ix.phase==='empty')log('🔎 add a folder before indexing');
+  else log('🔎 index ready — '+digup.files+' files, '+digup.chunks+' passages');
+ }
+ digupWasIndexing=false;
+}
+function digupWatch(){clearTimeout(digupTimer);digupWasIndexing=true;digupTimer=setTimeout(digupPoll,900);}
+function digupRender(hits,showAll=false){
+ const box=$('digupResults');box.innerHTML='';box.hidden=false;
+ (showAll?hits:hits.slice(0,8)).forEach(h=>{
+  const b=document.createElement('button');b.className='drow';b.type='button';b.title='Open '+h.path;
+  const n=document.createElement('span');n.className='dname';n.textContent=h.name+(h.where?' · '+h.where:'');
+  const s=document.createElement('span');s.className='dsnip';s.textContent=showAll?'Filename match':(h.snippet||h.path);
+  const p=document.createElement('span');p.className='dpath';p.textContent=h.path;
+  b.append(n,s,p);b.onclick=()=>digupOpen(h);box.appendChild(b);
+ });
+}
+async function digupSearch(q,code,filenames=false){
+ q=String(q||'').trim();
+ const version=++digupSearchVersion,box=$('digupResults'),meta=$('digupResultMeta');
+ if(digup.rebuilding){box.hidden=true;box.setAttribute('aria-busy','false');meta.hidden=false;meta.textContent='The index is being rebuilt. Try again when indexing finishes.';return {hits:[],error:meta.textContent};}
+ if(!q){box.hidden=true;box.setAttribute('aria-busy','false');meta.hidden=true;return {hits:[],error:''};}
+ box.hidden=false;box.setAttribute('aria-busy','true');box.innerHTML='<div class="dempty">Searching your files…</div>';
+ meta.hidden=false;meta.textContent='Searching for “'+q+'”…';
+ try{
+  const j=await digupFetch('/api/digup/search?q='+encodeURIComponent(q)+(code?'&code=1':'')+(filenames?'&filenames=1':''));
+  const hits=j.hits||[];
+  if(version===digupSearchVersion){
+   digupRender(hits,filenames);
+   meta.textContent=hits.length+' result'+(hits.length===1?'':'s')+' for “'+q+'”';
+   if(!hits.length){const n=document.createElement('div');n.className='dempty';n.textContent=!digup.roots.length?'Add a folder to make its contents searchable.':code&&!digup.roots.some(r=>r.code)?'Add a folder with source code enabled to search code.':'Try different words, or update the index if your files changed.';box.appendChild(n);}
+   digupError='';log('🔎 “'+q+'” → '+hits.length+' file(s)');
+  }
+  return {hits,error:''};
+ }catch(e){
+  const error=e.name==='TimeoutError'?'Search timed out. Try again.':e.message;
+  if(version===digupSearchVersion){
+   digupError=error;box.innerHTML='';meta.textContent='Search could not finish';
+   const n=document.createElement('div');n.className='dempty bad';n.textContent=error;box.appendChild(n);
+   const retry=document.createElement('button');retry.className='mini';retry.textContent='retry search';retry.onclick=()=>digupSearch(q,code,filenames);box.appendChild(retry);
+   log('🔎 search failed — '+error);
+  }
+  return {hits:[],error};
+ }finally{if(version===digupSearchVersion)box.setAttribute('aria-busy','false');}
+}
+async function digupOpen(h){
+ try{
+  await digupFetch('/api/digup/open',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:h.fileId})});
+  log('🔎 opened '+h.name);play('open');
+ }catch(e){digupNotice('Could not open '+h.name+': '+e.message);log('🔎 could not open '+h.name+' — '+e.message);}
+}
+async function digupIndex(reindex){
+ if(digup.indexing)return;
+ if(reindex){digup.rebuilding=true;++digupSearchVersion;$('digupResults').innerHTML='';$('digupResults').hidden=true;$('digupResults').setAttribute('aria-busy','false');$('digupResultMeta').hidden=true;}
+ digup.indexing=true;digupNotice('');digupMeta(null);
+ try{
+  await digupFetch('/api/digup/index',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reindex:!!reindex})});
+  digupWatch();log('🔎 reading files…');play('work');
+ }catch(e){digup.indexing=false;digup.rebuilding=false;digupMeta(null);digupNotice('Indexing could not start: '+e.message);log('🔎 index failed — '+e.message);}
+}
+async function digupAddFolder(){
+ const p=$('digupPath').value.trim(),code=$('digupIncludeCode').checked;
+ if(!p||digupSaving||digup.indexing)return;
+ digupSaving=true;digupMeta(null);digupNotice('');$('digupSave').textContent='adding…';
+ try{
+  const j=await digupFetch('/api/digup/roots',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'add',path:p,code})});
+  digup.roots=j.roots||[];$('digupPath').value='';
+  log('🔎 added '+p+(code?' (with source code)':'')+' — indexing');play('attach');
+  await digupIndex();
+ }catch(e){digupNotice('Could not add folder: '+e.message);}
+ finally{digupSaving=false;$('digupSave').textContent='add folder & index';digupMeta(null);}
+}
+async function digupRemoveFolder(path){
+ if(digup.indexing||digupSaving)return;
+ if(!confirm('Remove '+path+' from search? Your files will not be deleted.'))return;
+ digupSaving=true;digupMeta(null);digupNotice('');
+ try{
+  const j=await digupFetch('/api/digup/roots',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'remove',path})});
+  digup.roots=j.roots||[];await digupSearch('');await digupLoad();
+ }catch(e){digupNotice('Could not remove folder: '+e.message);}
+ finally{digupSaving=false;digupMeta(null);}
+}
+async function toolSearchFiles(args){
+ const q=String(args.query||'').trim();
+ if(!q)throw new Error('no search words given');
+ const code=args.code===true||/^code:\s*/i.test(q),filenames=args.filenames===true;
+ if(!digup.ok)await digupLoad();
+ if(!digup.ok)return 'DigUp is not available right now. '+(digupError||'Add a folder with + folder in the 🔎 DigUp files card.');
+ const r=await digupSearch(q,code,filenames);
+ if(r.error)return 'DigUp could not search: '+r.error;
+ if(!r.hits.length)return 'No files matched “'+q+'”. The user may need to add a folder in the 🔎 DigUp files card, or run an index if files changed.';
+ const listed=filenames?r.hits.slice(0,100):r.hits.slice(0,6);
+ const lines=listed.map((h,i)=>filenames?(i+1)+'. '+h.name+' — '+h.path:(i+1)+'. '+h.name+(h.where?' · '+h.where:'')+' — '+h.path+(h.snippet?'\n   “'+h.snippet+'”':''));
+ return 'Found '+r.hits.length+(filenames?' filename match(es)':' file(s)')+' for “'+q+'”'+(filenames&&listed.length<r.hits.length?' (first '+listed.length+' shown; full list is in DigUp)':'')+':\n'+lines.join('\n');
+}
+function digupFilenameIntent(q){return /\b(?:filenames?|file names?|names? of files?|files? (?:named|called|whose names?|starting|beginning|ending|with prefix))\b/i.test(q);}
+function digupSubmitSearch(){
+ const q=$('digupQ').value,filenames=$('digupFilenames').checked||digupFilenameIntent(q);
+ if(filenames){$('digupFilenames').checked=true;$('digupCode').checked=false;$('digupQ').placeholder='Enter a name, prefix, or extension…';}
+ return digupSearch(q,$('digupCode').checked,filenames);
+}
+$('digupFind').addEventListener('click',digupSubmitSearch);
+$('digupQ').addEventListener('input',()=>{++digupSearchVersion;$('digupResults').setAttribute('aria-busy','false');$('digupResults').hidden=true;$('digupResultMeta').hidden=true;});
+$('digupQ').addEventListener('keydown',e=>{
+ if(e.key==='Enter'){e.preventDefault();digupSubmitSearch();}
+ if(e.key==='ArrowDown'){const first=$('digupResults').querySelector('.drow');if(first&&!$('digupResults').hidden){e.preventDefault();first.focus();}}
+});
+$('digupResults').addEventListener('keydown',e=>{
+ const rows=Array.from($('digupResults').querySelectorAll('.drow')),i=rows.indexOf(document.activeElement);
+ if(e.key==='Escape'){$('digupQ').focus();return;}
+ if(i<0||!['ArrowDown','ArrowUp'].includes(e.key))return;
+ e.preventDefault();const next=i+(e.key==='ArrowDown'?1:-1);if(next<0)$('digupQ').focus();else rows[Math.min(next,rows.length-1)].focus();
+});
+$('digupCode').addEventListener('change',()=>{if($('digupCode').checked)$('digupFilenames').checked=false;if($('digupQ').value.trim())digupSubmitSearch();});
+$('digupFilenames').addEventListener('change',()=>{if($('digupFilenames').checked)$('digupCode').checked=false;$('digupQ').placeholder=$('digupFilenames').checked?'Enter a name, prefix, or extension…':'Describe the file…';if($('digupQ').value.trim())digupSubmitSearch();});
+$('digupAdd').addEventListener('click',()=>{const panel=$('digupFolders');panel.hidden=!panel.hidden;$('digupAdd').setAttribute('aria-expanded',String(!panel.hidden));if(!panel.hidden)$('digupPath').focus();});
+$('digupFolderForm').addEventListener('submit',e=>{e.preventDefault();digupAddFolder();});
+$('digupIndex').addEventListener('click',()=>digupIndex(false));
+$('digupRebuild').addEventListener('click',()=>{if(confirm('Rebuild the entire search index? Existing search results will be unavailable until files are indexed again. Your files will not be changed.'))digupIndex(true);});
+$('digupRetry').addEventListener('click',digupLoad);
 /* ================= Muslim prayer times =================
    Times come from the standard PrayTimes.org algorithm (Hamid Zarrabi-Zadeh,
    MIT) ported to plain JS — no library, no network, nothing to install. They read
@@ -1695,7 +2279,7 @@ $('logClear').addEventListener('click',()=>{$('log').innerHTML='';});
 // ---------- slash commands (work without a mic, and make the tools testable) ----------
 // bare=true lets the wake word run them without a slash, so "Arki, pause that" works
 function runCommand(text,bare){
- const m=text.trim().match(new RegExp('^\\/?'+(bare?'':'\\/')+'(play|pause|resume|stop|next|skip|vol|volume|open)\\b\\s*(.*)$','is'));
+ const m=text.trim().match(new RegExp('^\\/?'+(bare?'':'\\/')+'(play|pause|resume|stop|next|skip|vol|volume|open|find|digup)\\b\\s*(.*)$','is'));
  if(!m)return false;
  const cmd=m[1].toLowerCase(),rest=m[2].trim();
  const note=txt=>{toolNotes.push(txt);if(toolNotes.length>6)toolNotes.shift();
@@ -1713,6 +2297,10 @@ function runCommand(text,bare){
  if(cmd==='vol'||cmd==='volume'){
   const n=parseInt(rest,10),lv=isNaN(n)?media.vol:n;
   run('set_volume',()=>toolSetVolume({level:lv}),{level:lv});return true;}
+ if(cmd==='find'||cmd==='digup'){
+  const q=rest||'';
+  if(!q){addToolCard('search_files',{query:''},false,'Give me something to look for — /find lease pets');return true;}
+  run('search_files',()=>toolSearchFiles({query:q}),{query:q});return true;}
  if(resolveLocal(rest)){run('open_app',()=>toolOpenApp({name:rest}),{name:rest});return true;}
  const url=resolveApp(rest);
  // spoken "open question about…" isn't an app — let the model have it instead
@@ -1789,8 +2377,9 @@ $('dockVol').value=media.vol;
 // ---------- boot ----------
 syncUI();
 log('Arki ready');
+digupLoad();
 setTimeout(greet,900);   // the character says hello before anything else happens
-addMsg('assistant','Hi! I\'m **Arki** 🟦 — your local squircle companion.\nEverything runs on *your* machine via Ollama. Ask me anything, drop an image on me to talk about it, or just poke me 👋\n\nI can also **play music right here** while we chat, and open sites like Gmail or YouTube for you. Hit 🎤 and say **“Arki”** to pause or resume the music hands-free. You can also type `/play lofi`, `/pause`, `/vol 40`, `/open gmail`.');
+addMsg('assistant','Hi! I\'m **Arki** 🟦 — your local squircle companion.\nEverything runs on *your* machine via Ollama. Ask me anything, drop an image on me to talk about it, or just poke me 👋\n\nI can also **play music right here** while we chat, open sites like Gmail or YouTube for you, and dig through your own files with **DigUp**. Hit 🎤 and say **“Arki”** to pause or resume the music hands-free. You can also type `/play lofi`, `/pause`, `/vol 40`, `/open gmail`, or `/find lease pets`.');
 showStarters();
 refreshComposer();
 if(matchMedia('(hover:hover)').matches)input.focus();

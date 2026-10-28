@@ -6,11 +6,13 @@
 
 A squircle chatbot companion that lives in your browser, and a friendlier front for
 [Ollama](https://ollama.com) — the same local models, without the developer dashboard. Every
-reply is generated locally: no API keys, no cloud, no build step, **zero npm dependencies**.
+reply is generated locally: no API keys, no cloud, no build step, and **zero npm dependencies**
+for the chat app itself. The optional file search needs one.
 
 But it doesn't just answer. Arki can **act**: search YouTube and put on lofi in a built-in
-player while you keep chatting, open Gmail or GitHub in a tab for you, and listen for the wake
-word **“Arki”** so you can pause the music without touching the keyboard.
+player while you keep chatting, open Gmail or GitHub in a tab for you, search inside your own
+files on-device with DigUp, and listen for the wake word **“Arki”** so you can pause the music
+without touching the keyboard.
 
 > **Maintainer** — Adnuri Mohamidi
 
@@ -39,6 +41,7 @@ open http://localhost:5177
 - [Quick start](#quick-start)
 - [Why](#why)
 - [Tools — Arki can act](#tools--arki-can-act)
+- [Searching your own files (DigUp)](#searching-your-own-files-digup)
 - [Opening desktop apps](#opening-desktop-apps)
 - [Playing music in the page](#playing-music-in-the-page)
 - [Prayer times](#prayer-times)
@@ -71,8 +74,12 @@ model.
 # 1. Install Ollama and pull a model you like
 ollama pull qwen3.5:2b
 
-# 2. Run Arki — no npm install, there are no dependencies
+# 2. Run Arki — the chat app itself has no dependencies
 node server.js
+
+# optional: on-device file search (one dependency; needs Node 22.13+)
+ollama pull embeddinggemma-2   # reused from Ollama for semantic search
+npm install --prefix digup-js
 
 # 3. Open http://localhost:5177
 ```
@@ -81,8 +88,9 @@ Or read the [About page](about.html) first if you would rather know what you are
 
 If port 5177 is busy, Arki quietly moves to the next free one and prints the URL it used.
 
-Nothing is installed, built or bundled. `index.html` is the whole frontend; `server.js` is a
-~380-line static server, a proxy and a desktop app launcher.
+The chat app installs nothing and has no build step. `index.html` is the whole frontend;
+`server.js` is a ~490-line static server, a proxy and a desktop app launcher; `digup.js` bridges
+the optional DigUp engine for file search.
 
 ---
 
@@ -114,7 +122,7 @@ is for the person who has Ollama running and isn't sure what to do next.
 
 ## Tools — Arki can act
 
-Four tools are attached to every request. When the model decides one is needed it emits a
+Five tools are attached to every request. When the model decides one is needed it emits a
 `tool_calls` entry, Arki runs it locally, and the real result is fed back so the model can
 confirm what actually happened.
 
@@ -124,6 +132,7 @@ confirm what actually happened.
 | `control_music` | `action` | `pause` · `resume` · `stop` · `next` on the sidebar player. |
 | `set_volume` | `level` | In-page volume, 0–100. |
 | `open_app` | `name` | Opens a site in a new tab — gmail, youtube, github, drive, calendar, maps, netflix, reddit, wikipedia, x, notion, figma, amazon, chatgpt, claude, weather, news, npm, huggingface and more, via 41 name shortcuts covering ~37 sites. Any full URL works; an unrecognised name falls back to a web search. **It also launches any installed desktop program by name** — on the machine running Arki. |
+| `search_files` | `query`, `code?` | Searches the user's own documents, PDFs, notes and code — plus media filenames — through the DigUp index. Natural language; `code: true` targets source code. Returns paths, the matching page/moment/line and a snippet. |
 
 **Where the output goes.** Tool calls render as cards in the sidebar under *Tool activity* —
 arguments and the actual result — capped at the last 8 with a **clear** button. The transcript
@@ -152,6 +161,45 @@ arka   ▸ Here you go — smooth piano jazz is playing in the sidebar.
 **Tool-calling needs a tool-capable model.** Verified working here with `qwen3.5:2b`,
 `granite4.2`, `gemma4`, `ornith-1.5:9b` and `Spark-X2.5-4B`. `phi4-mini` and `gemma2:9b` ignored
 the tools and only chatted — with those, everything still works through the slash commands.
+
+---
+
+## Searching your own files (DigUp)
+
+Ask *“find the clause about pets in my lease”* and Arki can look inside your own files, not just
+the web. This is [digup-js](digup-js/), a Node rebuild of
+[DigUp](https://github.com/ARahim3/DigUp) bundled in this repo: one SQLite index, hybrid vector
+and keyword search, entirely on this machine.
+
+```bash
+npm install --prefix digup-js     # one dependency (fflate); Node 22.13+ for node:sqlite
+node server.js
+```
+
+Open the **🔎 DigUp files** card in the sidebar, press **+ folder**, enter a folder path and let it
+index. Then ask Arki in chat, use the card's search field, or type `/find <what you remember>`.
+The `search_files` tool returns file names, paths, the matching page/moment/line and a snippet;
+clicking a result opens it with your default app. Choose **Search filenames only** to match any name, prefix, or extension across your indexed folders; this returns every filename match without ranking file contents. The same mode is available to Arki when it calls DigUp. Source code is opt-in per folder: select **Include source code in this folder** when adding a project, then use **Search source code**, `code:`, or the tool's `code` flag.
+
+The **folders** panel lists your search folders and lets you remove them from the index without deleting files. Use **update index** for changed files, or **rebuild entire index** in the folders panel after changing embedding models. Indexing progress and recoverable errors appear in the card; **Search details** explains the active search capabilities. Results include a snippet and full path. Press ↓ from the search field, use ↑/↓ to move between results, Enter to open, and Escape to return to the query.
+
+**Embeddings come from Ollama.** Pull the model once and Arki uses it on the next start:
+
+```bash
+ollama pull embeddinggemma-2
+```
+
+`DIGUP_EMBED_MODEL` selects a different Ollama embedding model. To use llama.cpp instead, set
+`DIGUP_MODEL` (and `DIGUP_MMPROJ` for image/audio content). If no Ollama embedding model is
+pulled and no llama.cpp path is configured, DigUp falls back to a model-free lexical stand-in,
+which is honest about its limits and still finds names, numbers and exact phrases. Ollama's embedding API is text-only, so images, video frames and
+audio are indexed by filename there; the llama.cpp path with `DIGUP_MMPROJ` can embed their
+content.
+
+The index lives in `~/.digup/` (`DIGUP_HOME` overrides it); nothing is uploaded. DigUp never
+reads hidden folders, keys, password files or cloud-only placeholders. `npm run digup -- list`
+shows the folders and `npm run digup -- remove <folder>` drops one from the index without
+touching the files.
 
 ---
 
@@ -328,6 +376,7 @@ browsers without speech support, and for when you just want the thing to stop.
 | `/next` or `/skip` | `/next` |
 | `/vol <0-100>` | `/vol 35` |
 | `/open <app or url>` | `/open gmail` |
+| `/find <query>` | `/find lease pets` |
 
 ---
 
@@ -475,6 +524,14 @@ Everything uses `dvh` with a `vh` fallback, and the composer pads for the iPhone
 |---|---|---|
 | `PORT` | `5177` | HTTP port; auto-increments if busy |
 | `OLLAMA_HOST` | `http://127.0.0.1:11434` | where Ollama is listening |
+| `DIGUP_ROOTS` | — | folders to index, separated by the OS path delimiter |
+| `DIGUP_EMBED_MODEL` | `embeddinggemma-2` | Ollama embedding model |
+| `DIGUP_OLLAMA_HOST` | `OLLAMA_HOST` | Ollama used for embeddings |
+| `DIGUP_EMBEDDER` | auto | `ollama` / `hash`; `auto` prefers a pulled Ollama model |
+| `DIGUP_MODEL` | — | use a llama.cpp embedding GGUF instead of Ollama |
+| `DIGUP_MMPROJ` | — | llama.cpp multimodal projector for images/audio |
+| `DIGUP_EMBED_URL` | — | use an existing `llama-server --embeddings` |
+| `DIGUP_HOME` | `~/.digup` | where the index and folder config live |
 
 ```bash
 PORT=8080 OLLAMA_HOST=http://192.168.1.10:11434 node server.js
@@ -490,12 +547,13 @@ yours. Only reach it over a network you trust — the proxy is unauthenticated b
 ```
 browser  ──►  server.js  ──►  Ollama  (/api/chat, streaming NDJSON)
    │              │
-   │              └──────►  youtube.com  (/api/ytsearch — search page → video ids)
+   │              ├──────►  youtube.com  (/api/ytsearch — search page → video ids)
+   │              └──────►  ~/.digup/index.sqlite  (DigUp file search)
    │
    └── iframe ──► youtube-nocookie.com / open.spotify.com
 ```
 
-**`server.js`** is ~380 lines and does five things:
+**`server.js`** is ~490 lines and does six things:
 
 1. serves the static files from its own directory (with path-traversal protection)
 2. proxies every `/api/*` request to Ollama, streaming NDJSON straight through — this exists
@@ -505,10 +563,11 @@ browser  ──►  server.js  ──►  Ollama  (/api/chat, streaming NDJSON)
 4. listens on `PORT`, stepping up a port at a time if it's taken
 5. answers `GET /api/apps` and `POST /api/launch` — resolves any application name for the
    current OS and spawns it — see [Opening desktop apps](#opening-desktop-apps)
+6. serves `/api/digup*` for file search, lazily loading `digup-js` and keeping the index warm
 
 **`index.html`** is the entire frontend — avatar engine on canvas, chat UI, markdown-lite
 renderer, tool definitions, the tool-call loop, the player and the wake word. Tools are executed
-**client-side**; the server never sees them.
+**client-side**; only `search_files` asks the local server, because the index lives there.
 
 **Context management:** the transcript is capped at 40 messages, of which the last 20 are sent
 to the model. A leading orphaned assistant message is trimmed so a user/assistant pair is never
@@ -533,9 +592,9 @@ Stored in `localStorage`, all under the `arki.` prefix:
 | `arki.pMethod` | prayer calculation method |
 | `arki.pAdhan` | adhan chime on/off |
 
-The conversation itself is **not** persisted. Nothing is written to disk anywhere — reload and
-you're starting fresh. The server prints two startup lines and nothing else; it never logs
-request or message content.
+The conversation itself is **not** persisted. Apart from the optional DigUp index in `~/.digup`
+(written only when you add a folder), nothing goes to disk — reload and you're starting fresh.
+The server prints two startup lines and nothing else; it never logs request or message content.
 
 ---
 
@@ -603,11 +662,13 @@ chat) and as a 46px lockup beside the wordmark in the conversation header, blink
 
 ```
 logo.svg       The Arki Chat brand mark (also the favicon)
-server.js      Static server + Ollama streaming proxy + /api/ytsearch + desktop app launcher
+server.js      Static server + Ollama proxy + /api/ytsearch + desktop launcher + DigUp API
 index.html     Avatar engine (inspired by Coucou), chat UI, tools, player and wake word
 about.html     The About page — what it is, privacy, credits and licence
+digup.js       Bridge that lazily loads the DigUp engine for /api/digup*
+digup-js/      On-device file search engine (SQLite + embeddings), MIT
 screenshots/   The images in this file
-package.json   metadata only — there is nothing to install
+package.json   metadata + the optional `digup:install` and `digup` scripts
 ```
 
 **About page** — `about.html` is the human-facing explainer: what Arki is, a four-step
@@ -639,6 +700,7 @@ wake word, the responsive design, Arki's fringe and `logo.svg` — is original t
 
 ### Also standing on
 
+- [DigUp](https://github.com/ARahim3/DigUp) by ARahim3 — the architecture behind `digup-js`'s on-device file search
 - [Ollama](https://ollama.com) — runs every model locally, and does the actual reasoning
 - [Fredoka](https://fonts.google.com/specimen/Fredoka) & [Nunito](https://fonts.google.com/specimen/Nunito) — the type
 - YouTube and Spotify — the embedded players in the sidebar

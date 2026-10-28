@@ -17,7 +17,9 @@
   ],
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "digup:install": "npm install --prefix digup-js",
+    "digup": "node digup-js/src/cli.js"
   },
   "license": "MIT"
 }

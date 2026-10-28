@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>About — Arki Chat</title>
-<meta name="description" content="Arki Chat is a friendly front for Ollama: a squircle companion that chats with your local models, plays music, opens websites for you and listens for the wake word “Arki”.">
+<meta name="description" content="Arki Chat is a friendly front for Ollama and llama.cpp: a squircle companion that chats with your local models, plays music, opens websites for you and listens for the wake word “Arki”.">
 <link rel="icon" href="logo.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -129,15 +129,18 @@ footer .run{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:1
 </div>
 
 <header class="hero">
- <h1>A friendly front for Ollama.</h1>
+ <h1>A friendly front for Ollama — and llama.cpp.</h1>
  <p>Ollama is the easiest way to run an AI model on your own computer. Its built-in web page was
  made for checking that a model is running — not for actually using it. Arki Chat is the other
- front door: the same local models, the same machine, but a companion instead of a dashboard.</p>
+ front door: the same local models, the same machine, but a companion instead of a dashboard. If you'd
+ rather not run Ollama at all, the llama.cpp switch serves any GGUF on your disk — Arki starts it, waits
+ for the model to load, and stops it again.</p>
  <div class="badges">
   <span class="badge ok">Runs entirely on your machine</span>
+  <span class="badge">Ollama or llama.cpp</span>
   <span class="badge">No API keys</span>
   <span class="badge">No build step</span>
-  <span class="badge">Zero dependencies</span>
+  <span class="badge">Zero chat dependencies</span>
  </div>
 </header>
 
@@ -145,9 +148,11 @@ footer .run{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:1
  <h2>What it does</h2>
  <div class="cards">
   <div class="card"><span class="ico">💬</span><b>Chats with your models</b><span>Streaming replies from any chat model you have installed, with a model picker and a toggle for deep reasoning.</span></div>
+  <div class="card"><span class="ico">⚙️</span><b>Runs GGUFs without Ollama</b><span>Switch the header to llama.cpp, pick a GGUF, press start — Arki launches <code>llama-server</code>, waits out the load and picks up a sibling <code>mmproj-*.gguf</code> so images and audio keep working.</span></div>
   <div class="card"><span class="ico">👀</span><b>Sees images</b><span>Drop, paste or attach up to four pictures and ask about them on vision-capable models.</span></div>
   <div class="card"><span class="ico">🎵</span><b>Plays music while you chat</b><span>Ask for lofi or a playlist and it plays in a sidebar player without interrupting the conversation.</span></div>
   <div class="card"><span class="ico">🚀</span><b>Opens things for you</b><span>“Open my Gmail” and it opens Gmail. Every action it takes is listed in the sidebar so nothing is hidden.</span></div>
+  <div class="card"><span class="ico">🔎</span><b>Searches your own files</b><span>Ask where something is and DigUp looks inside your documents, PDFs, notes and code — and finds media by name — on this machine.</span></div>
   <div class="card"><span class="ico">🎤</span><b>Listens for “Arki”</b><span>A wake word pauses the music or runs a request hands-free, so you don't have to touch the keyboard.</span></div>
   <div class="card"><span class="ico">🟦</span><b>Has a face</b><span>Arki blinks, breathes, follows your cursor, gets annoyed when poked and dizzy when you insist.</span></div>
  </div>
@@ -155,7 +160,7 @@ footer .run{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:1
 
 <section>
  <h2>How to use it</h2>
- <p class="lead">There is nothing to install. If Ollama is running, Arki runs.</p>
+ <p class="lead">The chat app has nothing to install. If Ollama is running — or a GGUF is sitting on disk — Arki runs.</p>
  <ol class="steps">
   <li>Make sure <a href="https://ollama.com" rel="noopener">Ollama</a> is running — <code>ollama serve</code>, or just open the Ollama app.</li>
   <li>Pull a model you like: <code>ollama pull qwen3.5:2b</code></li>
@@ -164,6 +169,13 @@ footer .run{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:1
  </ol>
  <div class="note">Ollama listens on <code>127.0.0.1:11434</code> by default and Arki expects that. If yours runs
  somewhere else, set <code>OLLAMA_HOST</code> before starting.</div>
+ <div class="note">No Ollama? Flip the header switch to <b>llama.cpp</b>, pick a GGUF and press
+ <code>start llama.cpp</code>. Arki finds <code>llama-server</code> on your PATH (Homebrew: <code>brew install
+ llama.cpp</code>), runs it on port 8080 — or the next free port if that one is busy — and waits for the model to
+ load, up to six minutes, instead of calling it a failure. Drop an <code>mmproj-*.gguf</code> next to a
+ multimodal model and it is passed along automatically, so vision and audio work too.</div>
+ <div class="note">File search is optional and needs Node 22.13+: run <code>npm install --prefix digup-js</code>
+ once, pull the embedding model with <code>ollama pull embeddinggemma-2</code>, then add a folder from the 🔎 DigUp files card.</div>
 </section>
 
 <section>
@@ -171,9 +183,10 @@ footer .run{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:1
  <p>Arki is built so that your conversations stay on your computer. That claim deserves precision,
 so here is exactly what happens.</p>
  <table class="kv">
-  <tr><th>Your messages</th><td>Go from your browser to your own machine, to Ollama, and nowhere else.</td></tr>
-  <tr><th>Storage</th><td>None. Your conversation is kept in memory in the tab and is gone when you close it.</td></tr>
-  <tr><th>Server logs</th><td>Two startup lines. Requests and messages are never logged.</td></tr>
+  <tr><th>Your messages</th><td>Go from your browser to your own machine, to Ollama or llama.cpp — whichever you picked — and nowhere else.</td></tr>
+  <tr><th>Your files</th><td>Only folders you choose are read, locally, to build the optional DigUp index. Hidden folders, keys, password files and cloud-only placeholders are skipped; nothing is uploaded.</td></tr>
+  <tr><th>Storage</th><td>Your conversation stays in memory in the tab and is gone when you close it. The optional DigUp index is one SQLite file in <code>~/.digup</code>.</td></tr>
+  <tr><th>Server logs</th><td>A few startup lines (your URL and the two backends). Requests and messages are never logged.</td></tr>
   <tr><th>Accounts &amp; telemetry</th><td>None. There is no sign-in and nothing is measured.</td></tr>
  </table>
  <div class="note warn"><b>Two honest exceptions.</b> If you turn on the 🎤 wake word, Chrome and Safari
@@ -204,7 +217,9 @@ so here is exactly what happens.</p>
  <h2>Credits</h2>
  <ul>
   <li><a href="https://github.com/Louis-CFM/coucou" rel="noopener">Coucou</a> by Louis Raillé — the inspiration for Arki</li>
+  <li><a href="https://github.com/ARahim3/DigUp" rel="noopener">DigUp</a> by ARahim3 — the on-device file search architecture behind <code>digup-js</code></li>
   <li><a href="https://ollama.com" rel="noopener">Ollama</a> — runs the models</li>
+  <li><a href="https://github.com/ggml-org/llama.cpp" rel="noopener">llama.cpp</a> — the optional engine that serves your GGUFs directly, projector and all</li>
   <li><a href="https://fonts.google.com/specimen/Fredoka" rel="noopener">Fredoka</a> and <a href="https://fonts.google.com/specimen/Nunito" rel="noopener">Nunito</a> — the type</li>
   <li>YouTube and Spotify — the embedded players</li>
  </ul>
